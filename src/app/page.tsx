@@ -27,10 +27,13 @@ export default function Home() {
           <p className="mt-4 max-w-2xl text-base text-white/80">
             Near HPU, Kotwali Bazaar, Sidhpur, McLeodganj. Post fast, contact directly on WhatsApp.
           </p>
+          <p className="mt-2 max-w-2xl text-sm font-medium text-white/90">
+            Dhoop mein mat ghoomo. vStudent kholo. ☀️
+          </p>
 
           <div className="mt-7 flex flex-col gap-3 sm:flex-row">
             <Link className="btn bg-white text-slate-900 hover:bg-white/90" href="/rooms">
-              Browse Rooms →
+              Browse Rooms â†’
             </Link>
             <Link className="btn border-white/30 bg-white/10 text-white hover:bg-white/15" href="/items">
               Browse Items
@@ -49,7 +52,7 @@ export default function Home() {
       <div className="grid gap-4 sm:grid-cols-3">
         <div className="card card-hover p-5">
           <div className="text-sm font-medium">Area-first search</div>
-          <div className="mt-1 text-sm text-zinc-600">HPU Campus, Sidhpur, Kotwali Bazaar…</div>
+          <div className="mt-1 text-sm text-zinc-600">HPU Campus, Sidhpur, Kotwali Bazaarâ€¦</div>
         </div>
         <div className="card card-hover p-5">
           <div className="text-sm font-medium">Winter-ready listings</div>
@@ -73,7 +76,7 @@ export default function Home() {
           </p>
           <div className="mt-6 flex justify-center">
             <Link className="btn bg-white text-slate-900 hover:bg-white/90" href="/post">
-              Post a Listing →
+              Post a Listing â†’
             </Link>
           </div>
         </div>
