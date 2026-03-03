@@ -1,4 +1,4 @@
-# vStudent (MVP)
+
 Hyperlocal student marketplace (single city): rooms/PG + used items. PWA-first, WhatsApp contact only.
 
 ## Tech
@@ -36,6 +36,3 @@ firebase deploy --only firestore:rules,storage:rules
 ```
 
 ## Notes
-- Email/password avoids SMS billing; users still provide WhatsApp number in profile for contact.
-- Firestore may prompt you to create composite indexes when you add filters; follow the console link in the error message.
-- PWA service worker is enabled only in production builds.
