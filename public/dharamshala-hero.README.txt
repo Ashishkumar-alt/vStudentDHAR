@@ -1,0 +1,13 @@
+Add your Dharamshala mountain photo here as:
+
+  public/dharamshala-hero.webp
+
+Recommended:
+- WebP format (smaller + faster)
+- ~1600px wide
+- Quality ~70-80
+
+The homepage hero will use it as a subtle blurred background overlay.
+
+Alternative (also supported):
+- public/dharamshala-hero.jpg (or .jpeg / .png)

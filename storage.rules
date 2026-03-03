@@ -1,0 +1,30 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && exists(/databases/(default)/documents/admins/$(request.auth.uid));
+    }
+
+    match /users/{uid}/{allPaths=**} {
+      allow read: if true;
+      allow write: if isSignedIn() && request.auth.uid == uid;
+    }
+
+    match /listings/room/{listingId}/{fileName} {
+      allow read: if true;
+      allow write: if isSignedIn()
+        && firestore.get(/databases/(default)/documents/rooms/$(listingId)).data.createdBy == request.auth.uid;
+    }
+
+    match /listings/item/{listingId}/{fileName} {
+      allow read: if true;
+      allow write: if isSignedIn()
+        && firestore.get(/databases/(default)/documents/items/$(listingId)).data.createdBy == request.auth.uid;
+    }
+  }
+}
+

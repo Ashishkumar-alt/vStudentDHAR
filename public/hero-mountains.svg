@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" fill="none">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0F172A"/>
+      <stop offset="1" stop-color="#10B981"/>
+    </linearGradient>
+    <filter id="b" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="18"/>
+    </filter>
+  </defs>
+  <rect width="1600" height="900" fill="white"/>
+  <g filter="url(#b)" opacity="0.85">
+    <path d="M-50 700C200 560 360 520 560 580c160 48 260 12 420-64 190-90 360-120 720 40v420H-50V700Z" fill="url(#g)"/>
+    <path d="M-50 760c210-120 420-160 640-80 160 58 280 40 450-44 220-110 390-120 560 20v288H-50V760Z" fill="#0F172A" opacity="0.35"/>
+    <path d="M-50 810c240-110 470-140 700-50 170 66 320 40 520-40 180-72 310-66 480 30v240H-50V810Z" fill="#10B981" opacity="0.22"/>
+  </g>
+</svg>
+

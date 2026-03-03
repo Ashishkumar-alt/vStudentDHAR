@@ -1,0 +1,62 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    match /admins/{uid} {
+      allow read: if isSignedIn() && request.auth.uid == uid;
+      allow write: if false;
+    }
+
+    match /users/{uid} {
+      allow read: if isAdmin() || (isSignedIn() && request.auth.uid == uid);
+      allow create: if isSignedIn() && request.auth.uid == uid;
+      allow update: if isAdmin() || (isSignedIn() && request.auth.uid == uid);
+      allow delete: if false;
+    }
+
+    function listingReadable(resource) {
+      return resource.data.approved == true || isAdmin() || (isSignedIn() && resource.data.createdBy == request.auth.uid);
+    }
+
+    function listingCreatable() {
+      return isSignedIn() && request.resource.data.createdBy == request.auth.uid;
+    }
+
+    function listingUpdatable(resource) {
+      return isAdmin() ||
+        (isSignedIn()
+          && resource.data.createdBy == request.auth.uid
+          && request.resource.data.createdBy == resource.data.createdBy
+          && request.resource.data.createdAt == resource.data.createdAt
+          && request.resource.data.approved == resource.data.approved);
+    }
+
+    match /rooms/{id} {
+      allow read: if listingReadable(resource);
+      allow create: if listingCreatable();
+      allow update: if listingUpdatable(resource);
+      allow delete: if isAdmin() || (isSignedIn() && resource.data.createdBy == request.auth.uid);
+    }
+
+    match /items/{id} {
+      allow read: if listingReadable(resource);
+      allow create: if listingCreatable();
+      allow update: if listingUpdatable(resource);
+      allow delete: if isAdmin() || (isSignedIn() && resource.data.createdBy == request.auth.uid);
+    }
+
+    match /reports/{id} {
+      allow read: if isAdmin();
+      allow create: if isSignedIn() && request.resource.data.createdBy == request.auth.uid;
+      allow update, delete: if false;
+    }
+  }
+}
+
