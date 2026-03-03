@@ -3,17 +3,23 @@ Hyperlocal student marketplace (single city): rooms/PG + used items. PWA-first, 
 
 ## Tech
 - Next.js (App Router) + Tailwind
-- Firebase: Auth (Email/Password), Firestore, Storage
+- Firebase: Auth (Email/Password), Firestore
+- Cloudinary: Images (recommended)
 
 ## Setup
 1) Create a Firebase project.
 2) Enable **Authentication -> Sign-in method -> Email/Password**.
-3) Create **Firestore** and **Storage** in the project.
-4) Copy `.env.example` -> `.env.local` and fill `NEXT_PUBLIC_FIREBASE_*`.
-5) (Optional) Set city config in `.env.local`:
+3) Create **Firestore** in the project.
+4) Create a Cloudinary account (Images only).
+5) Copy `.env.example` -> `.env.local` and fill:
+   - `NEXT_PUBLIC_FIREBASE_*`
+   - `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME`
+   - `NEXT_PUBLIC_CLOUDINARY_API_KEY`
+   - `CLOUDINARY_API_SECRET`
+6) (Optional) Set city config in `.env.local`:
    - `NEXT_PUBLIC_CITY_ID`
    - `NEXT_PUBLIC_CITY_LABEL`
-6) (Optional) Require moderation before public visibility:
+7) (Optional) Require moderation before public visibility:
    - `NEXT_PUBLIC_REQUIRE_APPROVAL=1`
 
 ## Admin access
@@ -34,5 +40,8 @@ If you use Firebase CLI, deploy them with:
 ```bash
 firebase deploy --only firestore:rules,storage:rules
 ```
+
+## Cloudinary (signed uploads)
+Uploads use a server-side signature via `src/app/api/cloudinary/sign/route.ts`, so your Cloudinary secret never goes to the browser.
 
 ## Notes

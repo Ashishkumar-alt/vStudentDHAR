@@ -4,9 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth, updateProfileBasics } from "@/components/auth/AuthProvider";
 import { INSTITUTIONS } from "@/lib/constants";
-import { compressForUpload } from "@/lib/images";
-import { getFirebaseStorageCandidates } from "@/lib/firebase/storage";
-import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import { uploadImageToCloudinary } from "@/lib/cloudinary/client";
 
 export default function ProfileClient() {
   const { user, loading, profile, signOutNow } = useAuth();
@@ -58,56 +56,14 @@ export default function ProfileClient() {
       if (photo) {
         setStage("Uploading photo…");
 
-        const withTimeout = async <T,>(p: Promise<T>, ms: number, msg: string) => {
-          let t: ReturnType<typeof setTimeout> | null = null;
-          try {
-            return await Promise.race([
-              p,
-              new Promise<T>((_, reject) => {
-                t = setTimeout(() => reject(new Error(msg)), ms);
-              }),
-            ]);
-          } finally {
-            if (t) clearTimeout(t);
-          }
-        };
-
-        // Compression can hang on some devices/browsers; skip for small files and add a timeout.
-        const fileToUpload =
-          photo.size <= 600 * 1024
-            ? photo
-            : await withTimeout(
-                compressForUpload(photo, { maxMB: 0.5, maxSize: 800 }),
-                15000,
-                "Photo processing took too long. Try a smaller image or skip the photo.",
-              );
-
-        const storages = getFirebaseStorageCandidates();
-        let photoUrl: string | null = null;
-        let lastErr: unknown = null;
-
-        for (const storage of storages) {
-          try {
-            const objectRef = ref(storage, `users/${user.uid}/profile.jpg`);
-            await withTimeout(
-              uploadBytes(objectRef, fileToUpload, { contentType: fileToUpload.type || "image/jpeg" }),
-              25000,
-              "Photo upload timed out. Check your internet and try again.",
-            );
-            photoUrl = await withTimeout(getDownloadURL(objectRef), 10000, "Could not fetch photo URL. Try again.");
-            break;
-          } catch (e) {
-            lastErr = e;
-          }
-        }
-
-        if (!photoUrl) {
-          throw lastErr instanceof Error
-            ? lastErr
-            : new Error(
-                "Photo upload failed. Check Firebase Storage is enabled and `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET` is correct.",
-              );
-        }
+        const photoUrl = await uploadImageToCloudinary({
+          file: photo,
+          folder: `vstudent/users/${user.uid}`,
+          publicId: `vstudent/users/${user.uid}/profile`,
+          overwrite: true,
+          maxSize: 800,
+          maxMB: 0.6,
+        });
 
         setStage("Finishing…");
         await updateProfileBasics(user.uid, { photoUrl, name: name.trim(), institution, whatsappNumber: whatsappNumber.trim(), college: college.trim() || undefined });
