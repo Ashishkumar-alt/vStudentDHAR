@@ -10,6 +10,7 @@ import type { ItemListing, Report, RoomListing } from "@/lib/firebase/models";
 import { itemsRef, reportsRef, roomsRef } from "@/lib/firebase/refs";
 import { deleteItem, deleteRoom, setItemApproved, setRoomApproved } from "@/lib/firebase/listings";
 import { watchIsAdmin } from "@/lib/firebase/admin";
+import { setReportStatus } from "@/lib/firebase/reports";
 
 function Row({
   title,
@@ -39,7 +40,7 @@ export default function AdminPage() {
   const [items, setItems] = useState<{ id: string; data: ItemListing }[]>([]);
   const [reports, setReports] = useState<{ id: string; data: Report }[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [busyId, setBusyId] = useState<string | null>(null);
+  const [busyKey, setBusyKey] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -99,16 +100,20 @@ export default function AdminPage() {
   }, [user, isAdmin]);
 
   const cannot = useMemo(() => adminLoading || !isAdmin, [adminLoading, isAdmin]);
+  const openReports = useMemo(
+    () => reports.filter((r) => !r.data.status || r.data.status === "open"),
+    [reports],
+  );
 
-  async function act(id: string, fn: () => Promise<void>) {
-    setBusyId(id);
+  async function act(nextBusyKey: string, fn: () => Promise<void>) {
+    setBusyKey(nextBusyKey);
     setError(null);
     try {
       await fn();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Action failed");
     } finally {
-      setBusyId(null);
+      setBusyKey(null);
     }
   }
 
@@ -120,7 +125,7 @@ export default function AdminPage() {
       <RequireAuth>
         {cannot ? (
           <div className="card mt-6 p-5 text-sm text-zinc-700">
-            {adminLoading ? "Checking access…" : "Not authorized. Add your UID to Firestore collection `admins`."}
+            {adminLoading ? "Checking access..." : "Not authorized. Add your UID to Firestore collection `admins`."}
           </div>
         ) : (
           <>
@@ -143,15 +148,15 @@ export default function AdminPage() {
                         <>
                           <button
                             className="btn h-9 px-4 text-sm"
-                            disabled={busyId === id}
-                            onClick={() => act(id, () => setRoomApproved(id, true))}
+                            disabled={busyKey === `room:${id}`}
+                            onClick={() => act(`room:${id}`, () => setRoomApproved(id, true))}
                           >
                             Approve
                           </button>
                           <button
                             className="btn h-9 px-4 text-sm"
-                            disabled={busyId === id}
-                            onClick={() => act(id, () => deleteRoom(id))}
+                            disabled={busyKey === `room:${id}`}
+                            onClick={() => act(`room:${id}`, () => deleteRoom(id))}
                           >
                             Delete
                           </button>
@@ -178,15 +183,15 @@ export default function AdminPage() {
                         <>
                           <button
                             className="btn h-9 px-4 text-sm"
-                            disabled={busyId === id}
-                            onClick={() => act(id, () => setItemApproved(id, true))}
+                            disabled={busyKey === `item:${id}`}
+                            onClick={() => act(`item:${id}`, () => setItemApproved(id, true))}
                           >
                             Approve
                           </button>
                           <button
                             className="btn h-9 px-4 text-sm"
-                            disabled={busyId === id}
-                            onClick={() => act(id, () => deleteItem(id))}
+                            disabled={busyKey === `item:${id}`}
+                            onClick={() => act(`item:${id}`, () => deleteItem(id))}
                           >
                             Delete
                           </button>
@@ -203,24 +208,48 @@ export default function AdminPage() {
             <section className="mt-8">
               <h2 className="text-sm font-semibold">Reports</h2>
               <div className="card mt-3 overflow-hidden">
-                {reports.length ? (
-                  reports.map(({ id, data }) => (
+                {openReports.length ? (
+                  openReports.map(({ id, data }) => (
                     <Row
                       key={id}
                       title={`${data.reason} · ${data.listingType}/${data.listingId}`}
                       subtitle={data.details || "—"}
                       actions={
-                        <Link
-                          className="btn h-9 px-4 text-sm"
-                          href={data.listingType === "room" ? `/rooms/${data.listingId}` : `/items/${data.listingId}`}
-                        >
-                          Open
-                        </Link>
+                        <>
+                          <Link
+                            className="btn h-9 px-4 text-sm"
+                            href={data.listingType === "room" ? `/rooms/${data.listingId}` : `/items/${data.listingId}`}
+                          >
+                            Open
+                          </Link>
+                          <button
+                            className="btn h-9 px-4 text-sm"
+                            disabled={busyKey === `report:${id}`}
+                            onClick={() =>
+                              act(`report:${id}`, () =>
+                                setReportStatus(id, { status: "resolved", resolvedBy: user!.uid }),
+                              )
+                            }
+                          >
+                            Resolve
+                          </button>
+                          <button
+                            className="btn h-9 px-4 text-sm"
+                            disabled={busyKey === `report:${id}`}
+                            onClick={() =>
+                              act(`report:${id}`, () =>
+                                setReportStatus(id, { status: "ignored", resolvedBy: user!.uid }),
+                              )
+                            }
+                          >
+                            Ignore
+                          </button>
+                        </>
                       }
                     />
                   ))
                 ) : (
-                  <div className="p-4 text-sm text-zinc-600">No reports.</div>
+                  <div className="p-4 text-sm text-zinc-600">No open reports.</div>
                 )}
               </div>
             </section>
@@ -230,3 +259,4 @@ export default function AdminPage() {
     </main>
   );
 }
+

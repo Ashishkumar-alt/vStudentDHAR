@@ -5,7 +5,9 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { DEFAULT_CITY_LABEL } from "@/lib/constants";
-import { Home, House, ShoppingBag, Plus, User, Shield, Menu, X } from "lucide-react";
+import { Home, House, ShoppingBag, Plus, User, Shield, Menu, X, Heart } from "lucide-react";
+import { Moon, Sun } from "lucide-react";
+import { useTheme } from "@/components/theme/ThemeProvider";
 
 function NavPill({
   href,
@@ -34,6 +36,7 @@ function NavPill({
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const { user, loading, signOutNow } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -44,7 +47,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-dvh bg-transparent">
-      <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/80 shadow-sm backdrop-blur">
+      <header className="app-header sticky top-0 z-20 border-b border-slate-200 bg-white/80 shadow-sm backdrop-blur">
         <div className="mx-auto flex w-full max-w-screen-2xl items-center justify-between gap-3 px-4 py-3">
           <div className="flex items-center gap-3">
             <Link href="/" className="flex items-center gap-2 text-sm font-semibold tracking-tight">
@@ -62,6 +65,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             <NavPill href="/" label="Home" icon={<Home className="h-4 w-4" />} />
             <NavPill href="/rooms" label="Rooms" icon={<House className="h-4 w-4" />} />
             <NavPill href="/items" label="Items" icon={<ShoppingBag className="h-4 w-4" />} />
+            <NavPill href="/saved" label="Saved" icon={<Heart className="h-4 w-4" />} />
             <NavPill href="/my-listings" label="My Listings" icon={<User className="h-4 w-4" />} />
           </nav>
 
@@ -78,7 +82,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             </button>
 
             {mobileMenuOpen ? (
-              <div className="absolute right-0 top-12 w-56 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl">
+              <div className="app-mobile-menu absolute right-0 top-12 w-56 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl">
                 <div className="border-b border-slate-100 p-3">
                   <div className="text-xs font-medium text-slate-600">{DEFAULT_CITY_LABEL}</div>
                   <div className="mt-1 truncate text-sm font-semibold text-slate-900">
@@ -89,7 +93,18 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                 <div className="p-2">
                   {user ? (
                     <>
+                      <button
+                        type="button"
+                        className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                        onClick={toggleTheme}
+                      >
+                        <span className="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-slate-100">
+                          {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                        </span>
+                        {theme === "dark" ? "Light mode" : "Dark mode"}
+                      </button>
                       <MenuLink href="/post" label="Post" icon={<Plus className="h-4 w-4" />} />
+                      <MenuLink href="/saved" label="Saved" icon={<Heart className="h-4 w-4" />} />
                       <MenuLink href="/my-listings" label="My Listings" icon={<House className="h-4 w-4" />} />
                       <MenuLink href="/profile" label="Profile" icon={<User className="h-4 w-4" />} />
                       <MenuLink href="/admin" label="Admin" icon={<Shield className="h-4 w-4" />} />
@@ -105,7 +120,19 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                       </button>
                     </>
                   ) : (
-                    <MenuLink href="/login" label="Sign in" icon={<User className="h-4 w-4" />} />
+                    <>
+                      <button
+                        type="button"
+                        className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                        onClick={toggleTheme}
+                      >
+                        <span className="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-slate-100">
+                          {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                        </span>
+                        {theme === "dark" ? "Light mode" : "Dark mode"}
+                      </button>
+                      <MenuLink href="/login" label="Sign in" icon={<User className="h-4 w-4" />} />
+                    </>
                   )}
                 </div>
               </div>
@@ -118,6 +145,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               <span className="text-xs text-slate-500">Loading...</span>
             ) : user ? (
               <>
+                <button className="btn h-9 w-9 px-0 text-sm" onClick={toggleTheme} aria-label="Toggle theme" title="Toggle theme">
+                  {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                </button>
                 <Link className="btn btn-primary h-9 px-4 text-sm" href="/post">
                   <Plus className="mr-2 h-4 w-4" />
                   Post
@@ -135,9 +165,14 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                 </button>
               </>
             ) : (
-              <Link className="btn btn-primary h-9 px-4 text-sm" href="/login">
-                Sign in
-              </Link>
+              <>
+                <button className="btn h-9 w-9 px-0 text-sm" onClick={toggleTheme} aria-label="Toggle theme" title="Toggle theme">
+                  {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                </button>
+                <Link className="btn btn-primary h-9 px-4 text-sm" href="/login">
+                  Sign in
+                </Link>
+              </>
             )}
           </div>
         </div>
@@ -145,7 +180,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
       <div className="pb-16 sm:pb-0">{children}</div>
 
-      <nav className="fixed bottom-0 left-0 right-0 z-30 border-t border-slate-200 bg-white/90 backdrop-blur sm:hidden">
+      <nav className="app-bottom-nav fixed bottom-0 left-0 right-0 z-30 border-t border-slate-200 bg-white/90 backdrop-blur sm:hidden">
         <div className="mx-auto grid w-full max-w-screen-2xl grid-cols-4 gap-1 px-2 py-2">
           <MobileTab href="/rooms" label="Rooms" icon="rooms" />
           <MobileTab href="/items" label="Items" icon="items" />

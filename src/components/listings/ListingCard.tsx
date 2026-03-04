@@ -5,6 +5,7 @@ import Link from "next/link";
 import type { ItemListing, RoomListing } from "@/lib/firebase/models";
 import { formatINR, toWhatsAppLink } from "@/lib/utils";
 import { MapPin, MessageCircle, Footprints, Flame, Leaf } from "lucide-react";
+import FavoriteButton from "@/components/favorites/FavoriteButton";
 
 function isNew(createdAt: unknown) {
   try {
@@ -25,6 +26,9 @@ export function RoomCard({ id, listing }: { id: string; listing: RoomListing }) 
   return (
     <div className="card card-hover group overflow-hidden">
       <Link href={`/rooms/${id}`} className="relative block aspect-[16/10] w-full bg-zinc-100">
+        <div className="absolute right-3 top-3 z-10">
+          <FavoriteButton listingType="room" listingId={id} />
+        </div>
         {listing.photoUrls?.[0] ? (
           <Image
             src={listing.photoUrls[0]}
@@ -117,6 +121,9 @@ export function ItemCard({ id, listing }: { id: string; listing: ItemListing }) 
   return (
     <div className="card card-hover group overflow-hidden">
       <Link href={`/items/${id}`} className="relative block aspect-[16/10] w-full bg-zinc-100">
+        <div className="absolute right-3 top-3 z-10">
+          <FavoriteButton listingType="item" listingId={id} />
+        </div>
         {listing.photoUrls?.[0] ? (
           <Image
             src={listing.photoUrls[0]}

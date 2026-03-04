@@ -3,17 +3,20 @@
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { useParams } from "next/navigation";
+import Link from "next/link";
 import { getItem } from "@/lib/firebase/listings";
 import type { ItemListing } from "@/lib/firebase/models";
 import { formatINR, institutionShortLabel, toWhatsAppLink } from "@/lib/utils";
 import ReportListing from "@/components/listings/ReportListing";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { PRIMARY_INSTITUTION_SHORT } from "@/lib/constants";
+import FavoriteButton from "@/components/favorites/FavoriteButton";
+import { recordItemView } from "@/lib/firebase/views";
 
 export default function ItemDetailsPage() {
   const params = useParams<{ id: string }>();
   const id = params.id;
-  const { profile } = useAuth();
+  const { user, profile } = useAuth();
   const [listing, setListing] = useState<ItemListing | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -38,6 +41,11 @@ export default function ItemDetailsPage() {
       alive = false;
     };
   }, [id]);
+
+  useEffect(() => {
+    if (!user || !listing) return;
+    recordItemView({ itemId: id, viewerId: user.uid }).catch(() => {});
+  }, [id, listing, user]);
 
   const wa = useMemo(() => {
     if (!listing) return null;
@@ -73,6 +81,12 @@ export default function ItemDetailsPage() {
           </p>
         </div>
         <div className="flex flex-col gap-2 sm:flex-row">
+          <FavoriteButton listingType="item" listingId={id} />
+          {user?.uid && listing.createdBy === user.uid ? (
+            <Link className="btn" href={`/edit/item/${id}`}>
+              Edit
+            </Link>
+          ) : null}
           {waShare ? (
             <a className="btn" href={waShare} target="_blank" rel="noreferrer">
               Share to {PRIMARY_INSTITUTION_SHORT} WhatsApp group

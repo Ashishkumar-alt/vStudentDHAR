@@ -7,7 +7,12 @@
   --card: #ffffff;
   --border: #e2e8f0; /* slate-200 (more visible) */
   --brand: #0f172a; /* primary */
+  --brand-hover: #0b1222;
   --accent: #10b981; /* emerald */
+
+  --bg1: #eff6ff;
+  --bg2: #ffffff;
+  --bg3: #f1f5f9;
 }
 
 @theme inline {
@@ -16,21 +21,23 @@
   --font-sans: var(--font-sans);
 }
 
-/* Keep MVP in a consistent light theme (better contrast on devices set to dark mode). */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #ffffff;
-    --foreground: #0f172a;
-    --muted: #475569;
-    --card: #ffffff;
-    --border: #e2e8f0;
-    --brand: #0f172a;
-    --accent: #10b981;
-  }
+html[data-theme="dark"] {
+  --background: #050b18;
+  --foreground: #e2e8f0;
+  --muted: #94a3b8;
+  --card: #0b1222;
+  --border: #1e293b;
+  --brand: #3b82f6;
+  --brand-hover: #2563eb;
+  --accent: #34d399;
+
+  --bg1: #020617;
+  --bg2: #050b18;
+  --bg3: #0b1222;
 }
 
 body {
-  background: linear-gradient(to bottom, #eff6ff, #ffffff, #f1f5f9);
+  background: linear-gradient(to bottom, var(--bg1), var(--bg2), var(--bg3));
   color: var(--foreground);
   font-family: var(--font-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial,
     "Apple Color Emoji", "Segoe UI Emoji";
@@ -46,12 +53,12 @@ body {
   background: var(--card);
   padding: 0 16px;
   font-weight: 500;
-  color: rgb(24 24 27);
+  color: var(--foreground);
   transition: background 120ms ease, border-color 120ms ease, transform 120ms ease;
 }
 
 .btn:hover {
-  background: rgb(244 244 245);
+  background: color-mix(in srgb, var(--card) 88%, white 12%);
 }
 
 .btn:active {
@@ -70,7 +77,7 @@ body {
 }
 
 .btn-primary:hover {
-  background: #0b1222;
+  background: var(--brand-hover);
 }
 
 .btn-danger {
@@ -106,7 +113,7 @@ body {
   width: 100%;
   border-radius: 14px;
   border: 1px solid var(--border);
-  background: white;
+  background: var(--card);
   padding: 10px 12px;
   font-size: 14px;
   color: var(--foreground);
@@ -116,8 +123,8 @@ body {
 .input:disabled,
 .select:disabled,
 .textarea:disabled {
-  background: #f8fafc;
-  color: #64748b; /* slate-500 */
+  background: color-mix(in srgb, var(--card) 85%, var(--background) 15%);
+  color: color-mix(in srgb, var(--muted) 80%, var(--foreground) 20%);
 }
 
 .input::placeholder,
@@ -135,4 +142,28 @@ body {
 .textarea:focus {
   border-color: #94a3b8;
   box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.16);
+}
+
+/* AppShell overrides to avoid hard-coded light backgrounds */
+.app-header {
+  border-color: var(--border) !important;
+  background: rgba(255, 255, 255, 0.82) !important;
+}
+
+html[data-theme="dark"] .app-header {
+  background: rgba(11, 18, 34, 0.78) !important;
+}
+
+.app-bottom-nav {
+  border-color: var(--border) !important;
+  background: rgba(255, 255, 255, 0.9) !important;
+}
+
+html[data-theme="dark"] .app-bottom-nav {
+  background: rgba(11, 18, 34, 0.9) !important;
+}
+
+.app-mobile-menu {
+  border-color: var(--border) !important;
+  background: var(--card) !important;
 }

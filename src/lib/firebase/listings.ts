@@ -32,6 +32,46 @@ export async function createItem(input: Omit<ItemListing, "createdAt" | "updated
   return docRef.id;
 }
 
+export async function updateRoom(
+  id: string,
+  input: Partial<Omit<RoomListing, "createdAt" | "updatedAt" | "createdBy" | "type">>,
+  opts?: { newPhotos?: File[]; replacePhotos?: boolean },
+) {
+  const next: Record<string, unknown> = { ...input, updatedAt: serverTimestamp() };
+
+  if (opts?.newPhotos?.length) {
+    const urls = await uploadListingPhotos({ type: "room", id }, opts.newPhotos);
+    if (opts.replacePhotos) {
+      next.photoUrls = urls;
+    } else {
+      const existing = await getRoom(id);
+      next.photoUrls = [...(existing?.data.photoUrls || []), ...urls];
+    }
+  }
+
+  await updateDoc(roomRef(id), next);
+}
+
+export async function updateItem(
+  id: string,
+  input: Partial<Omit<ItemListing, "createdAt" | "updatedAt" | "createdBy" | "type">>,
+  opts?: { newPhotos?: File[]; replacePhotos?: boolean },
+) {
+  const next: Record<string, unknown> = { ...input, updatedAt: serverTimestamp() };
+
+  if (opts?.newPhotos?.length) {
+    const urls = await uploadListingPhotos({ type: "item", id }, opts.newPhotos);
+    if (opts.replacePhotos) {
+      next.photoUrls = urls;
+    } else {
+      const existing = await getItem(id);
+      next.photoUrls = [...(existing?.data.photoUrls || []), ...urls];
+    }
+  }
+
+  await updateDoc(itemRef(id), next);
+}
+
 async function uploadListingPhotos(
   listing: { type: "room" | "item"; id: string },
   photos: File[],

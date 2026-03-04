@@ -10,12 +10,12 @@ export default function Home() {
       <section className="card card-hover relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-indigo-600 to-fuchsia-600" />
         <div
-          className="absolute inset-0 opacity-[0.08] blur-2xl"
+          className="absolute inset-0 opacity-[0.18] blur-2xl sm:opacity-[0.14]"
           style={{
             backgroundImage:
               "url(/dharamshala-hero.webp), url(/dharamshala-hero.jpg), url(/dharamshala-hero.jpeg), url(/dharamshala-hero.png), url(/hero-mountains.svg)",
             backgroundSize: "cover",
-            backgroundPosition: "center",
+            backgroundPosition: "50% 20%",
           }}
         />
         <div className="relative p-6 sm:p-12">

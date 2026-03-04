@@ -52,11 +52,22 @@ export type ItemListing = {
   updatedAt: Timestamp;
 };
 
+export type Favorite = {
+  listingType: "room" | "item";
+  listingId: string;
+  createdAt: Timestamp;
+};
+
+export type ReportStatus = "open" | "resolved" | "ignored";
+
 export type Report = {
   listingType: "room" | "item";
   listingId: string;
   reason: "Spam" | "Fake" | "Wrong info" | "Other";
   details?: string;
+  status?: ReportStatus;
+  resolvedBy?: string;
+  resolvedAt?: Timestamp;
   createdBy: string;
   createdAt: Timestamp;
 };

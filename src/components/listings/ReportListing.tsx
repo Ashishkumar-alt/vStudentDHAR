@@ -32,6 +32,7 @@ export default function ReportListing({
         listingId,
         reason,
         details: details.trim() || undefined,
+        status: "open",
         createdBy: user.uid,
         createdAt: serverTimestamp(),
       });

@@ -19,6 +19,11 @@ service cloud.firestore {
       allow create: if isSignedIn() && request.auth.uid == uid;
       allow update: if isAdmin() || (isSignedIn() && request.auth.uid == uid);
       allow delete: if false;
+
+      match /favorites/{favId} {
+        allow read: if isSignedIn() && request.auth.uid == uid;
+        allow create, update, delete: if isSignedIn() && request.auth.uid == uid;
+      }
     }
 
     function listingReadable(resource) {
@@ -45,6 +50,12 @@ service cloud.firestore {
       allow delete: if isAdmin() || (isSignedIn() && resource.data.createdBy == request.auth.uid);
     }
 
+    match /rooms/{id}/views/{viewerId} {
+      allow read: if isAdmin() || (isSignedIn() && get(/databases/$(database)/documents/rooms/$(id)).data.createdBy == request.auth.uid);
+      allow create, update: if isSignedIn() && request.auth.uid == viewerId;
+      allow delete: if false;
+    }
+
     match /items/{id} {
       allow read: if listingReadable(resource);
       allow create: if listingCreatable();
@@ -52,11 +63,19 @@ service cloud.firestore {
       allow delete: if isAdmin() || (isSignedIn() && resource.data.createdBy == request.auth.uid);
     }
 
+    match /items/{id}/views/{viewerId} {
+      allow read: if isAdmin() || (isSignedIn() && get(/databases/$(database)/documents/items/$(id)).data.createdBy == request.auth.uid);
+      allow create, update: if isSignedIn() && request.auth.uid == viewerId;
+      allow delete: if false;
+    }
+
     match /reports/{id} {
       allow read: if isAdmin();
-      allow create: if isSignedIn() && request.resource.data.createdBy == request.auth.uid;
-      allow update, delete: if false;
+      allow create: if isSignedIn()
+        && request.resource.data.createdBy == request.auth.uid
+        && request.resource.data.status == "open";
+      allow update: if isAdmin();
+      allow delete: if false;
     }
   }
 }
-

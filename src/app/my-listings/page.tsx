@@ -8,9 +8,10 @@ import { useAuth } from "@/components/auth/AuthProvider";
 import type { ItemListing, RoomListing } from "@/lib/firebase/models";
 import { itemsRef, roomsRef } from "@/lib/firebase/refs";
 import { deleteItem, deleteRoom, markItemSold, markRoomSold } from "@/lib/firebase/listings";
+import { getItemViewsCount, getRoomViewsCount } from "@/lib/firebase/views";
 import { formatINR } from "@/lib/utils";
 import { CardSkeleton } from "@/components/ui/Skeleton";
-import { Eye, Trash2, CheckCircle2 } from "lucide-react";
+import { Eye, Trash2, CheckCircle2, Pencil } from "lucide-react";
 
 function StatusPill({ approved, status }: { approved: boolean; status: string }) {
   const text = !approved ? "Pending" : status === "sold" ? "Sold" : "Active";
@@ -28,7 +29,9 @@ export default function MyListingsPage() {
   const [rooms, setRooms] = useState<{ id: string; data: RoomListing }[] | null>(null);
   const [items, setItems] = useState<{ id: string; data: ItemListing }[] | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [busyId, setBusyId] = useState<string | null>(null);
+  const [busyKey, setBusyKey] = useState<string | null>(null);
+  const [views, setViews] = useState<Record<string, number>>({});
+  const [viewsLoading, setViewsLoading] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -61,15 +64,50 @@ export default function MyListingsPage() {
     return { active, sold, total: all.length };
   }, [rooms, items]);
 
-  async function act(id: string, fn: () => Promise<void>) {
-    setBusyId(id);
+  const totalViews = useMemo(() => Object.values(views).reduce((a, b) => a + b, 0), [views]);
+
+  useEffect(() => {
+    if (!user) return;
+    if (rooms === null || items === null) return;
+    let alive = true;
+    setViewsLoading(true);
+
+    const roomJobs = (rooms || []).map(async (r) => {
+      const count = await getRoomViewsCount(r.id);
+      return [`room:${r.id}`, count] as const;
+    });
+    const itemJobs = (items || []).map(async (it) => {
+      const count = await getItemViewsCount(it.id);
+      return [`item:${it.id}`, count] as const;
+    });
+
+    Promise.all([...roomJobs, ...itemJobs])
+      .then((pairs) => {
+        if (!alive) return;
+        const next: Record<string, number> = {};
+        for (const [k, v] of pairs) next[k] = v;
+        setViews(next);
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!alive) return;
+        setViewsLoading(false);
+      });
+
+    return () => {
+      alive = false;
+    };
+  }, [items, rooms, user]);
+
+  async function act(nextBusyKey: string, fn: () => Promise<void>) {
+    setBusyKey(nextBusyKey);
     setError(null);
     try {
       await fn();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Action failed");
     } finally {
-      setBusyId(null);
+      setBusyKey(null);
     }
   }
 
@@ -97,8 +135,8 @@ export default function MyListingsPage() {
               <Eye className="h-4 w-4" />
               Total views
             </div>
-            <div className="mt-1 text-2xl font-semibold">—</div>
-            <div className="mt-1 text-xs text-slate-500">Coming soon</div>
+            <div className="mt-1 text-2xl font-semibold">{loading || viewsLoading ? "—" : totalViews}</div>
+            <div className="mt-1 text-xs text-slate-500">Unique signed-in views</div>
           </div>
         </div>
 
@@ -138,16 +176,20 @@ export default function MyListingsPage() {
                       {data.title}
                     </Link>
                     <div className="mt-1 text-xs text-zinc-600">
-                      {data.area} · {formatINR(data.rent)}/mo
+                      {data.area} · {formatINR(data.rent)}/mo · {views[`room:${id}`] ?? 0} views
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
                     <StatusPill approved={data.approved} status={data.status} />
+                    <Link className="btn h-9 px-4 text-sm" href={`/edit/room/${id}`}>
+                      <Pencil className="mr-2 h-4 w-4" />
+                      Edit
+                    </Link>
                     {data.status !== "sold" ? (
                       <button
                         className="btn h-9 px-4 text-sm"
-                        disabled={busyId === id}
-                        onClick={() => act(id, () => markRoomSold(id))}
+                        disabled={busyKey === `roomSold:${id}`}
+                        onClick={() => act(`roomSold:${id}`, () => markRoomSold(id))}
                       >
                         <CheckCircle2 className="mr-2 h-4 w-4" />
                         Mark sold
@@ -155,8 +197,8 @@ export default function MyListingsPage() {
                     ) : null}
                     <button
                       className="btn h-9 px-4 text-sm"
-                      disabled={busyId === id}
-                      onClick={() => act(id, () => deleteRoom(id))}
+                      disabled={busyKey === `roomDel:${id}`}
+                      onClick={() => act(`roomDel:${id}`, () => deleteRoom(id))}
                     >
                       <Trash2 className="mr-2 h-4 w-4" />
                       Delete
@@ -179,16 +221,20 @@ export default function MyListingsPage() {
                       {data.title}
                     </Link>
                     <div className="mt-1 text-xs text-zinc-600">
-                      {data.category} · {formatINR(data.price)}
+                      {data.category} · {formatINR(data.price)} · {views[`item:${id}`] ?? 0} views
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
                     <StatusPill approved={data.approved} status={data.status} />
+                    <Link className="btn h-9 px-4 text-sm" href={`/edit/item/${id}`}>
+                      <Pencil className="mr-2 h-4 w-4" />
+                      Edit
+                    </Link>
                     {data.status !== "sold" ? (
                       <button
                         className="btn h-9 px-4 text-sm"
-                        disabled={busyId === id}
-                        onClick={() => act(id, () => markItemSold(id))}
+                        disabled={busyKey === `itemSold:${id}`}
+                        onClick={() => act(`itemSold:${id}`, () => markItemSold(id))}
                       >
                         <CheckCircle2 className="mr-2 h-4 w-4" />
                         Mark sold
@@ -196,8 +242,8 @@ export default function MyListingsPage() {
                     ) : null}
                     <button
                       className="btn h-9 px-4 text-sm"
-                      disabled={busyId === id}
-                      onClick={() => act(id, () => deleteItem(id))}
+                      disabled={busyKey === `itemDel:${id}`}
+                      onClick={() => act(`itemDel:${id}`, () => deleteItem(id))}
                     >
                       <Trash2 className="mr-2 h-4 w-4" />
                       Delete
@@ -212,3 +258,4 @@ export default function MyListingsPage() {
     </main>
   );
 }
+
