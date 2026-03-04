@@ -39,14 +39,16 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="h-full" suppressHydrationWarning>
-      <Script id="theme-init" strategy="beforeInteractive">{`
-        (function () {
-          try {
-            var t = window.localStorage.getItem("vstudent.theme");
-            if (t === "dark" || t === "light") document.documentElement.dataset.theme = t;
-          } catch (e) {}
-        })();
-      `}</Script>
+      <head>
+        <Script id="theme-init" strategy="beforeInteractive">{`
+          (function () {
+            try {
+              var t = window.localStorage.getItem("vstudent.theme");
+              if (t === "dark" || t === "light") document.documentElement.dataset.theme = t;
+            } catch (e) {}
+          })();
+        `}</Script>
+      </head>
       <body className={`${inter.variable} h-full antialiased`}>
         <Providers>
           <AppShell>{children}</AppShell>
