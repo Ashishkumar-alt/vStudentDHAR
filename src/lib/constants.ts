@@ -2,6 +2,10 @@ export const DEFAULT_CITY_ID = process.env.NEXT_PUBLIC_CITY_ID || "dharamshala";
 export const DEFAULT_CITY_LABEL = process.env.NEXT_PUBLIC_CITY_LABEL || "Dharamshala";
 export const REQUIRE_APPROVAL = process.env.NEXT_PUBLIC_REQUIRE_APPROVAL === "1";
 
+export const PRIMARY_INSTITUTION_SHORT = process.env.NEXT_PUBLIC_PRIMARY_INSTITUTION_SHORT || "GCD";
+export const PRIMARY_INSTITUTION_LONG =
+  process.env.NEXT_PUBLIC_PRIMARY_INSTITUTION_LONG || `Govt College Dharamshala (${PRIMARY_INSTITUTION_SHORT})`;
+
 export const DHARAMSHALA_AREAS = [
   "HPU Campus",
   "Sidhpur",
@@ -11,11 +15,11 @@ export const DHARAMSHALA_AREAS = [
   "Sheela Chowk",
 ] as const;
 
-export const DEFAULT_INSTITUTION_LABEL = "HPU";
+export const DEFAULT_INSTITUTION_LABEL = PRIMARY_INSTITUTION_LONG;
 export const INSTITUTIONS = [
+  PRIMARY_INSTITUTION_LONG,
   "Himachal Pradesh University (HPU)",
   "Central University of Himachal Pradesh",
-  "Govt College Dharamshala",
   "Nursing Colleges",
   "ITI Dharamshala",
 ] as const;

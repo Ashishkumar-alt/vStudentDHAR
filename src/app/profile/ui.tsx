@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth, updateProfileBasics } from "@/components/auth/AuthProvider";
-import { INSTITUTIONS } from "@/lib/constants";
+import { DEFAULT_INSTITUTION_LABEL, INSTITUTIONS } from "@/lib/constants";
 import { uploadImageToCloudinary } from "@/lib/cloudinary/client";
 
 export default function ProfileClient() {
@@ -13,7 +13,7 @@ export default function ProfileClient() {
   const next = useMemo(() => search.get("next") || "/post", [search]);
 
   const [name, setName] = useState("");
-  const [institution, setInstitution] = useState<string>(INSTITUTIONS[0]);
+  const [institution, setInstitution] = useState<string>(DEFAULT_INSTITUTION_LABEL);
   const [whatsappNumber, setWhatsappNumber] = useState("");
   const [college, setCollege] = useState("");
   const [photo, setPhoto] = useState<File | null>(null);

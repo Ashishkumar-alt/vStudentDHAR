@@ -74,7 +74,7 @@ export default function MyListingsPage() {
   }
 
   return (
-    <main className="mx-auto w-full max-w-5xl px-4 py-8">
+    <main className="mx-auto w-full max-w-screen-2xl px-4 py-8">
       <h1 className="text-2xl font-semibold">My listings</h1>
       <p className="mt-1 text-sm text-zinc-600">Manage your posted rooms and items.</p>
 

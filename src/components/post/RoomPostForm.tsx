@@ -8,7 +8,7 @@ import { useForm } from "react-hook-form";
 import { useAuth } from "@/components/auth/AuthProvider";
 import PhotoPicker from "./PhotoPicker";
 import { createRoom } from "@/lib/firebase/listings";
-import { DEFAULT_CITY_ID, DHARAMSHALA_AREAS, REQUIRE_APPROVAL, ROOM_GENDER_ALLOWED } from "@/lib/constants";
+import { DEFAULT_CITY_ID, DHARAMSHALA_AREAS, PRIMARY_INSTITUTION_SHORT, REQUIRE_APPROVAL, ROOM_GENDER_ALLOWED } from "@/lib/constants";
 
 const schema = z.object({
   title: z.string().min(5, "Title is required"),
@@ -202,7 +202,7 @@ export default function RoomPostForm() {
         </label>
 
         <div>
-          <label className="text-sm font-medium">Walking distance to HPU (minutes)</label>
+          <label className="text-sm font-medium">Walking distance to {PRIMARY_INSTITUTION_SHORT} (minutes)</label>
           <input className="input mt-2" inputMode="numeric" placeholder="e.g. 8" {...form.register("walkMinutesToHPU")} />
           {form.formState.errors.walkMinutesToHPU ? (
             <p className="mt-1 text-xs text-red-600">{form.formState.errors.walkMinutesToHPU.message}</p>

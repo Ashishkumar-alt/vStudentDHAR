@@ -5,9 +5,10 @@ import Image from "next/image";
 import { useParams } from "next/navigation";
 import { getRoom } from "@/lib/firebase/listings";
 import type { RoomListing } from "@/lib/firebase/models";
-import { formatINR, toWhatsAppLink } from "@/lib/utils";
+import { formatINR, institutionShortLabel, toWhatsAppLink } from "@/lib/utils";
 import ReportListing from "@/components/listings/ReportListing";
 import { useAuth } from "@/components/auth/AuthProvider";
+import { PRIMARY_INSTITUTION_SHORT } from "@/lib/constants";
 
 export default function RoomDetailsPage() {
   const params = useParams<{ id: string }>();
@@ -40,7 +41,7 @@ export default function RoomDetailsPage() {
 
   const wa = useMemo(() => {
     if (!listing) return null;
-    const inst = profile?.institution?.includes("HPU") ? "HPU" : profile?.institution || "a";
+    const inst = institutionShortLabel(profile?.institution) || "a";
     return toWhatsAppLink(
       listing.contactPhone,
       `Hi, I’m a student from ${inst}. Is this room still available? (vStudent Dharamshala)`,
@@ -58,12 +59,12 @@ export default function RoomDetailsPage() {
     return `https://wa.me/?text=${encodeURIComponent(shareText)}`;
   }, [shareText]);
 
-  if (loading) return <main className="mx-auto w-full max-w-5xl px-4 py-8">Loading…</main>;
-  if (error) return <main className="mx-auto w-full max-w-5xl px-4 py-8 text-red-600">{error}</main>;
-  if (!listing) return <main className="mx-auto w-full max-w-5xl px-4 py-8">Not found.</main>;
+  if (loading) return <main className="mx-auto w-full max-w-screen-2xl px-4 py-8">Loading…</main>;
+  if (error) return <main className="mx-auto w-full max-w-screen-2xl px-4 py-8 text-red-600">{error}</main>;
+  if (!listing) return <main className="mx-auto w-full max-w-screen-2xl px-4 py-8">Not found.</main>;
 
   return (
-    <main className="mx-auto w-full max-w-5xl px-4 py-8">
+    <main className="mx-auto w-full max-w-screen-2xl px-4 py-8">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold">{listing.title}</h1>
@@ -74,7 +75,7 @@ export default function RoomDetailsPage() {
         <div className="flex flex-col gap-2 sm:flex-row">
           {waShare ? (
             <a className="btn" href={waShare} target="_blank" rel="noreferrer">
-              Share to HPU WhatsApp group
+              Share to {PRIMARY_INSTITUTION_SHORT} WhatsApp group
             </a>
           ) : null}
           {wa ? (
@@ -111,7 +112,7 @@ export default function RoomDetailsPage() {
               <div>Veg only: {listing.vegOnly ? "Yes" : "No"}</div>
               <div>Heater included: {listing.heaterIncluded ? "Yes" : "No"}</div>
               {typeof listing.walkMinutesToHPU === "number" ? (
-                <div>Walking distance to HPU: {listing.walkMinutesToHPU} min</div>
+                <div>Walking distance to {PRIMARY_INSTITUTION_SHORT}: {listing.walkMinutesToHPU} min</div>
               ) : null}
               <div className="sm:col-span-2">Address: {listing.address}</div>
             </div>

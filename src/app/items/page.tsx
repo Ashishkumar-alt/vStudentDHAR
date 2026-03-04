@@ -64,7 +64,7 @@ export default function ItemsPage() {
   }, [rows, area, category, minPrice, maxPrice, q, sort, profile?.institution]);
 
   return (
-    <main className="mx-auto w-full max-w-5xl px-4 py-8">
+    <main className="mx-auto w-full max-w-screen-2xl px-4 py-8">
       <section className="rounded-3xl border border-slate-200/70 bg-slate-50/60 p-6 shadow-sm">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
           <div>

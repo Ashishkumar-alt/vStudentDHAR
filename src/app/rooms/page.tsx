@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { ROOM_GENDER_ALLOWED } from "@/lib/constants";
+import { PRIMARY_INSTITUTION_SHORT, ROOM_GENDER_ALLOWED } from "@/lib/constants";
 import { asNumber } from "@/lib/utils";
 import { RoomCard } from "@/components/listings/ListingCard";
 import { useRooms } from "@/components/listings/useListings";
@@ -91,7 +91,7 @@ export default function RoomsPage() {
   ]);
 
   return (
-    <main className="mx-auto w-full max-w-5xl px-4 py-8">
+    <main className="mx-auto w-full max-w-screen-2xl px-4 py-8">
       <section className="rounded-3xl border border-slate-200/70 bg-slate-50/60 p-6 shadow-sm">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
           <div>
@@ -165,7 +165,7 @@ export default function RoomsPage() {
             Winter ready (heater)
           </label>
           <div className="min-w-[180px]">
-            <label className="text-xs font-medium text-zinc-600">Walking distance to HPU (max minutes)</label>
+            <label className="text-xs font-medium text-zinc-600">Walking distance to {PRIMARY_INSTITUTION_SHORT} (max minutes)</label>
             <input className="input mt-1" value={maxWalk} onChange={(e) => setMaxWalk(e.target.value)} placeholder="e.g. 10" inputMode="numeric" />
           </div>
           </div>

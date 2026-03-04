@@ -17,6 +17,12 @@ export function toWhatsAppLink(phoneE164: string, message: string) {
   return `https://wa.me/${phoneDigits}?text=${text}`;
 }
 
+export function institutionShortLabel(institution?: string | null) {
+  if (!institution) return null;
+  const match = institution.match(/\(([A-Za-z0-9&.+-]{2,})\)\s*$/);
+  return match?.[1] || institution;
+}
+
 export function asNumber(value: unknown) {
   const num = typeof value === "number" ? value : Number(value);
   return Number.isFinite(num) ? num : null;

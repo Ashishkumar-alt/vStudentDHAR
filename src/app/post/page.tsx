@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Home, Package } from "lucide-react";
+import { PRIMARY_INSTITUTION_SHORT } from "@/lib/constants";
 
 export default function PostPage() {
   return (
@@ -19,7 +20,7 @@ export default function PostPage() {
             </div>
             <div>
               <div className="text-base font-semibold">🏠 Post Room</div>
-              <div className="mt-1 text-sm text-slate-600">Heater, walk-to-HPU, veg, photos.</div>
+              <div className="mt-1 text-sm text-slate-600">Heater, walk-to-{PRIMARY_INSTITUTION_SHORT}, veg, photos.</div>
               <div className="mt-4 inline-flex text-sm font-medium text-slate-900 underline underline-offset-4">
                 Continue
               </div>

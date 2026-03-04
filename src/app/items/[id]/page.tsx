@@ -5,9 +5,10 @@ import Image from "next/image";
 import { useParams } from "next/navigation";
 import { getItem } from "@/lib/firebase/listings";
 import type { ItemListing } from "@/lib/firebase/models";
-import { formatINR, toWhatsAppLink } from "@/lib/utils";
+import { formatINR, institutionShortLabel, toWhatsAppLink } from "@/lib/utils";
 import ReportListing from "@/components/listings/ReportListing";
 import { useAuth } from "@/components/auth/AuthProvider";
+import { PRIMARY_INSTITUTION_SHORT } from "@/lib/constants";
 
 export default function ItemDetailsPage() {
   const params = useParams<{ id: string }>();
@@ -40,7 +41,7 @@ export default function ItemDetailsPage() {
 
   const wa = useMemo(() => {
     if (!listing) return null;
-    const inst = profile?.institution?.includes("HPU") ? "HPU" : profile?.institution || "a";
+    const inst = institutionShortLabel(profile?.institution) || "a";
     return toWhatsAppLink(
       listing.contactPhone,
       `Hi, I saw your listing on vStudent Dharamshala. Is it available? (I’m from ${inst})`,
@@ -58,12 +59,12 @@ export default function ItemDetailsPage() {
     return `https://wa.me/?text=${encodeURIComponent(shareText)}`;
   }, [shareText]);
 
-  if (loading) return <main className="mx-auto w-full max-w-5xl px-4 py-8">Loading…</main>;
-  if (error) return <main className="mx-auto w-full max-w-5xl px-4 py-8 text-red-600">{error}</main>;
-  if (!listing) return <main className="mx-auto w-full max-w-5xl px-4 py-8">Not found.</main>;
+  if (loading) return <main className="mx-auto w-full max-w-screen-2xl px-4 py-8">Loading…</main>;
+  if (error) return <main className="mx-auto w-full max-w-screen-2xl px-4 py-8 text-red-600">{error}</main>;
+  if (!listing) return <main className="mx-auto w-full max-w-screen-2xl px-4 py-8">Not found.</main>;
 
   return (
-    <main className="mx-auto w-full max-w-5xl px-4 py-8">
+    <main className="mx-auto w-full max-w-screen-2xl px-4 py-8">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold">{listing.title}</h1>
@@ -74,7 +75,7 @@ export default function ItemDetailsPage() {
         <div className="flex flex-col gap-2 sm:flex-row">
           {waShare ? (
             <a className="btn" href={waShare} target="_blank" rel="noreferrer">
-              Share to HPU WhatsApp group
+              Share to {PRIMARY_INSTITUTION_SHORT} WhatsApp group
             </a>
           ) : null}
           {wa ? (

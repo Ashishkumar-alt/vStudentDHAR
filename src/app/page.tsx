@@ -2,10 +2,11 @@ import Link from "next/link";
 import AreaQuickChips from "@/components/home/AreaQuickChips";
 import DharamshalaPulse from "@/components/home/DharamshalaPulse";
 import HomePreviews from "@/components/home/HomePreviews";
+import { PRIMARY_INSTITUTION_SHORT } from "@/lib/constants";
 
 export default function Home() {
   return (
-    <main className="mx-auto w-full max-w-5xl space-y-16 px-4 py-10">
+    <main className="mx-auto w-full max-w-screen-2xl space-y-16 px-4 py-10">
       <section className="card card-hover relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-indigo-600 to-fuchsia-600" />
         <div
@@ -25,7 +26,7 @@ export default function Home() {
             Find your perfect student space
           </h1>
           <p className="mt-4 max-w-2xl text-base text-white/80">
-            Near HPU, Kotwali Bazaar, Sidhpur, McLeodganj. Post fast, contact directly on WhatsApp.
+            Near {PRIMARY_INSTITUTION_SHORT}, Kotwali Bazaar, Sidhpur, McLeodganj. Post fast, contact directly on WhatsApp.
           </p>
           <p className="mt-2 max-w-2xl text-sm font-medium text-white/90">
             Dhoop mein mat ghoomo. vStudent kholo. ☀️
