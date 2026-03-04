@@ -80,6 +80,7 @@ export type UserProfile = {
   name?: string;
   college?: string;
   institution?: string;
+  userType?: "student" | "landlord";
   photoUrl?: string;
   createdAt: Timestamp;
   updatedAt: Timestamp;

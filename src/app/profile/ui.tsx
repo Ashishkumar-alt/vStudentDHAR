@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth, updateProfileBasics } from "@/components/auth/AuthProvider";
 import { DEFAULT_INSTITUTION_LABEL, INSTITUTIONS } from "@/lib/constants";
 import { uploadImageToCloudinary } from "@/lib/cloudinary/client";
+import { deleteField } from "firebase/firestore";
 
 export default function ProfileClient() {
   const { user, loading, profile, signOutNow } = useAuth();
@@ -13,6 +14,7 @@ export default function ProfileClient() {
   const next = useMemo(() => search.get("next") || "/post", [search]);
 
   const [name, setName] = useState("");
+  const [userType, setUserType] = useState<"student" | "landlord">("student");
   const [institution, setInstitution] = useState<string>(DEFAULT_INSTITUTION_LABEL);
   const [whatsappNumber, setWhatsappNumber] = useState("");
   const [college, setCollege] = useState("");
@@ -28,6 +30,7 @@ export default function ProfileClient() {
   useEffect(() => {
     if (!profile) return;
     if (profile.name) setName(profile.name);
+    if (profile.userType) setUserType(profile.userType);
     if (profile.institution) setInstitution(profile.institution);
     if (profile.whatsappNumber) setWhatsappNumber(profile.whatsappNumber);
     if (profile.college) setCollege(profile.college);
@@ -40,16 +43,18 @@ export default function ProfileClient() {
     setStage("Saving profile…");
     try {
       if (!name.trim()) throw new Error("Name is required.");
-      if (!institution.trim()) throw new Error("Select your institution.");
+      if (!userType) throw new Error("Select user type.");
+      if (userType === "student" && !institution.trim()) throw new Error("Select your institution.");
       if (!whatsappNumber.trim()) throw new Error("WhatsApp number is required.");
       if (!whatsappNumber.trim().startsWith("+"))
         throw new Error("Enter WhatsApp number in E.164 format, e.g. +91XXXXXXXXXX");
 
       await updateProfileBasics(user.uid, {
         name: name.trim(),
-        institution,
+        userType,
+        institution: userType === "student" ? institution : deleteField(),
         whatsappNumber: whatsappNumber.trim(),
-        college: college.trim() || undefined,
+        college: userType === "student" ? (college.trim() || "") : deleteField(),
       });
 
       // Photo is optional; upload it after the basics are saved.
@@ -66,7 +71,14 @@ export default function ProfileClient() {
         });
 
         setStage("Finishing…");
-        await updateProfileBasics(user.uid, { photoUrl, name: name.trim(), institution, whatsappNumber: whatsappNumber.trim(), college: college.trim() || undefined });
+        await updateProfileBasics(user.uid, {
+          photoUrl,
+          name: name.trim(),
+          userType,
+          institution: userType === "student" ? institution : deleteField(),
+          whatsappNumber: whatsappNumber.trim(),
+          college: userType === "student" ? (college.trim() || "") : deleteField(),
+        });
       }
 
       router.replace(next);
@@ -93,14 +105,30 @@ export default function ProfileClient() {
           <label className="mt-4 block text-sm font-medium">Name *</label>
           <input className="input mt-2" value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" />
 
-          <label className="mt-4 block text-sm font-medium">I study at *</label>
-          <select className="select mt-2" value={institution} onChange={(e) => setInstitution(e.target.value)}>
-            {INSTITUTIONS.map((inst) => (
-              <option key={inst} value={inst}>
-                {inst}
-              </option>
-            ))}
+          <label className="mt-4 block text-sm font-medium">I am a *</label>
+          <select
+            className="select mt-2"
+            value={userType}
+            onChange={(e) => setUserType(e.target.value as "student" | "landlord")}
+          >
+            <option value="student">Student</option>
+            <option value="landlord">Room Owner / Landlord</option>
           </select>
+
+          {userType === "student" ? (
+            <>
+              <label className="mt-4 block text-sm font-medium">College/University *</label>
+              <select className="select mt-2" value={institution} onChange={(e) => setInstitution(e.target.value)}>
+                {INSTITUTIONS.map((inst) => (
+                  <option key={inst} value={inst}>
+                    {inst}
+                  </option>
+                ))}
+              </select>
+            </>
+          ) : (
+            <p className="mt-4 text-xs text-slate-500">If you&apos;re a room owner/landlord, you don&apos;t need to add any college.</p>
+          )}
 
           <label className="mt-4 block text-sm font-medium">WhatsApp number *</label>
           <input
@@ -113,8 +141,12 @@ export default function ProfileClient() {
           />
           <p className="mt-2 text-xs text-slate-500">This will be used for WhatsApp contact on your listings.</p>
 
-          <label className="mt-4 block text-sm font-medium">College (optional)</label>
-          <input className="input mt-2" value={college} onChange={(e) => setCollege(e.target.value)} />
+          {userType === "student" ? (
+            <>
+              <label className="mt-4 block text-sm font-medium">College name (optional)</label>
+              <input className="input mt-2" value={college} onChange={(e) => setCollege(e.target.value)} />
+            </>
+          ) : null}
 
           <label className="mt-4 block text-sm font-medium">Profile photo (optional)</label>
           <input className="mt-2 block w-full text-sm" type="file" accept="image/*" onChange={(e) => setPhoto(e.target.files?.[0] || null)} />

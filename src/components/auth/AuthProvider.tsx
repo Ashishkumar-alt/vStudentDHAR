@@ -4,7 +4,7 @@ import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import type { User } from "firebase/auth";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { getFirebaseAuth } from "@/lib/firebase/auth";
-import { doc, onSnapshot, setDoc, updateDoc } from "firebase/firestore";
+import { doc, onSnapshot, setDoc, updateDoc, type FieldValue } from "firebase/firestore";
 import { getDb, serverTimestamp } from "@/lib/firebase/db";
 import type { UserProfile } from "@/lib/firebase/models";
 
@@ -60,7 +60,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
           const data = snap.data() as UserProfile;
           setProfile({ ...(data as UserProfile), id: snap.id });
-          setProfileComplete(Boolean(data?.name && data?.institution && data?.whatsappNumber));
+          // Default to legacy behavior when `userType` is missing: require `institution`.
+          const userType = data?.userType;
+          const institutionRequired = userType ? userType === "student" : true;
+          setProfileComplete(Boolean(data?.name && data?.whatsappNumber && (!institutionRequired || data?.institution)));
         });
       } finally {
         setLoading(false);
@@ -97,7 +100,14 @@ export function useAuth() {
 
 export async function updateProfileBasics(
   uid: string,
-  input: { name: string; institution: string; whatsappNumber: string; college?: string; photoUrl?: string },
+  input: {
+    name: string;
+    whatsappNumber: string;
+    userType?: UserProfile["userType"];
+    institution?: string | FieldValue;
+    college?: string | FieldValue;
+    photoUrl?: string;
+  },
 ) {
   const ref = doc(getDb(), "users", uid);
   await updateDoc(ref, { ...input, updatedAt: serverTimestamp() });
