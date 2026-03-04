@@ -34,6 +34,10 @@ npm run dev
 ```
 Open `http://localhost:3000`.
 
+## Logo / branding
+- Put your logo image at `public/logo.png` (the header will use it automatically).
+- If `public/logo.png` is missing, the app falls back to `public/logo.svg`.
+
 ## Firebase rules (recommended)
 This repo includes `firestore.rules` and `storage.rules` plus `firebase.json`.
 If you use Firebase CLI, deploy them with:

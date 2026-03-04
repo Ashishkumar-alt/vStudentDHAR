@@ -20,7 +20,12 @@ export const metadata: Metadata = {
   applicationName: "vStudent",
   manifest: "/manifest.webmanifest",
   icons: {
-    icon: [{ url: "/favicon.ico" }],
+    icon: [
+      { url: "/logo.svg", type: "image/svg+xml" },
+      { url: "/logo.png", type: "image/png" },
+      { url: "/favicon.ico" },
+    ],
+    apple: [{ url: "/logo.png" }],
   },
 };
 

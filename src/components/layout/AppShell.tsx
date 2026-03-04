@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -39,6 +40,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const { theme, toggleTheme } = useTheme();
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [logoSrc, setLogoSrc] = useState<string>("/logo.png");
 
   useEffect(() => {
     // Close the mobile menu on route change (lint rule disallows setState directly in effects here).
@@ -51,8 +53,16 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         <div className="mx-auto flex w-full max-w-screen-2xl items-center justify-between gap-3 px-4 py-3">
           <div className="flex items-center gap-3">
             <Link href="/" className="flex items-center gap-2 text-sm font-semibold tracking-tight">
-              <span className="inline-flex h-9 w-9 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-sm">
-                v
+              <span className="inline-flex h-9 w-9 items-center justify-center rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
+                <Image
+                  src={logoSrc}
+                  alt="vStudent"
+                  width={36}
+                  height={36}
+                  className="h-9 w-9 rounded-2xl object-contain"
+                  priority
+                  onError={() => setLogoSrc("/logo.svg")}
+                />
               </span>
               <span className="text-base text-slate-900">vStudent</span>
             </Link>
