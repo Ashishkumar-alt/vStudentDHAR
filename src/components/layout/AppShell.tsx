@@ -201,7 +201,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
       <footer className="mx-auto w-full max-w-screen-2xl px-4 pt-10 pb-24 text-center text-xs text-slate-500 sm:py-10">
         <div className="flex flex-col items-center justify-center gap-2 sm:flex-row sm:gap-3">
-          <span>MVP - No chat - WhatsApp only</span>
+          <span>© 2026 vStudent. All Rights Reserved.</span>
           <span className="hidden text-slate-300 sm:inline">•</span>
           <span className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
             <Link className="underline underline-offset-4 hover:text-slate-700" href="/privacy">

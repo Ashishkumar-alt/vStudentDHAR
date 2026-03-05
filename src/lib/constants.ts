@@ -1,7 +1,7 @@
 export const DEFAULT_CITY_ID = process.env.NEXT_PUBLIC_CITY_ID || "dharamshala";
 export const DEFAULT_CITY_LABEL = process.env.NEXT_PUBLIC_CITY_LABEL || "Dharamshala";
 export const REQUIRE_APPROVAL = process.env.NEXT_PUBLIC_REQUIRE_APPROVAL === "1";
-export const CONTACT_EMAIL = process.env.NEXT_PUBLIC_CONTACT_EMAIL || "contact@vstudent.example";
+export const CONTACT_EMAIL = process.env.NEXT_PUBLIC_CONTACT_EMAIL || "vstudent343@gmail.com";
 
 export const PRIMARY_INSTITUTION_SHORT = process.env.NEXT_PUBLIC_PRIMARY_INSTITUTION_SHORT || "GCD";
 export const PRIMARY_INSTITUTION_LONG =
