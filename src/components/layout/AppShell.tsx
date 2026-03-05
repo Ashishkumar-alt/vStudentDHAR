@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/components/auth/AuthProvider";
-import { DEFAULT_CITY_LABEL } from "@/lib/constants";
+import { CONTACT_EMAIL, DEFAULT_CITY_LABEL } from "@/lib/constants";
 import { Home, House, ShoppingBag, Plus, User, Shield, Menu, X, Heart } from "lucide-react";
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "@/components/theme/ThemeProvider";
@@ -200,7 +200,21 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       </nav>
 
       <footer className="mx-auto w-full max-w-screen-2xl px-4 py-10 text-center text-xs text-slate-500">
-        MVP - No chat - WhatsApp only
+        <div className="flex flex-col items-center justify-center gap-2 sm:flex-row sm:gap-3">
+          <span>MVP - No chat - WhatsApp only</span>
+          <span className="hidden text-slate-300 sm:inline">•</span>
+          <span className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
+            <Link className="underline underline-offset-4 hover:text-slate-700" href="/privacy">
+              Privacy
+            </Link>
+            <Link className="underline underline-offset-4 hover:text-slate-700" href="/terms">
+              Terms
+            </Link>
+            <a className="underline underline-offset-4 hover:text-slate-700" href={`mailto:${CONTACT_EMAIL}`}>
+              {CONTACT_EMAIL}
+            </a>
+          </span>
+        </div>
       </footer>
     </div>
   );

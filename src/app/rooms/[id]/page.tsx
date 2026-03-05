@@ -12,6 +12,7 @@ import { useAuth } from "@/components/auth/AuthProvider";
 import { PRIMARY_INSTITUTION_SHORT } from "@/lib/constants";
 import FavoriteButton from "@/components/favorites/FavoriteButton";
 import { recordRoomView } from "@/lib/firebase/views";
+import SafetyNotice from "@/components/listings/SafetyNotice";
 
 export default function RoomDetailsPage() {
   const params = useParams<{ id: string }>();
@@ -153,6 +154,9 @@ export default function RoomDetailsPage() {
           <div className="card p-5">
             <div className="text-sm font-semibold">Contact</div>
             <p className="mt-2 text-sm text-zinc-600">WhatsApp: {listing.contactPhone}</p>
+            <div className="mt-3">
+              <SafetyNotice context="room" />
+            </div>
             {wa ? (
               <a className="btn btn-primary mt-3 w-full" href={wa} target="_blank" rel="noreferrer">
                 Open WhatsApp
