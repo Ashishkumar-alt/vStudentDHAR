@@ -199,7 +199,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         </div>
       </nav>
 
-      <footer className="mx-auto w-full max-w-screen-2xl px-4 py-10 text-center text-xs text-slate-500">
+      <footer className="mx-auto w-full max-w-screen-2xl px-4 pt-10 pb-24 text-center text-xs text-slate-500 sm:py-10">
         <div className="flex flex-col items-center justify-center gap-2 sm:flex-row sm:gap-3">
           <span>MVP - No chat - WhatsApp only</span>
           <span className="hidden text-slate-300 sm:inline">•</span>
