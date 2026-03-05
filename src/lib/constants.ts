@@ -8,7 +8,10 @@ export const PRIMARY_INSTITUTION_LONG =
   process.env.NEXT_PUBLIC_PRIMARY_INSTITUTION_LONG || `Govt College Dharamshala (${PRIMARY_INSTITUTION_SHORT})`;
 
 export const DHARAMSHALA_AREAS = [
-  "HPU Campus",
+  "Upper Sakoh",
+  "GCD Campus",
+  "Sakoh Upper",
+  "kachcheri",
   "Sidhpur",
   "Kotwali Bazaar",
   "McLeodganj",
@@ -26,15 +29,30 @@ export const INSTITUTIONS = [
 ] as const;
 
 export const ITEM_CATEGORIES = [
-  "Room Heater",
+  "Table Fan",
+  "Cooler",
+  "Mini Fridge",
+  "Water Cooler",
+  "Cycle",
+  "College Function",
+  "Blazer",
+  "Formal Suit",
+  "Saree",
+  "Traditional Dress",
+  "Function Dress",
+  "Cricket Bat",
+  "Football",
+  "Badminton Racket",
+  "Gym Equipment",
+  "Sports Shoes",
   "Geyser",
   "Mattress",
   "Study Table",
   "Induction",
   "Gas Cylinder",
   "Scooter",
-  "Warm Blankets",
   "Snow Boots",
+
 ] as const;
 
 export const ROOM_GENDER_ALLOWED = ["Any", "Boys", "Girls"] as const;
