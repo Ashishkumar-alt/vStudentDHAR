@@ -12,6 +12,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://vstudent.in"),
   title: {
     default: "vStudent",
     template: "%s · vStudent",
@@ -20,14 +21,8 @@ export const metadata: Metadata = {
   applicationName: "vStudent",
   manifest: "/manifest.webmanifest",
   icons: {
-    icon: [
-      { url: "/favicon.ico" },
-      { url: "/favicon.png", type: "image/png" },
-      { url: "/logo.svg", type: "image/svg+xml" },
-      { url: "/logo.png", type: "image/png" },
-    ],
-    shortcut: [{ url: "/favicon.ico" }],
-    apple: [{ url: "/logo.png" }],
+    icon: "/favicon.ico",
+    apple: "/logo.png",
   },
 };
 
@@ -37,21 +32,26 @@ export const viewport: Viewport = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="en" className="h-full" suppressHydrationWarning>
       <head>
-        <Script id="theme-init" strategy="beforeInteractive">{`
+        <Script id="theme-init" strategy="beforeInteractive">
+          {`
           (function () {
             try {
               var t = window.localStorage.getItem("vstudent.theme");
-              if (t === "dark" || t === "light") document.documentElement.dataset.theme = t;
+              if (t === "dark" || t === "light") {
+                document.documentElement.dataset.theme = t;
+              }
             } catch (e) {}
           })();
-        `}</Script>
+          `}
+        </Script>
       </head>
+
       <body className={`${inter.variable} h-full antialiased`}>
         <Providers>
           <AppShell>{children}</AppShell>
