@@ -40,14 +40,19 @@ function Chip({
   variant: "blue" | "emerald";
   children: React.ReactNode;
 }) {
-  const activeCls = variant === "emerald" ? "bg-emerald-600" : "bg-blue-600";
+  const activeCls =
+    variant === "emerald"
+      ? "bg-gradient-to-r from-emerald-600 to-teal-600"
+      : "bg-gradient-to-r from-blue-600 to-indigo-600";
   return (
     <button
       type="button"
       onClick={onClick}
       className={[
-        "shrink-0 rounded-full px-3 py-1.5 text-sm font-medium",
-        active ? `${activeCls} text-white shadow-sm` : "bg-white text-slate-700 ring-1 ring-slate-200 hover:bg-slate-50",
+        "focus-ring shrink-0 rounded-full px-3 py-1.5 text-sm font-medium transition",
+        active
+          ? `${activeCls} text-white shadow-sm ring-1 ring-white/15`
+          : "bg-[color:var(--card)] text-[color:var(--foreground)] ring-1 ring-[color:var(--border)] hover:bg-[color:color-mix(in srgb, var(--card) 82%, transparent)]",
       ].join(" ")}
     >
       {children}

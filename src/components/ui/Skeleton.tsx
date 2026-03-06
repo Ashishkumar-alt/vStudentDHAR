@@ -1,7 +1,7 @@
 "use client";
 
 export function Skeleton({ className }: { className?: string }) {
-  return <div className={["animate-pulse rounded-xl bg-slate-200/70", className || ""].join(" ")} />;
+  return <div className={["skeleton animate-pulse rounded-xl", className || ""].join(" ")} />;
 }
 
 export function CardSkeleton({ lines = 3 }: { lines?: number }) {

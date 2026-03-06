@@ -25,7 +25,10 @@ export function RoomCard({ id, listing }: { id: string; listing: RoomListing }) 
   );
   return (
     <div className="card card-hover group overflow-hidden">
-      <Link href={`/rooms/${id}`} className="relative block aspect-[16/10] w-full bg-zinc-100">
+      <Link
+        href={`/rooms/${id}`}
+        className="relative block aspect-[16/10] w-full bg-[color:color-mix(in srgb, var(--card) 70%, var(--background) 30%)]"
+      >
         <div className="absolute right-3 top-3 z-10">
           <FavoriteButton listingType="room" listingId={id} />
         </div>
@@ -34,71 +37,92 @@ export function RoomCard({ id, listing }: { id: string; listing: RoomListing }) 
             src={listing.photoUrls[0]}
             alt={listing.title}
             fill
-            className="object-cover transition group-hover:scale-[1.02]"
+            className="object-cover transition duration-500 group-hover:scale-[1.04]"
           />
         ) : null}
-        <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/55 to-transparent" />
+        <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/60 via-black/25 to-transparent" />
         <div className="absolute left-3 top-3 flex flex-wrap gap-2">
           {isNew(listing.createdAt) ? (
-            <span className="rounded-full bg-emerald-500/90 px-2.5 py-1 text-xs font-semibold text-white">
+            <span className="rounded-full bg-emerald-500/90 px-2.5 py-1 text-xs font-semibold text-white shadow-sm ring-1 ring-white/20">
               New
             </span>
           ) : null}
           {listing.heaterIncluded ? (
-            <span className="rounded-full bg-emerald-600/90 px-2.5 py-1 text-xs font-semibold text-white">
+            <span className="rounded-full bg-emerald-600/90 px-2.5 py-1 text-xs font-semibold text-white shadow-sm ring-1 ring-white/20">
               Winter Ready
             </span>
           ) : null}
         </div>
-      </Link>
-      <div className="p-4">
-        <div className="flex items-start justify-between gap-2">
-          <div className="min-w-0">
-            <Link href={`/rooms/${id}`} className="block truncate text-sm font-semibold hover:underline">
-              {listing.title}
-            </Link>
-            <div className="mt-1 flex items-center gap-1 text-xs text-slate-600">
-              <MapPin className="h-3.5 w-3.5" />
-              <span className="truncate">
-                {listing.area} · {listing.genderAllowed}
-              </span>
+
+        <div className="absolute inset-x-3 bottom-3">
+          <div className="flex items-end justify-between gap-3">
+            <div className="min-w-0">
+              <div className="truncate text-sm font-semibold tracking-tight text-white">{listing.title}</div>
+              <div className="mt-1 flex items-center gap-1 text-xs text-white/80">
+                <MapPin className="h-3.5 w-3.5" />
+                <span className="truncate">
+                  {listing.area} · {listing.genderAllowed}
+                </span>
+              </div>
+            </div>
+            <div className="shrink-0 rounded-2xl bg-white/10 px-3 py-2 text-right backdrop-blur">
+              <div className="text-[11px] font-medium text-white/80">Rent</div>
+              <div className="text-sm font-semibold text-white">{formatINR(listing.rent)}/mo</div>
             </div>
           </div>
-          <div className="shrink-0 text-xs text-zinc-500">Deposit {formatINR(listing.deposit)}</div>
         </div>
-        <div className="mt-2 flex flex-wrap gap-2 text-xs text-zinc-600">
-          {listing.foodIncluded ? <span className="rounded-full bg-zinc-100 px-2 py-1">Food</span> : null}
-          {listing.attachedBathroom ? <span className="rounded-full bg-zinc-100 px-2 py-1">Attached bath</span> : null}
+      </Link>
+      <div className="p-4">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="text-xs text-[color:var(--muted)]">Deposit {formatINR(listing.deposit)}</div>
+          <div className="inline-flex items-center gap-2 text-xs text-[color:var(--muted)]">
+            {listing.foodIncluded ? (
+              <span className="rounded-full bg-[color:color-mix(in srgb, var(--card) 80%, var(--background) 20%)] px-2 py-1 ring-1 ring-[color:var(--border)]">
+                Food
+              </span>
+            ) : null}
+            {listing.attachedBathroom ? (
+              <span className="rounded-full bg-[color:color-mix(in srgb, var(--card) 80%, var(--background) 20%)] px-2 py-1 ring-1 ring-[color:var(--border)]">
+                Attached bath
+              </span>
+            ) : null}
+          </div>
+        </div>
+
+        <div className="mt-3 flex flex-wrap gap-2 text-xs text-[color:var(--muted)]">
           {listing.vegOnly ? (
-            <span className="inline-flex items-center gap-1 rounded-full bg-zinc-100 px-2 py-1">
+            <span className="inline-flex items-center gap-1 rounded-full bg-[color:color-mix(in srgb, var(--card) 80%, var(--background) 20%)] px-2 py-1 ring-1 ring-[color:var(--border)]">
               <Leaf className="h-3.5 w-3.5" />
               Veg
             </span>
           ) : null}
           {listing.heaterIncluded ? (
-            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-1 text-emerald-700">
+            <span className="inline-flex items-center gap-1 rounded-full bg-[color:color-mix(in srgb, var(--accent) 14%, transparent)] px-2 py-1 text-[color:color-mix(in srgb, var(--accent) 60%, var(--foreground) 40%)] ring-1 ring-[color:color-mix(in srgb, var(--accent) 30%, var(--border) 70%)]">
               <Flame className="h-3.5 w-3.5" />
               Heater
             </span>
           ) : null}
           {typeof listing.walkMinutesToHPU === "number" ? (
-            <span className="inline-flex items-center gap-1 rounded-full bg-zinc-100 px-2 py-1">
+            <span className="inline-flex items-center gap-1 rounded-full bg-[color:color-mix(in srgb, var(--card) 80%, var(--background) 20%)] px-2 py-1 ring-1 ring-[color:var(--border)]">
               <Footprints className="h-3.5 w-3.5" />
-              {listing.walkMinutesToHPU} min
+              {listing.walkMinutesToHPU} min walk
             </span>
           ) : null}
         </div>
+
         <div className="mt-4 flex items-center justify-between gap-2">
-          <div className="text-sm font-semibold text-blue-600">{formatINR(listing.rent)}/month</div>
+          <div className="text-sm font-semibold text-[color:color-mix(in srgb, var(--brand) 70%, #2563eb 30%)]">
+            {formatINR(listing.rent)}/month
+          </div>
           <div className="flex items-center gap-2">
             <Link
               href={`/rooms/${id}`}
-              className="inline-flex h-9 items-center justify-center rounded-xl bg-blue-600 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700"
+              className="focus-ring inline-flex h-9 items-center justify-center rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 px-4 text-sm font-medium text-white shadow-sm transition hover:shadow-md hover:brightness-[1.02] active:translate-y-px"
             >
-              View Details
+              View details
             </Link>
             <a
-              className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+              className="focus-ring inline-flex h-9 w-9 items-center justify-center rounded-2xl border border-[color:var(--border)] bg-[color:var(--card)] text-[color:var(--foreground)] shadow-sm transition hover:shadow-md active:translate-y-px"
               href={wa}
               target="_blank"
               rel="noreferrer"
@@ -120,7 +144,10 @@ export function ItemCard({ id, listing }: { id: string; listing: ItemListing }) 
   );
   return (
     <div className="card card-hover group overflow-hidden">
-      <Link href={`/items/${id}`} className="relative block aspect-[16/10] w-full bg-zinc-100">
+      <Link
+        href={`/items/${id}`}
+        className="relative block aspect-[16/10] w-full bg-[color:color-mix(in srgb, var(--card) 70%, var(--background) 30%)]"
+      >
         <div className="absolute right-3 top-3 z-10">
           <FavoriteButton listingType="item" listingId={id} />
         </div>
@@ -129,52 +156,65 @@ export function ItemCard({ id, listing }: { id: string; listing: ItemListing }) 
             src={listing.photoUrls[0]}
             alt={listing.title}
             fill
-            className="object-cover transition group-hover:scale-[1.02]"
+            className="object-cover transition duration-500 group-hover:scale-[1.04]"
           />
         ) : null}
-        <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/55 to-transparent" />
+        <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/60 via-black/25 to-transparent" />
         <div className="absolute left-3 top-3 flex flex-wrap gap-2">
           {isNew(listing.createdAt) ? (
-            <span className="rounded-full bg-emerald-500/90 px-2.5 py-1 text-xs font-semibold text-white">
+            <span className="rounded-full bg-emerald-500/90 px-2.5 py-1 text-xs font-semibold text-white shadow-sm ring-1 ring-white/20">
               New
             </span>
           ) : null}
           {listing.category === "Room Heater" ? (
-            <span className="rounded-full bg-emerald-600/90 px-2.5 py-1 text-xs font-semibold text-white">
+            <span className="rounded-full bg-emerald-600/90 px-2.5 py-1 text-xs font-semibold text-white shadow-sm ring-1 ring-white/20">
               Winter Hot
             </span>
           ) : null}
         </div>
-      </Link>
-      <div className="p-4">
-        <div className="flex items-start justify-between gap-2">
-          <div className="min-w-0">
-            <Link href={`/items/${id}`} className="block truncate text-sm font-semibold hover:underline">
-              {listing.title}
-            </Link>
-            <div className="mt-1 flex items-center gap-1 text-xs text-slate-600">
-              <MapPin className="h-3.5 w-3.5" />
-              <span className="truncate">
-                {listing.category} · {listing.area}
-              </span>
+
+        <div className="absolute inset-x-3 bottom-3">
+          <div className="flex items-end justify-between gap-3">
+            <div className="min-w-0">
+              <div className="truncate text-sm font-semibold tracking-tight text-white">{listing.title}</div>
+              <div className="mt-1 flex items-center gap-1 text-xs text-white/80">
+                <MapPin className="h-3.5 w-3.5" />
+                <span className="truncate">
+                  {listing.category} · {listing.area}
+                </span>
+              </div>
+            </div>
+            <div className="shrink-0 rounded-2xl bg-white/10 px-3 py-2 text-right backdrop-blur">
+              <div className="text-[11px] font-medium text-white/80">Price</div>
+              <div className="text-sm font-semibold text-white">{formatINR(listing.price)}</div>
             </div>
           </div>
-          <div className="shrink-0 text-xs text-zinc-500">{listing.condition}</div>
         </div>
-        <div className="mt-2 flex flex-wrap gap-2 text-xs text-zinc-600">
-          <span className="rounded-full bg-zinc-100 px-2 py-1">{listing.condition}</span>
+      </Link>
+      <div className="p-4">
+        <div className="flex items-center justify-between gap-2">
+          <div className="min-w-0 text-xs text-[color:var(--muted)]">
+            Condition{" "}
+            <span className="font-medium text-[color:var(--foreground)]">{listing.condition}</span>
+          </div>
+          <span className="rounded-full bg-[color:color-mix(in srgb, var(--card) 80%, var(--background) 20%)] px-2 py-1 text-xs text-[color:var(--muted)] ring-1 ring-[color:var(--border)]">
+            {listing.condition}
+          </span>
         </div>
+
         <div className="mt-4 flex items-center justify-between gap-2">
-          <div className="text-sm font-semibold text-emerald-600">{formatINR(listing.price)}</div>
+          <div className="text-sm font-semibold text-[color:color-mix(in srgb, var(--accent) 70%, var(--foreground) 30%)]">
+            {formatINR(listing.price)}
+          </div>
           <div className="flex items-center gap-2">
             <Link
               href={`/items/${id}`}
-              className="inline-flex h-9 items-center justify-center rounded-xl bg-emerald-600 px-4 text-sm font-medium text-white shadow-sm hover:bg-emerald-700"
+              className="focus-ring inline-flex h-9 items-center justify-center rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 px-4 text-sm font-medium text-white shadow-sm transition hover:shadow-md hover:brightness-[1.02] active:translate-y-px"
             >
-              View Details
+              View details
             </Link>
             <a
-              className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+              className="focus-ring inline-flex h-9 w-9 items-center justify-center rounded-2xl border border-[color:var(--border)] bg-[color:var(--card)] text-[color:var(--foreground)] shadow-sm transition hover:shadow-md active:translate-y-px"
               href={wa}
               target="_blank"
               rel="noreferrer"

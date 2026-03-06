@@ -225,13 +225,13 @@ export default function RoomsClient() {
 
         <div className="space-y-4 p-4 sm:p-6">
 
-        <div className="rounded-2xl bg-white/70 p-3 ring-1 ring-slate-200/70">
+        <div className="rounded-2xl bg-[color:var(--card-2)] p-3 ring-1 ring-[color:var(--border)]">
           <AreaChips value={area} onChange={setArea} variant="blue" />
         </div>
 
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[1fr_10rem_9rem_9rem_auto] lg:items-center">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[color:color-mix(in srgb, var(--muted) 75%, transparent)]" />
             <input
               className="input pl-9"
               value={q}
@@ -254,8 +254,8 @@ export default function RoomsClient() {
           </button>
         </div>
 
-        <div className="flex flex-col gap-3 rounded-2xl bg-white/70 px-4 py-3 ring-1 ring-slate-200/70 sm:flex-row sm:items-center sm:justify-between">
-          <div className="text-sm font-medium text-slate-700">
+        <div className="flex flex-col gap-3 rounded-2xl bg-[color:var(--card-2)] px-4 py-3 ring-1 ring-[color:var(--border)] sm:flex-row sm:items-center sm:justify-between">
+          <div className="text-sm font-medium text-[color:var(--foreground)]">
             {loading ? "Loading..." : `${filtered.length} room${filtered.length === 1 ? "" : "s"} available`}
           </div>
           <select className="select h-10 w-full sm:w-64" value={sort} onChange={(e) => setSort(e.target.value as typeof sort)}>
@@ -266,22 +266,24 @@ export default function RoomsClient() {
         </div>
 
         {showFilters ? (
-          <div className="rounded-2xl bg-white/70 p-4 ring-1 ring-slate-200/70">
+          <div className="rounded-2xl bg-[color:var(--card-2)] p-4 ring-1 ring-[color:var(--border)]">
             <div className="flex flex-wrap items-center gap-4">
-              <label className="flex items-center gap-2 text-sm text-zinc-700">
+              <label className="flex items-center gap-2 text-sm text-[color:var(--foreground)]">
                 <input type="checkbox" className="h-4 w-4" checked={vegOnly} onChange={(e) => setVegOnly(e.target.checked)} />
                 Veg only
               </label>
-              <label className="flex items-center gap-2 text-sm text-zinc-700">
+              <label className="flex items-center gap-2 text-sm text-[color:var(--foreground)]">
                 <input type="checkbox" className="h-4 w-4" checked={attachedBathroom} onChange={(e) => setAttachedBathroom(e.target.checked)} />
                 Attached bathroom
               </label>
-              <label className="flex items-center gap-2 text-sm text-zinc-700">
+              <label className="flex items-center gap-2 text-sm text-[color:var(--foreground)]">
                 <input type="checkbox" className="h-4 w-4" checked={heaterIncluded} onChange={(e) => setHeaterIncluded(e.target.checked)} />
                 Winter ready (heater)
               </label>
               <div className="min-w-[200px]">
-                <label className="text-xs font-medium text-zinc-600">Walking distance to {PRIMARY_INSTITUTION_SHORT} (max minutes)</label>
+                <label className="text-xs font-medium text-[color:var(--muted)]">
+                  Walking distance to {PRIMARY_INSTITUTION_SHORT} (max minutes)
+                </label>
                 <input className="input mt-1" value={maxWalk} onChange={(e) => setMaxWalk(e.target.value)} placeholder="e.g. 10" inputMode="numeric" />
               </div>
             </div>

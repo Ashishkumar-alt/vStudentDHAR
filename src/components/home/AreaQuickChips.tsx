@@ -20,7 +20,7 @@ export default function AreaQuickChips() {
           key={a}
           type="button"
           onClick={() => go(a)}
-          className="shrink-0 rounded-full bg-white px-3 py-1.5 text-sm font-medium text-slate-700 ring-1 ring-slate-200 hover:bg-slate-50"
+          className="focus-ring shrink-0 rounded-full bg-[color:var(--card)] px-3 py-1.5 text-sm font-medium text-[color:var(--foreground)] ring-1 ring-[color:var(--border)] transition hover:bg-[color:color-mix(in srgb, var(--card) 82%, transparent)]"
         >
           {a}
         </button>

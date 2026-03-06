@@ -154,13 +154,13 @@ export default function ItemsClient() {
 
         <div className="space-y-4 p-4 sm:p-6">
 
-        <div className="rounded-2xl bg-white/70 p-3 ring-1 ring-slate-200/70">
+        <div className="rounded-2xl bg-[color:var(--card-2)] p-3 ring-1 ring-[color:var(--border)]">
           <AreaChips value={area} onChange={setArea} variant="emerald" />
         </div>
 
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[1fr_9rem_9rem_auto] lg:items-center">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[color:color-mix(in srgb, var(--muted) 75%, transparent)]" />
             <input
               className="input pl-9"
               value={q}
@@ -176,8 +176,8 @@ export default function ItemsClient() {
           </button>
         </div>
 
-        <div className="flex flex-col gap-3 rounded-2xl bg-white/70 px-4 py-3 ring-1 ring-slate-200/70 sm:flex-row sm:items-center sm:justify-between">
-          <div className="text-sm font-medium text-slate-700">
+        <div className="flex flex-col gap-3 rounded-2xl bg-[color:var(--card-2)] px-4 py-3 ring-1 ring-[color:var(--border)] sm:flex-row sm:items-center sm:justify-between">
+          <div className="text-sm font-medium text-[color:var(--foreground)]">
             {loading ? "Loading..." : `${filtered.length} item${filtered.length === 1 ? "" : "s"} available`}
           </div>
           <select className="select h-10 w-full sm:w-64" value={sort} onChange={(e) => setSort(e.target.value as typeof sort)}>
@@ -188,10 +188,10 @@ export default function ItemsClient() {
         </div>
 
         {showFilters ? (
-          <div className="rounded-2xl bg-white/70 p-4 ring-1 ring-slate-200/70">
+          <div className="rounded-2xl bg-[color:var(--card-2)] p-4 ring-1 ring-[color:var(--border)]">
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               <div>
-                <label className="text-xs font-medium text-zinc-600">Category</label>
+                <label className="text-xs font-medium text-[color:var(--muted)]">Category</label>
                 <select className="select mt-1" value={category} onChange={(e) => setCategory(e.target.value)}>
                   <option value="">Any</option>
                   {ITEM_CATEGORIES.map((c) => (
@@ -202,7 +202,7 @@ export default function ItemsClient() {
                 </select>
               </div>
               <div>
-                <label className="text-xs font-medium text-zinc-600">Condition</label>
+                <label className="text-xs font-medium text-[color:var(--muted)]">Condition</label>
                 <select className="select mt-1" value={condition} onChange={(e) => setCondition(e.target.value)}>
                   <option value="">Any</option>
                   {ITEM_CONDITION.map((c) => (

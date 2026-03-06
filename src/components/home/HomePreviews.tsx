@@ -11,11 +11,11 @@ export default function HomePreviews() {
 
   return (
     <div className="space-y-12">
-      <section className="rounded-3xl border border-slate-200/70 bg-slate-50/60 p-6 shadow-sm">
+      <section className="card overflow-hidden p-6 sm:p-8">
         <div className="flex items-end justify-between gap-3">
           <div>
             <h2 className="text-lg font-semibold">Rooms near you</h2>
-            <p className="mt-1 text-sm text-slate-600">Fresh Dharamshala listings (area-first).</p>
+            <p className="mt-1 text-sm text-[color:var(--muted)]">Fresh Dharamshala listings (area-first).</p>
           </div>
           <Link className="btn h-9 px-4 text-sm" href="/rooms">
             View all
@@ -28,11 +28,11 @@ export default function HomePreviews() {
         </div>
       </section>
 
-      <section className="rounded-3xl border border-slate-200/70 bg-slate-50/60 p-6 shadow-sm">
+      <section className="card overflow-hidden p-6 sm:p-8">
         <div className="flex items-end justify-between gap-3">
           <div>
             <h2 className="text-lg font-semibold">Items trending</h2>
-            <p className="mt-1 text-sm text-slate-600">Heaters, scooters, winter essentials.</p>
+            <p className="mt-1 text-sm text-[color:var(--muted)]">Heaters, scooters, winter essentials.</p>
           </div>
           <Link className="btn h-9 px-4 text-sm" href="/items">
             View all

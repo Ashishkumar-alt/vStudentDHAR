@@ -25,8 +25,10 @@ function NavPill({
     <Link
       href={href}
       className={[
-        "inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition",
-        active ? "bg-white text-slate-900 shadow-sm" : "text-slate-600 hover:text-slate-900",
+        "focus-ring inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all duration-200",
+        active
+          ? "bg-[color:var(--card)] text-[color:var(--foreground)] shadow-sm ring-1 ring-[color:var(--border)]"
+          : "text-[color:var(--muted)] hover:text-[color:var(--foreground)] hover:bg-[color:color-mix(in srgb, var(--card) 65%, transparent)]",
       ].join(" ")}
     >
       <span className="opacity-80">{icon}</span>
@@ -49,11 +51,11 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-dvh bg-transparent">
-      <header className="app-header sticky top-0 z-20 border-b border-slate-200 bg-white/80 shadow-sm backdrop-blur">
+      <header className="app-header sticky top-0 z-20 border-b border-[color:var(--border)] backdrop-blur">
         <div className="mx-auto flex w-full max-w-screen-2xl items-center justify-between gap-3 px-4 py-3">
           <div className="flex items-center gap-3">
             <Link href="/" className="flex items-center gap-2 text-sm font-semibold tracking-tight">
-              <span className="inline-flex h-9 w-9 items-center justify-center rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
+              <span className="inline-flex h-9 w-9 items-center justify-center rounded-2xl bg-[color:var(--card)] shadow-sm ring-1 ring-[color:var(--border)]">
                 <Image
                   src={logoSrc}
                   alt="vStudent"
@@ -64,14 +66,14 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                   onError={() => setLogoSrc("/logo.svg")}
                 />
               </span>
-              <span className="text-base text-slate-900">vStudent</span>
+              <span className="text-base text-[color:var(--foreground)]">vStudent</span>
             </Link>
-            <span className="hidden rounded-full border border-slate-200 bg-white px-2 py-0.5 text-xs text-slate-600 sm:inline">
+            <span className="hidden rounded-full border border-[color:var(--border)] bg-[color:color-mix(in srgb, var(--card) 78%, transparent)] px-2 py-0.5 text-xs text-[color:var(--muted)] sm:inline">
               {DEFAULT_CITY_LABEL}
             </span>
           </div>
 
-          <nav className="hidden items-center gap-1 rounded-full bg-slate-100/70 p-1 sm:flex">
+          <nav className="hidden items-center gap-1 rounded-full bg-[color:color-mix(in srgb, var(--card) 68%, transparent)] p-1 ring-1 ring-[color:var(--border)] sm:flex">
             <NavPill href="/" label="Home" icon={<Home className="h-4 w-4" />} />
             <NavPill href="/rooms" label="Rooms" icon={<House className="h-4 w-4" />} />
             <NavPill href="/items" label="Items" icon={<ShoppingBag className="h-4 w-4" />} />
@@ -83,7 +85,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           <div className="relative sm:hidden">
             <button
               type="button"
-              className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-700 shadow-sm"
+              className="focus-ring inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-[color:var(--border)] bg-[color:var(--card)] text-[color:var(--foreground)] shadow-sm transition hover:shadow-md"
               onClick={() => setMobileMenuOpen((v) => !v)}
               aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
               aria-expanded={mobileMenuOpen}
@@ -92,10 +94,10 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             </button>
 
             {mobileMenuOpen ? (
-              <div className="app-mobile-menu absolute right-0 top-12 w-56 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl">
-                <div className="border-b border-slate-100 p-3">
-                  <div className="text-xs font-medium text-slate-600">{DEFAULT_CITY_LABEL}</div>
-                  <div className="mt-1 truncate text-sm font-semibold text-slate-900">
+              <div className="app-mobile-menu absolute right-0 top-12 w-60 overflow-hidden rounded-2xl border border-[color:var(--border)] bg-[color:var(--card)] shadow-xl">
+                <div className="border-b border-[color:var(--border)]/60 p-3">
+                  <div className="text-xs font-medium text-[color:var(--muted)]">{DEFAULT_CITY_LABEL}</div>
+                  <div className="mt-1 truncate text-sm font-semibold text-[color:var(--foreground)]">
                     {loading ? "Loading..." : user?.email || "Guest"}
                   </div>
                 </div>
@@ -105,10 +107,10 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                     <>
                       <button
                         type="button"
-                        className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                        className="focus-ring flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-[color:var(--foreground)] transition hover:bg-[color:color-mix(in srgb, var(--card) 82%, transparent)]"
                         onClick={toggleTheme}
                       >
-                        <span className="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-slate-100">
+                        <span className="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-[color:color-mix(in srgb, var(--card) 80%, var(--background) 20%)] ring-1 ring-[color:var(--border)]">
                           {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
                         </span>
                         {theme === "dark" ? "Light mode" : "Dark mode"}
@@ -120,10 +122,10 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                       <MenuLink href="/admin" label="Admin" icon={<Shield className="h-4 w-4" />} />
                       <button
                         type="button"
-                        className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                        className="focus-ring flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-[color:var(--foreground)] transition hover:bg-[color:color-mix(in srgb, var(--card) 82%, transparent)]"
                         onClick={signOutNow}
                       >
-                        <span className="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-slate-100">
+                        <span className="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-[color:color-mix(in srgb, var(--card) 80%, var(--background) 20%)] ring-1 ring-[color:var(--border)]">
                           <X className="h-4 w-4" />
                         </span>
                         Sign out
@@ -133,10 +135,10 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                     <>
                       <button
                         type="button"
-                        className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                        className="focus-ring flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-[color:var(--foreground)] transition hover:bg-[color:color-mix(in srgb, var(--card) 82%, transparent)]"
                         onClick={toggleTheme}
                       >
-                        <span className="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-slate-100">
+                        <span className="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-[color:color-mix(in srgb, var(--card) 80%, var(--background) 20%)] ring-1 ring-[color:var(--border)]">
                           {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
                         </span>
                         {theme === "dark" ? "Light mode" : "Dark mode"}
@@ -152,10 +154,15 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           {/* Desktop actions only (mobile uses bottom nav) */}
           <div className="hidden items-center gap-2 sm:flex">
             {loading ? (
-              <span className="text-xs text-slate-500">Loading...</span>
+              <span className="text-xs text-[color:var(--muted)]">Loading...</span>
             ) : user ? (
               <>
-                <button className="btn h-9 w-9 px-0 text-sm" onClick={toggleTheme} aria-label="Toggle theme" title="Toggle theme">
+                <button
+                  className="btn h-9 w-9 px-0 text-sm"
+                  onClick={toggleTheme}
+                  aria-label="Toggle theme"
+                  title="Toggle theme"
+                >
                   {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
                 </button>
                 <Link className="btn btn-primary h-9 px-4 text-sm" href="/post">
@@ -176,7 +183,12 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               </>
             ) : (
               <>
-                <button className="btn h-9 w-9 px-0 text-sm" onClick={toggleTheme} aria-label="Toggle theme" title="Toggle theme">
+                <button
+                  className="btn h-9 w-9 px-0 text-sm"
+                  onClick={toggleTheme}
+                  aria-label="Toggle theme"
+                  title="Toggle theme"
+                >
                   {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
                 </button>
                 <Link className="btn btn-primary h-9 px-4 text-sm" href="/login">
@@ -190,7 +202,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
       <div className="pb-16 sm:pb-0">{children}</div>
 
-      <nav className="app-bottom-nav fixed bottom-0 left-0 right-0 z-30 border-t border-slate-200 bg-white/90 backdrop-blur sm:hidden">
+      <nav className="app-bottom-nav fixed bottom-0 left-0 right-0 z-30 border-t border-[color:var(--border)] backdrop-blur sm:hidden">
         <div className="mx-auto grid w-full max-w-screen-2xl grid-cols-4 gap-1 px-2 py-2">
           <MobileTab href="/rooms" label="Rooms" icon="rooms" />
           <MobileTab href="/items" label="Items" icon="items" />
@@ -199,18 +211,18 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         </div>
       </nav>
 
-      <footer className="mx-auto w-full max-w-screen-2xl px-4 pt-10 pb-24 text-center text-xs text-slate-500 sm:py-10">
+      <footer className="mx-auto w-full max-w-screen-2xl px-4 pt-10 pb-24 text-center text-xs text-[color:var(--muted)] sm:py-10">
         <div className="flex flex-col items-center justify-center gap-2 sm:flex-row sm:gap-3">
           <span>© 2026 vStudent. All Rights Reserved.</span>
-          <span className="hidden text-slate-300 sm:inline">•</span>
+          <span className="hidden text-[color:color-mix(in srgb, var(--muted) 35%, transparent)] sm:inline">•</span>
           <span className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
-            <Link className="underline underline-offset-4 hover:text-slate-700" href="/privacy">
+            <Link className="underline underline-offset-4 hover:text-[color:var(--foreground)]" href="/privacy">
               Privacy
             </Link>
-            <Link className="underline underline-offset-4 hover:text-slate-700" href="/terms">
+            <Link className="underline underline-offset-4 hover:text-[color:var(--foreground)]" href="/terms">
               Terms
             </Link>
-            <a className="underline underline-offset-4 hover:text-slate-700" href={`mailto:${CONTACT_EMAIL}`}>
+            <a className="underline underline-offset-4 hover:text-[color:var(--foreground)]" href={`mailto:${CONTACT_EMAIL}`}>
               {CONTACT_EMAIL}
             </a>
           </span>
@@ -224,9 +236,11 @@ function MenuLink({ href, label, icon }: { href: string; label: string; icon: Re
   return (
     <Link
       href={href}
-      className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+      className="focus-ring flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-[color:var(--foreground)] transition hover:bg-[color:color-mix(in srgb, var(--card) 82%, transparent)]"
     >
-      <span className="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-slate-100">{icon}</span>
+      <span className="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-[color:color-mix(in srgb, var(--card) 80%, var(--background) 20%)] ring-1 ring-[color:var(--border)]">
+        {icon}
+      </span>
       {label}
     </Link>
   );
@@ -249,14 +263,16 @@ function MobileTab({
     <Link
       href={href}
       className={[
-        "flex flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2 text-[11px]",
-        active ? "text-slate-900" : "text-slate-500",
+        "focus-ring flex flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2 text-[11px] transition",
+        active ? "text-[color:var(--foreground)]" : "text-[color:var(--muted)]",
       ].join(" ")}
     >
       <div
         className={[
-          "flex h-9 w-9 items-center justify-center rounded-2xl",
-          active ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-700",
+          "flex h-9 w-9 items-center justify-center rounded-2xl ring-1 ring-[color:var(--border)]",
+          active
+            ? "bg-[color:var(--foreground)] text-[color:var(--background)] shadow-sm"
+            : "bg-[color:color-mix(in srgb, var(--card) 78%, transparent)] text-[color:var(--foreground)]",
         ].join(" ")}
       >
         <IconEl className="h-5 w-5" />
