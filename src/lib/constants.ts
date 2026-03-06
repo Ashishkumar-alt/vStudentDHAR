@@ -9,8 +9,9 @@ export const PRIMARY_INSTITUTION_LONG =
 
 export const DHARAMSHALA_AREAS = [
   "Upper Sakoh",
+
   "GCD Campus",
-  "Sakoh Upper",
+  "Shyam Nagar",
   "kachcheri",
   "Sidhpur",
   "Kotwali Bazaar",
