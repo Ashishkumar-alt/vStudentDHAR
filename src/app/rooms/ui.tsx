@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { RotateCcw, Search, SearchX, SlidersHorizontal } from "lucide-react";
+import { RotateCcw, Search, SearchX } from "lucide-react";
 import { PRIMARY_INSTITUTION_SHORT, ROOM_GENDER_ALLOWED } from "@/lib/constants";
 import { asNumber } from "@/lib/utils";
 import { RoomCard } from "@/components/listings/ListingCard";
@@ -11,7 +11,6 @@ import { useRooms } from "@/components/listings/useListings";
 import AreaChips from "@/components/ui/AreaChips";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { CardSkeleton } from "@/components/ui/Skeleton";
-import HeroSection from "@/components/ui/HeroSection";
 
 export default function RoomsClient() {
   const router = useRouter();
@@ -78,6 +77,7 @@ export default function RoomsClient() {
     const max = asNumber(maxRent);
     const walkMax = asNumber(maxWalk);
     const keyword = q.trim().toLowerCase();
+
     const base = rows.filter(({ data }) => {
       if (area && data.area !== area) return false;
       if (genderAllowed !== "Any" && data.genderAllowed !== genderAllowed) return false;
@@ -87,25 +87,31 @@ export default function RoomsClient() {
       if (vegOnly && !data.vegOnly) return false;
       if (heaterIncluded && !data.heaterIncluded) return false;
       if (attachedBathroom && !data.attachedBathroom) return false;
+
       if (walkMax !== null) {
         const v = typeof data.walkMinutesToHPU === "number" ? data.walkMinutesToHPU : null;
         if (v === null || v > walkMax) return false;
       }
+
       return true;
     });
 
     return [...base].sort((a, b) => {
       const inst = profile?.institution;
+
       const score = (x: typeof a) => {
         let s = 0;
         if (area && x.data.area === area) s += 20;
         if (inst && x.data.institution === inst) s += 10;
         return s;
       };
+
       const ds = score(b) - score(a);
       if (ds !== 0) return ds;
+
       if (sort === "priceAsc") return a.data.rent - b.data.rent;
       if (sort === "priceDesc") return b.data.rent - a.data.rent;
+
       return (b.data.createdAt?.toMillis?.() || 0) - (a.data.createdAt?.toMillis?.() || 0);
     });
   }, [
@@ -152,10 +158,9 @@ export default function RoomsClient() {
 
   return (
     <main className="mx-auto w-full max-w-screen-2xl">
-      <HeroSection />
-
       <div className="px-4 py-10 sm:px-6 sm:py-12">
-        {/* Search Bar Section */}
+
+        {/* Search Bar */}
         <div className="mb-8">
           <div className="relative">
             <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
@@ -168,86 +173,11 @@ export default function RoomsClient() {
           </div>
         </div>
 
-        {/* Filter Section */}
-        <section className="card overflow-hidden bg-white border border-gray-200">
-          <div className="px-6 py-6 sm:px-8">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <h2 className="text-2xl font-semibold tracking-tight text-gray-900 sm:text-3xl">Filter Rooms</h2>
-                <p className="mt-1 text-sm text-gray-600">Filter by area, rent, and features.</p>
-              </div>
-              <div className="flex flex-wrap items-center gap-2">
-                {hasActiveFilters ? (
-                  <button type="button" className="btn border-gray-300 bg-gray-50 text-gray-700 hover:bg-gray-100" onClick={clearAll}>
-                    <RotateCcw className="mr-2 h-4 w-4" />
-                    Reset
-                  </button>
-                ) : null}
-                <Link className="btn bg-blue-600 text-white hover:bg-blue-700" href="/post/room">
-                  Post Room
-                </Link>
-              </div>
-            </div>
-          </div>
-
-          <div className="space-y-4 p-4 sm:p-6">
-            <div className="rounded-2xl bg-[color:var(--card-2)] p-4 ring-1 ring-[color:var(--border)]">
-              <h3 className="text-sm font-medium text-[color:var(--muted-foreground)] mb-3">Popular Locations</h3>
-              <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-                <Link href="/rooms/dharamshala" className="flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 hover:bg-gray-50 hover:border-blue-300 transition-colors">
-                  <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-                  Dharamshala
-                </Link>
-                <Link href="/rooms/mcleodganj" className="flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 hover:bg-gray-50 hover:border-blue-300 transition-colors">
-                  <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                  McLeod Ganj
-                </Link>
-                <Link href="/rooms/sidhbari" className="flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 hover:bg-gray-50 hover:border-blue-300 transition-colors">
-                  <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
-                  Sidhbari
-                </Link>
-                <Link href="/rooms/central-university" className="flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 hover:bg-gray-50 hover:border-blue-300 transition-colors">
-                  <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
-                  Central University
-                </Link>
-              </div>
-            </div>
-
-            <div className="rounded-2xl bg-[color:var(--card-2)] p-3 ring-1 ring-[color:var(--border)]">
-              <AreaChips value={area} onChange={setArea} variant="blue" />
-            </div>
-
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[1fr_10rem_9rem_9rem_auto] lg:items-center">
-              <select className="select h-10 w-full sm:w-64" value={sort} onChange={(e) => setSort(e.target.value as typeof sort)}>
-                <option value="new">Sort by: Newest</option>
-                <option value="priceAsc">Sort by: Price low to high</option>
-                <option value="priceDesc">Sort by: Price high to low</option>
-              </select>
-              <input className="input" value={minRent} onChange={(e) => setMinRent(e.target.value)} placeholder="Min rent (₹)" inputMode="numeric" />
-              <input className="input" value={maxRent} onChange={(e) => setMaxRent(e.target.value)} placeholder="Max rent (₹)" inputMode="numeric" />
-              <select className="select" value={genderAllowed} onChange={(e) => setGenderAllowed(e.target.value)}>
-                {ROOM_GENDER_ALLOWED.map((g) => (
-                  <option key={g} value={g}>
-                    {g}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-        </section>
-
-        {error ? (
-          <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-            {error}
-          </div>
-        ) : null}
-
+        {/* Rooms grid */}
         <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {loading ? (
-            Array.from({ length: 6 }).map((_, i) => <CardSkeleton key={i} />)
-          ) : (
-            filtered.map(({ id, data }) => <RoomCard key={id} id={id} listing={data} />)
-          )}
+          {loading
+            ? Array.from({ length: 6 }).map((_, i) => <CardSkeleton key={i} />)
+            : filtered.map(({ id, data }) => <RoomCard key={id} id={id} listing={data} />)}
         </div>
 
         {!loading && !filtered.length ? (
@@ -257,7 +187,7 @@ export default function RoomsClient() {
                 <SearchX className="h-6 w-6" />
               </div>
               <div className="mt-4 text-lg font-semibold">No rooms match these filters</div>
-              <p className="mt-1 text-sm text-slate-600">Try removing a filter, changing the area, or posting a listing.</p>
+              <p className="mt-1 text-sm text-slate-600">Try removing a filter or changing the area.</p>
               <div className="mt-5 flex flex-col justify-center gap-2 sm:flex-row">
                 <button type="button" className="btn" onClick={clearAll}>
                   <RotateCcw className="mr-2 h-4 w-4" />
@@ -270,6 +200,7 @@ export default function RoomsClient() {
             </div>
           </div>
         ) : null}
+
       </div>
     </main>
   );
