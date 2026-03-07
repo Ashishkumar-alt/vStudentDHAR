@@ -177,56 +177,56 @@ export default function RoomsClient() {
 
           {/* Location Navigation */}
           <div className="rounded-2xl bg-[color:var(--card-2)] p-3 ring-1 ring-[color:var(--border)]">
-            <div className="flex flex-wrap gap-2">
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
               <Link 
                 href="/rooms/dharamshala" 
-                className="flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 hover:bg-gray-50 hover:border-blue-300 transition-colors"
+                className="flex items-center justify-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 hover:bg-gray-50 hover:border-blue-300 transition-colors min-h-[2.5rem]"
               >
-                <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-                Dharamshala
+                <span className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0"></span>
+                <span className="truncate">Dharamshala</span>
               </Link>
               <Link 
                 href="/rooms/mcleodganj" 
-                className="flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 hover:bg-gray-50 hover:border-blue-300 transition-colors"
+                className="flex items-center justify-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 hover:bg-gray-50 hover:border-blue-300 transition-colors min-h-[2.5rem]"
               >
-                <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                McLeod Ganj
+                <span className="w-2 h-2 bg-green-500 rounded-full flex-shrink-0"></span>
+                <span className="truncate">McLeod Ganj</span>
               </Link>
               <Link 
                 href="/rooms/sidhbari" 
-                className="flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 hover:bg-gray-50 hover:border-blue-300 transition-colors"
+                className="flex items-center justify-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 hover:bg-gray-50 hover:border-blue-300 transition-colors min-h-[2.5rem]"
               >
-                <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
-                Sidhbari
+                <span className="w-2 h-2 bg-purple-500 rounded-full flex-shrink-0"></span>
+                <span className="truncate">Sidhbari</span>
               </Link>
               <Link 
                 href="/rooms/central-university" 
-                className="flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 hover:bg-gray-50 hover:border-blue-300 transition-colors"
+                className="flex items-center justify-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 hover:bg-gray-50 hover:border-blue-300 transition-colors min-h-[2.5rem]"
               >
-                <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
-                Central University
+                <span className="w-2 h-2 bg-orange-500 rounded-full flex-shrink-0"></span>
+                <span className="truncate">Central University</span>
               </Link>
             </div>
           </div>
 
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[1fr_9rem_9rem_auto] lg:items-center">
-            <div className="relative">
+          <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-[1fr_9rem_9rem_auto] lg:items-center">
+            <div className="relative sm:col-span-2 md:col-span-3 lg:col-span-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[color:color-mix(in srgb, var(--muted) 75%, transparent)]" />
               <input
-                className="input pl-9"
+                className="input pl-9 w-full"
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 placeholder="Search by title (e.g. sun facing, single room)"
               />
             </div>
-            <select className="select h-10 w-full sm:w-64" value={sort} onChange={(e) => setSort(e.target.value as typeof sort)}>
+            <select className="select h-10 w-full" value={sort} onChange={(e) => setSort(e.target.value as typeof sort)}>
               <option value="new">Sort by: Newest</option>
               <option value="priceAsc">Sort by: Price low to high</option>
               <option value="priceDesc">Sort by: Price high to low</option>
             </select>
-            <input className="input" value={minRent} onChange={(e) => setMinRent(e.target.value)} placeholder="Min rent (₹)" inputMode="numeric" />
-            <input className="input" value={maxRent} onChange={(e) => setMaxRent(e.target.value)} placeholder="Max rent (₹)" inputMode="numeric" />
-            <select className="select" value={genderAllowed} onChange={(e) => setGenderAllowed(e.target.value)}>
+            <input className="input w-full" value={minRent} onChange={(e) => setMinRent(e.target.value)} placeholder="Min rent (₹)" inputMode="numeric" />
+            <input className="input w-full" value={maxRent} onChange={(e) => setMaxRent(e.target.value)} placeholder="Max rent (₹)" inputMode="numeric" />
+            <select className="select w-full" value={genderAllowed} onChange={(e) => setGenderAllowed(e.target.value)}>
               {ROOM_GENDER_ALLOWED.map((g) => (
                 <option key={g} value={g}>
                   {g}
@@ -243,7 +243,7 @@ export default function RoomsClient() {
         </div>
       ) : null}
 
-      <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mt-6 grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
         {loading ? (
           Array.from({ length: 6 }).map((_, i) => <CardSkeleton key={i} />)
         ) : (

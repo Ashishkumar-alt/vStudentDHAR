@@ -141,46 +141,50 @@ export default function RoomsLocationClient({ location }: RoomsLocationClientPro
         {/* Popular Locations */}
         <div className="bg-gray-50 rounded-lg p-4 mb-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-3">Popular Locations</h2>
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
             <Link
               href="/rooms/dharamshala"
-              className={`inline-flex items-center justify-center px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              className={`flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors min-h-[2.5rem] ${
                 location === 'dharamshala' 
                   ? 'bg-blue-600 text-white' 
                   : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
               }`}
             >
-              Dharamshala
+              <span className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0"></span>
+              <span className="truncate">Dharamshala</span>
             </Link>
             <Link
               href="/rooms/mcleodganj"
-              className={`inline-flex items-center justify-center px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              className={`flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors min-h-[2.5rem] ${
                 location === 'mcleodganj' 
                   ? 'bg-blue-600 text-white' 
                   : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
               }`}
             >
-              McLeodganj
+              <span className="w-2 h-2 bg-green-500 rounded-full flex-shrink-0"></span>
+              <span className="truncate">McLeod Ganj</span>
             </Link>
             <Link
               href="/rooms/sidhbari"
-              className={`inline-flex items-center justify-center px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              className={`flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors min-h-[2.5rem] ${
                 location === 'sidhbari' 
                   ? 'bg-blue-600 text-white' 
                   : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
               }`}
             >
-              Sidhbari
+              <span className="w-2 h-2 bg-purple-500 rounded-full flex-shrink-0"></span>
+              <span className="truncate">Sidhbari</span>
             </Link>
             <Link
               href="/rooms/central-university"
-              className={`inline-flex items-center justify-center px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              className={`flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors min-h-[2.5rem] ${
                 location === 'central-university' 
                   ? 'bg-blue-600 text-white' 
                   : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
               }`}
             >
-              Central University
+              <span className="w-2 h-2 bg-orange-500 rounded-full flex-shrink-0"></span>
+              <span className="truncate">Central University</span>
             </Link>
           </div>
         </div>
@@ -369,7 +373,7 @@ export default function RoomsLocationClient({ location }: RoomsLocationClientPro
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {sortedRows.map(({ id, data }) => (
             <RoomCard key={id} id={id} listing={data} />
           ))}
