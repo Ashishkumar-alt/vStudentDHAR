@@ -15,27 +15,63 @@ interface RoomsLocationClientProps {
   location: string;
 }
 
-// Location configuration
+// Location configuration with natural, human-friendly content
 const LOCATION_CONFIG = {
   dharamshala: {
     name: "Dharamshala",
-    description: "Find student rooms and PG accommodations in the main Dharamshala area with easy access to markets, transportation, and educational institutions.",
-    areas: ["Kotwali Bazaar", "Sidhpur", "Kaccheri", "Chamunda"]
+    description: "Find your perfect student room in the heart of Dharamshala. We connect students directly with room owners - no brokers, no hassles.",
+    areas: ["Kotwali Bazaar", "Sidhpur", "Kaccheri", "Chamunda"],
+    intro: "Looking for a room in Dharamshala? You're in the right place! Every year, hundreds of students move here for college and coaching. We make finding your perfect room simple and stress-free.",
+    whyChoose: "Dharamshala is the perfect spot for students. You'll find everything you need within walking distance - from local cafes and libraries to bus stops and markets. The peaceful environment helps you focus on studies, while the friendly community makes you feel right at home.",
+    tips: [
+      "Start your room hunt at least a month before college starts - good places get booked quickly!",
+      "Visit the room in person and chat with neighbors to get a feel for the area",
+      "Check internet connectivity and water supply - these matter more than you think",
+      "Always get a written agreement to avoid any confusion later"
+    ],
+    aboutVStudent: "vStudent is your friendly roommate finder! We connect students directly with room owners in Dharamshala. No broker fees, no middlemen - just simple, honest connections that help you find your ideal student home."
   },
   mcleodganj: {
     name: "McLeod Ganj",
-    description: "Discover affordable student housing in McLeod Ganj, known for its peaceful environment and proximity to Tibetan culture and educational centers.",
-    areas: ["Main Square", "Temple Road", "Jogiwara Road", "Bhagsu"]
+    description: "Discover peaceful student living in McLeod Ganj. Find rooms that offer the perfect study environment with easy access to cafes and cultural spots.",
+    areas: ["Main Square", "Temple Road", "Jogiwara Road", "Bhagsu"],
+    intro: "Welcome to McLeod Ganj! This beautiful hill town is a favorite among students who love a calm, inspiring environment. Whether you're studying nearby or just want a peaceful place to focus, we'll help you find the perfect room.",
+    whyChoose: "Students love McLeod Ganj for its unique blend of tranquility and convenience. The area is famous for its Tibetan culture, amazing cafes perfect for study sessions, and stunning views that make every day better. Plus, you're never far from essential amenities.",
+    tips: [
+      "Look for rooms with good heating - McLeod Ganj can get chilly in winters",
+      "Choose a place closer to the main square for easy access to cafes and shops",
+      "Check the water pressure and electricity backup - hilly areas can have issues",
+      "Talk to local students about the best areas for safety and connectivity"
+    ],
+    aboutVStudent: "At vStudent, we understand how important the right environment is for your studies. We help you find rooms in McLeod Ganj that match your needs and budget, connecting you directly with trusted local room owners."
   },
   sidhbari: {
     name: "Sidhbari",
-    description: "Browse student accommodations in Sidhbari, a quiet residential area ideal for studying with modern amenities and good connectivity.",
-    areas: ["Main Market", "Near University", "Temple Area", "New Colony"]
+    description: "Find affordable student rooms in Sidhbari's quiet residential neighborhoods. Perfect for focused studying with modern amenities nearby.",
+    areas: ["Main Market", "Near University", "Temple Area", "New Colony"],
+    intro: "Searching for a room in Sidhbari? You've come to the right place! This growing educational hub is becoming increasingly popular among students who want quality education in a peaceful setting.",
+    whyChoose: "Sidhbari offers the best of both worlds - it's quiet enough for serious studying but has all the modern facilities you need. The area is well-connected to educational institutions and has plenty of affordable food options. Plus, the friendly local community makes settling in easy.",
+    tips: [
+      "Focus on areas near educational institutions for shorter commute times",
+      "Check for reliable internet - essential for online studies and research",
+      "Look for rooms with proper ventilation and natural light",
+      "Ask about nearby mess facilities or food options - good food is crucial!"
+    ],
+    aboutVStudent: "vStudent makes finding student accommodation in Sidhbari simple and transparent. We connect you directly with verified room owners, ensuring you get honest information and fair prices for your student home."
   },
   "central-university": {
     name: "Central University Area",
-    description: "Find rooms within walking distance of Central University of Himachal Pradesh. Perfect for students wanting minimal commute.",
-    areas: ["University Gate", "Campus Road", "Student Colony", "Faculty Quarters"]
+    description: "Find rooms within walking distance of Central University of Himachal Pradesh. Save time and money with accommodation right near campus.",
+    areas: ["University Gate", "Campus Road", "Student Colony", "Faculty Quarters"],
+    intro: "Looking for a room near Central University? You're smart to stay close to campus! Walking distance to university means more time for studies and less money spent on transport. Let us help you find your perfect student home.",
+    whyChoose: "Living near Central University is a game-changer for students. Imagine rolling out of bed and being in class in 10 minutes! The area is designed for students - with affordable food options, study-friendly environments, and everything you need within easy reach.",
+    tips: [
+      "Book early - rooms near campus are always in high demand",
+      "Check the exact walking time to your department buildings",
+      "Look for study-friendly environments with minimal disturbance",
+      "Consider shared accommodations to save money while staying close to campus"
+    ],
+    aboutVStudent: "vStudent specializes in helping students find rooms near Central University. We connect you directly with room owners who understand student needs, making your accommodation search smooth and hassle-free."
   }
 };
 
@@ -135,58 +171,48 @@ export default function RoomsLocationClient({ location }: RoomsLocationClientPro
         </h1>
         
         <p className="text-gray-600 mb-6 max-w-3xl">
-          Find affordable rooms and PGs for students near colleges, markets and transport in {locationConfig.name}.
+          {locationConfig.intro}
         </p>
 
-        {/* Popular Locations */}
+        {/* Why Students Choose Section */}
+        <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">Why Students Choose {locationConfig.name}</h2>
+          <p className="text-gray-600 mb-4">
+            {locationConfig.whyChoose}
+          </p>
+        </div>
+
+        {/* Popular Areas Section */}
         <div className="bg-gray-50 rounded-lg p-4 mb-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-3">Popular Locations</h2>
+          <h2 className="text-lg font-semibold text-gray-900 mb-3">Popular Areas Nearby</h2>
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
-            <Link
-              href="/rooms/dharamshala"
-              className={`flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors min-h-[2.5rem] ${
-                location === 'dharamshala' 
-                  ? 'bg-blue-600 text-white' 
-                  : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
-              }`}
-            >
-              <span className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0"></span>
-              <span className="truncate">Dharamshala</span>
-            </Link>
-            <Link
-              href="/rooms/mcleodganj"
-              className={`flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors min-h-[2.5rem] ${
-                location === 'mcleodganj' 
-                  ? 'bg-blue-600 text-white' 
-                  : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
-              }`}
-            >
-              <span className="w-2 h-2 bg-green-500 rounded-full flex-shrink-0"></span>
-              <span className="truncate">McLeod Ganj</span>
-            </Link>
-            <Link
-              href="/rooms/sidhbari"
-              className={`flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors min-h-[2.5rem] ${
-                location === 'sidhbari' 
-                  ? 'bg-blue-600 text-white' 
-                  : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
-              }`}
-            >
-              <span className="w-2 h-2 bg-purple-500 rounded-full flex-shrink-0"></span>
-              <span className="truncate">Sidhbari</span>
-            </Link>
-            <Link
-              href="/rooms/central-university"
-              className={`flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors min-h-[2.5rem] ${
-                location === 'central-university' 
-                  ? 'bg-blue-600 text-white' 
-                  : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
-              }`}
-            >
-              <span className="w-2 h-2 bg-orange-500 rounded-full flex-shrink-0"></span>
-              <span className="truncate">Central University</span>
-            </Link>
+            {locationConfig.areas.map((area, index) => (
+              <div key={index} className="bg-white border border-gray-200 rounded-lg p-3 text-center">
+                <span className="text-sm font-medium text-gray-900">{area}</span>
+              </div>
+            ))}
           </div>
+        </div>
+
+        {/* Tips Section */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
+          <h2 className="text-xl font-semibold text-blue-900 mb-4">Tips for Students Looking for Rooms</h2>
+          <ul className="space-y-3">
+            {locationConfig.tips.map((tip, index) => (
+              <li key={index} className="flex items-start gap-2 text-gray-700">
+                <span className="text-blue-600 mt-1">•</span>
+                <span className="text-sm">{tip}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* About vStudent Section */}
+        <div className="bg-green-50 border border-green-200 rounded-lg p-6 mb-6">
+          <h2 className="text-xl font-semibold text-green-900 mb-4">About vStudent</h2>
+          <p className="text-gray-700">
+            {locationConfig.aboutVStudent}
+          </p>
         </div>
       </div>
 
@@ -339,9 +365,9 @@ export default function RoomsLocationClient({ location }: RoomsLocationClientPro
       ) : sortedRows.length === 0 ? (
         <div className="text-center py-12">
           <SearchX className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No rooms available in {locationConfig.name} right now.</h3>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">No rooms listed in {locationConfig.name} yet</h3>
           <p className="text-gray-600 mb-6">
-            Try nearby locations:
+            You can explore nearby areas or be the first to post a room in {locationConfig.name}!
           </p>
           <div className="flex flex-wrap justify-center gap-2 mb-6">
             {Object.entries(LOCATION_CONFIG)
@@ -369,7 +395,7 @@ export default function RoomsLocationClient({ location }: RoomsLocationClientPro
             className="flex items-center gap-2 mx-auto px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
           >
             <RotateCcw className="w-4 h-4" />
-            Clear Filters
+            Reset Filters
           </button>
         </div>
       ) : (
@@ -383,24 +409,23 @@ export default function RoomsLocationClient({ location }: RoomsLocationClientPro
       {/* SEO Content */}
       <div className="mt-12 pt-8 border-t border-gray-200">
         <h2 className="text-2xl font-bold text-gray-900 mb-4">
-          Why Choose {locationConfig.name} for Student Accommodation?
+          Everything You Need to Know About Student Living in {locationConfig.name}
         </h2>
         <div className="prose max-w-none text-gray-600">
           <p className="mb-4">
-            {locationConfig.name} offers excellent options for student housing with various amenities 
-            and price ranges to suit different budgets. Students can find rooms with features like 
-            attached bathrooms, heating facilities, and vegetarian meal options.
+            {locationConfig.intro} The area has become increasingly popular among students due to its excellent educational facilities and student-friendly atmosphere.
           </p>
           <h3 className="text-lg font-semibold text-gray-900 mb-2">Popular Areas in {locationConfig.name}</h3>
           <ul className="list-disc pl-6 mb-4">
             {locationConfig.areas.map((area) => (
-              <li key={area}>{area} - Well-connected area with good amenities</li>
+              <li key={area}>{area} - Great choice for students with good connectivity and amenities</li>
             ))}
           </ul>
           <p className="mb-4">
-            Most rooms in {locationConfig.name} are within walking distance or a short commute from 
-            educational institutions, making it convenient for students. The area offers good 
-            connectivity to markets, hospitals, and recreational facilities.
+            Most student rooms in {locationConfig.name} are conveniently located near educational institutions, making daily commute easy and affordable. The area offers everything you need for a comfortable student life - from affordable food options to quiet study spots.
+          </p>
+          <p className="mb-4">
+            Whether you're looking for a peaceful place to focus on your studies or want to be close to campus activities, {locationConfig.name} has something perfect for every student's needs and budget.
           </p>
         </div>
       </div>
