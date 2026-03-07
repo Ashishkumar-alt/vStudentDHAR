@@ -1,6 +1,14 @@
 import Link from "next/link";
 import { Home, Package } from "lucide-react";
+import type { Metadata } from "next";
 import { PRIMARY_INSTITUTION_SHORT } from "@/lib/constants";
+
+export const metadata: Metadata = {
+  title: "Post a Listing",
+  description: "Post a room or student item listing on vStudent.",
+  alternates: { canonical: "/post" },
+  robots: { index: false, follow: true },
+};
 
 export default function PostPage() {
   return (

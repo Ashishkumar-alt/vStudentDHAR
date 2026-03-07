@@ -1,3 +1,12 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Offline",
+  description: "You are offline.",
+  alternates: { canonical: "/offline" },
+  robots: { index: false, follow: false },
+};
+
 export default function OfflinePage() {
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-lg flex-col items-center justify-center px-6 text-center">

@@ -1,3 +1,12 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "About vStudent",
+  description:
+    "vStudent is a hyperlocal student marketplace for Dharamshala—find rooms/PG near Central University and buy or sell used student items.",
+  alternates: { canonical: "/about" },
+};
+
 export default function AboutPage() {
     return (
         <main className="max-w-3xl mx-auto p-6 space-y-6">

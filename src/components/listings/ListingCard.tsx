@@ -6,6 +6,7 @@ import type { ItemListing, RoomListing } from "@/lib/firebase/models";
 import { formatINR, toWhatsAppLink } from "@/lib/utils";
 import { MapPin, MessageCircle, Footprints, Flame, Leaf } from "lucide-react";
 import FavoriteButton from "@/components/favorites/FavoriteButton";
+import { itemSlug, roomSlug } from "@/lib/seo/slug";
 
 function isNew(createdAt: unknown) {
   try {
@@ -19,6 +20,12 @@ function isNew(createdAt: unknown) {
 }
 
 export function RoomCard({ id, listing }: { id: string; listing: RoomListing }) {
+  const slug = roomSlug({
+    title: listing.title,
+    area: listing.area,
+    genderAllowed: listing.genderAllowed,
+    rent: listing.rent,
+  });
   const wa = toWhatsAppLink(
     listing.contactPhone,
     `Hi, I’m interested in your room on vStudent Dharamshala: ${listing.title}. Is it available?`,
@@ -26,7 +33,7 @@ export function RoomCard({ id, listing }: { id: string; listing: RoomListing }) 
   return (
     <div className="card card-hover group overflow-hidden">
       <Link
-        href={`/rooms/${id}`}
+        href={`/rooms/${id}/${slug}`}
         className="relative block aspect-[16/10] w-full bg-[color:color-mix(in srgb, var(--card) 70%, var(--background) 30%)]"
       >
         <div className="absolute right-3 top-3 z-10">
@@ -116,7 +123,7 @@ export function RoomCard({ id, listing }: { id: string; listing: RoomListing }) 
           </div>
           <div className="flex items-center gap-2">
             <Link
-              href={`/rooms/${id}`}
+              href={`/rooms/${id}/${slug}`}
               className="focus-ring inline-flex h-9 items-center justify-center rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 px-4 text-sm font-medium text-white shadow-sm transition hover:shadow-md hover:brightness-[1.02] active:translate-y-px"
             >
               View details
@@ -138,6 +145,12 @@ export function RoomCard({ id, listing }: { id: string; listing: RoomListing }) 
 }
 
 export function ItemCard({ id, listing }: { id: string; listing: ItemListing }) {
+  const slug = itemSlug({
+    title: listing.title,
+    category: listing.category,
+    area: listing.area,
+    price: listing.price,
+  });
   const wa = toWhatsAppLink(
     listing.contactPhone,
     `Hi, I saw your listing on vStudent Dharamshala: ${listing.title}. Is it available?`,
@@ -145,7 +158,7 @@ export function ItemCard({ id, listing }: { id: string; listing: ItemListing }) 
   return (
     <div className="card card-hover group overflow-hidden">
       <Link
-        href={`/items/${id}`}
+        href={`/items/${id}/${slug}`}
         className="relative block aspect-[16/10] w-full bg-[color:color-mix(in srgb, var(--card) 70%, var(--background) 30%)]"
       >
         <div className="absolute right-3 top-3 z-10">
@@ -208,7 +221,7 @@ export function ItemCard({ id, listing }: { id: string; listing: ItemListing }) 
           </div>
           <div className="flex items-center gap-2">
             <Link
-              href={`/items/${id}`}
+              href={`/items/${id}/${slug}`}
               className="focus-ring inline-flex h-9 items-center justify-center rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 px-4 text-sm font-medium text-white shadow-sm transition hover:shadow-md hover:brightness-[1.02] active:translate-y-px"
             >
               View details

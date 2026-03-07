@@ -1,8 +1,16 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import AreaQuickChips from "@/components/home/AreaQuickChips";
 import DharamshalaPulse from "@/components/home/DharamshalaPulse";
 import HomePreviews from "@/components/home/HomePreviews";
 import { PRIMARY_INSTITUTION_SHORT } from "@/lib/constants";
+
+export const metadata: Metadata = {
+  title: "Rooms & PG in Dharamshala for Students",
+  description:
+    "vStudent is a local student marketplace to find rooms and PG in Dharamshala near Central University. Browse verified listings, filter by area, and contact owners on WhatsApp.",
+  alternates: { canonical: "/" },
+};
 
 export default function Home() {
   return (
