@@ -48,16 +48,15 @@ export default function RoomsClient() {
 
     const t = setTimeout(() => {
       if (nextArea) setArea(nextArea);
-      setGenderAllowed(nextGender);
-      setMinRent(nextMin);
-      setMaxRent(nextMax);
-      setQ(nextQ);
-      setSort(nextSort);
-      setVegOnly(nextVeg);
-      setHeaterIncluded(nextHeater);
-      setAttachedBathroom(nextBath);
-      setMaxWalk(nextWalk);
-      if (nextVeg || nextHeater || nextBath || nextWalk) setShowFilters(true);
+      if (nextGender) setGenderAllowed(nextGender);
+      if (nextMin) setMinRent(nextMin);
+      if (nextMax) setMaxRent(nextMax);
+      if (nextQ) setQ(nextQ);
+      if (nextSort) setSort(nextSort);
+      if (nextVeg) setVegOnly(true);
+      if (nextHeater) setHeaterIncluded(true);
+      if (nextBath) setAttachedBathroom(true);
+      if (nextWalk) setMaxWalk(nextWalk);
       setHydratedFromUrl(true);
     }, 0);
 

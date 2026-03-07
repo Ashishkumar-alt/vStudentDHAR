@@ -4,6 +4,7 @@ import Script from "next/script";
 import "./globals.css";
 import Providers from "./providers";
 import AppShell from "@/components/layout/AppShell";
+import ThemeInitializer from "@/components/layout/ThemeInitializer";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -39,18 +40,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full" suppressHydrationWarning>
       <head>
-        <Script id="theme-init" strategy="beforeInteractive">
-          {`
-          (function () {
-            try {
-              var t = window.localStorage.getItem("vstudent.theme");
-              if (t === "dark" || t === "light") {
-                document.documentElement.dataset.theme = t;
-              }
-            } catch (e) {}
-          })();
-          `}
-        </Script>
+        <ThemeInitializer />
       </head>
 
       <body className={`${inter.variable} h-full antialiased`}>

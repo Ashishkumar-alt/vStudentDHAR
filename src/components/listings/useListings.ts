@@ -36,6 +36,37 @@ export function useRooms() {
   return { rows: rows || [], loading: rows === null && !error, error };
 }
 
+export function useRoomsByLocation(location: string) {
+  const [rows, setRows] = useState<{ id: string; data: RoomListing }[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const q = query(
+      roomsRef(),
+      where("cityId", "==", DEFAULT_CITY_ID),
+      where("approved", "==", true),
+      where("status", "==", "active"),
+      where("area", "==", location.replace(/-/g, ' ')),
+      orderBy("createdAt", "desc"),
+      limit(80),
+    );
+    const unsub = onSnapshot(
+      q,
+      (snap) => {
+        const next = snap.docs.map((d) => ({ id: d.id, data: d.data() as RoomListing }));
+        setRows(next);
+        setError(null);
+      },
+      (err) => {
+        setError(err.message || "Failed to load rooms");
+      },
+    );
+    return () => unsub();
+  }, [location]);
+
+  return { rows: rows || [], loading: rows === null && !error, error };
+}
+
 export function useItems() {
   const [rows, setRows] = useState<{ id: string; data: ItemListing }[] | null>(null);
   const [error, setError] = useState<string | null>(null);
