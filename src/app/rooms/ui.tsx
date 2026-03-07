@@ -11,6 +11,7 @@ import { useRooms } from "@/components/listings/useListings";
 import AreaChips from "@/components/ui/AreaChips";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { CardSkeleton } from "@/components/ui/Skeleton";
+import HeroSection from "@/components/ui/HeroSection";
 
 export default function RoomsClient() {
   const router = useRouter();
@@ -64,50 +65,13 @@ export default function RoomsClient() {
   }, [search, hydratedFromUrl]);
 
   useEffect(() => {
-    try {
-      const saved = window.localStorage.getItem("vstudent.area") || "";
-      if (!search.get("area") && saved) setTimeout(() => setArea(saved), 0);
-    } catch {}
-  }, [search]);
-
-  useEffect(() => {
-    try {
-      if (area) window.localStorage.setItem("vstudent.area", area);
-    } catch {}
-  }, [area]);
-
-  useEffect(() => {
-    if (!hydratedFromUrl) return;
-    const params = new URLSearchParams();
-    if (area) params.set("area", area);
-    if (genderAllowed && genderAllowed !== "Any") params.set("gender", genderAllowed);
-    if (minRent) params.set("min", minRent);
-    if (maxRent) params.set("max", maxRent);
-    if (q.trim()) params.set("q", q.trim());
-    if (sort !== "new") params.set("sort", sort);
-    if (vegOnly) params.set("veg", "1");
-    if (heaterIncluded) params.set("heater", "1");
-    if (attachedBathroom) params.set("bath", "1");
-    if (maxWalk) params.set("walk", maxWalk);
-
-    const qs = params.toString();
-    const next = qs ? `/rooms?${qs}` : "/rooms";
-    const t = setTimeout(() => router.replace(next), 250);
-    return () => clearTimeout(t);
-  }, [
-    area,
-    genderAllowed,
-    minRent,
-    maxRent,
-    q,
-    sort,
-    vegOnly,
-    heaterIncluded,
-    attachedBathroom,
-    maxWalk,
-    router,
-    hydratedFromUrl,
-  ]);
+    if (!hydratedFromUrl && area) {
+      const t = setTimeout(() => {
+        router.replace(`/rooms?area=${encodeURIComponent(area)}`);
+      }, 250);
+      return () => clearTimeout(t);
+    }
+  }, [area, hydratedFromUrl]);
 
   const filtered = useMemo(() => {
     const min = asNumber(minRent);
@@ -151,11 +115,11 @@ export default function RoomsClient() {
     minRent,
     maxRent,
     q,
-    sort,
     vegOnly,
     heaterIncluded,
     attachedBathroom,
     maxWalk,
+    sort,
     profile?.institution,
   ]);
 
@@ -169,29 +133,16 @@ export default function RoomsClient() {
         vegOnly ||
         heaterIncluded ||
         attachedBathroom ||
-        maxWalk ||
-        sort !== "new",
+        maxWalk,
     );
-  }, [
-    area,
-    q,
-    genderAllowed,
-    minRent,
-    maxRent,
-    vegOnly,
-    heaterIncluded,
-    attachedBathroom,
-    maxWalk,
-    sort,
-  ]);
+  }, [area, q, genderAllowed, minRent, maxRent, vegOnly, heaterIncluded, attachedBathroom, maxWalk]);
 
   const clearAll = () => {
     setArea("");
+    setQ("");
     setGenderAllowed("Any");
     setMinRent("");
     setMaxRent("");
-    setQ("");
-    setSort("new");
     setVegOnly(false);
     setHeaterIncluded(false);
     setAttachedBathroom(false);
@@ -200,125 +151,126 @@ export default function RoomsClient() {
   };
 
   return (
-    <main className="mx-auto w-full max-w-screen-2xl px-4 py-10">
-      <section className="card overflow-hidden">
-        <div className="bg-gradient-to-br from-blue-600 via-indigo-600 to-fuchsia-600 px-6 py-6 text-white sm:px-8">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">Find Rooms</h1>
-              <p className="mt-1 text-sm text-white/80">Find PG & rooms in Dharamshala. Filter by area first.</p>
-            </div>
-            <div className="flex flex-wrap items-center gap-2">
-              {hasActiveFilters ? (
-                <button type="button" className="btn border-white/30 bg-white/10 text-white hover:bg-white/15" onClick={clearAll}>
-                  <RotateCcw className="mr-2 h-4 w-4" />
-                  Reset
-                </button>
-              ) : null}
-              <Link className="btn bg-white text-slate-900 hover:bg-white/90" href="/post/room">
-                Post Room
-              </Link>
-            </div>
-          </div>
-        </div>
+    <main className="mx-auto w-full max-w-screen-2xl">
+      <HeroSection />
 
-        <div className="space-y-4 p-4 sm:p-6">
-
-        <div className="rounded-2xl bg-[color:var(--card-2)] p-3 ring-1 ring-[color:var(--border)]">
-          <AreaChips value={area} onChange={setArea} variant="blue" />
-        </div>
-
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[1fr_10rem_9rem_9rem_auto] lg:items-center">
+      <div className="px-4 py-10 sm:px-6 sm:py-12">
+        {/* Search Bar Section */}
+        <div className="mb-8">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[color:color-mix(in srgb, var(--muted) 75%, transparent)]" />
+            <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
             <input
-              className="input pl-9"
+              className="w-full rounded-lg border border-gray-300 bg-white px-12 py-4 text-lg text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
               value={q}
               onChange={(e) => setQ(e.target.value)}
-              placeholder="Search by title (e.g. sun facing, single room)"
+              placeholder="Search by title, location, or features..."
             />
           </div>
-          <select className="select" value={genderAllowed} onChange={(e) => setGenderAllowed(e.target.value)}>
-            {ROOM_GENDER_ALLOWED.map((g) => (
-              <option key={g} value={g}>
-                {g}
-              </option>
-            ))}
-          </select>
-          <input className="input" value={minRent} onChange={(e) => setMinRent(e.target.value)} placeholder="Min rent (₹)" inputMode="numeric" />
-          <input className="input" value={maxRent} onChange={(e) => setMaxRent(e.target.value)} placeholder="Max rent (₹)" inputMode="numeric" />
-          <button type="button" className="btn h-10 px-4 text-sm" onClick={() => setShowFilters((v) => !v)}>
-            <SlidersHorizontal className="mr-2 h-4 w-4" />
-            {showFilters ? "Hide filters" : "Filters"}
-          </button>
         </div>
 
-        <div className="flex flex-col gap-3 rounded-2xl bg-[color:var(--card-2)] px-4 py-3 ring-1 ring-[color:var(--border)] sm:flex-row sm:items-center sm:justify-between">
-          <div className="text-sm font-medium text-[color:var(--foreground)]">
-            {loading ? "Loading..." : `${filtered.length} room${filtered.length === 1 ? "" : "s"} available`}
+        {/* Filter Section */}
+        <section className="card overflow-hidden bg-white border border-gray-200">
+          <div className="px-6 py-6 sm:px-8">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <h2 className="text-2xl font-semibold tracking-tight text-gray-900 sm:text-3xl">Filter Rooms</h2>
+                <p className="mt-1 text-sm text-gray-600">Filter by area, rent, and features.</p>
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                {hasActiveFilters ? (
+                  <button type="button" className="btn border-gray-300 bg-gray-50 text-gray-700 hover:bg-gray-100" onClick={clearAll}>
+                    <RotateCcw className="mr-2 h-4 w-4" />
+                    Reset
+                  </button>
+                ) : null}
+                <Link className="btn bg-blue-600 text-white hover:bg-blue-700" href="/post/room">
+                  Post Room
+                </Link>
+              </div>
+            </div>
           </div>
-          <select className="select h-10 w-full sm:w-64" value={sort} onChange={(e) => setSort(e.target.value as typeof sort)}>
-            <option value="new">Sort by: Newest</option>
-            <option value="priceAsc">Sort by: Price low to high</option>
-            <option value="priceDesc">Sort by: Price high to low</option>
-          </select>
+
+          <div className="space-y-4 p-4 sm:p-6">
+            <div className="rounded-2xl bg-[color:var(--card-2)] p-4 ring-1 ring-[color:var(--border)]">
+              <h3 className="text-sm font-medium text-[color:var(--muted-foreground)] mb-3">Popular Locations</h3>
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                <Link href="/rooms/dharamshala" className="flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 hover:bg-gray-50 hover:border-blue-300 transition-colors">
+                  <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                  Dharamshala
+                </Link>
+                <Link href="/rooms/mcleodganj" className="flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 hover:bg-gray-50 hover:border-blue-300 transition-colors">
+                  <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                  McLeod Ganj
+                </Link>
+                <Link href="/rooms/sidhbari" className="flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 hover:bg-gray-50 hover:border-blue-300 transition-colors">
+                  <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
+                  Sidhbari
+                </Link>
+                <Link href="/rooms/central-university" className="flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 hover:bg-gray-50 hover:border-blue-300 transition-colors">
+                  <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
+                  Central University
+                </Link>
+              </div>
+            </div>
+
+            <div className="rounded-2xl bg-[color:var(--card-2)] p-3 ring-1 ring-[color:var(--border)]">
+              <AreaChips value={area} onChange={setArea} variant="blue" />
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[1fr_10rem_9rem_9rem_auto] lg:items-center">
+              <select className="select h-10 w-full sm:w-64" value={sort} onChange={(e) => setSort(e.target.value as typeof sort)}>
+                <option value="new">Sort by: Newest</option>
+                <option value="priceAsc">Sort by: Price low to high</option>
+                <option value="priceDesc">Sort by: Price high to low</option>
+              </select>
+              <input className="input" value={minRent} onChange={(e) => setMinRent(e.target.value)} placeholder="Min rent (₹)" inputMode="numeric" />
+              <input className="input" value={maxRent} onChange={(e) => setMaxRent(e.target.value)} placeholder="Max rent (₹)" inputMode="numeric" />
+              <select className="select" value={genderAllowed} onChange={(e) => setGenderAllowed(e.target.value)}>
+                {ROOM_GENDER_ALLOWED.map((g) => (
+                  <option key={g} value={g}>
+                    {g}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </section>
+
+        {error ? (
+          <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+            {error}
+          </div>
+        ) : null}
+
+        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {loading ? (
+            Array.from({ length: 6 }).map((_, i) => <CardSkeleton key={i} />)
+          ) : (
+            filtered.map(({ id, data }) => <RoomCard key={id} id={id} listing={data} />)
+          )}
         </div>
 
-        {showFilters ? (
-          <div className="rounded-2xl bg-[color:var(--card-2)] p-4 ring-1 ring-[color:var(--border)]">
-            <div className="flex flex-wrap items-center gap-4">
-              <label className="flex items-center gap-2 text-sm text-[color:var(--foreground)]">
-                <input type="checkbox" className="h-4 w-4" checked={vegOnly} onChange={(e) => setVegOnly(e.target.checked)} />
-                Veg only
-              </label>
-              <label className="flex items-center gap-2 text-sm text-[color:var(--foreground)]">
-                <input type="checkbox" className="h-4 w-4" checked={attachedBathroom} onChange={(e) => setAttachedBathroom(e.target.checked)} />
-                Attached bathroom
-              </label>
-              <label className="flex items-center gap-2 text-sm text-[color:var(--foreground)]">
-                <input type="checkbox" className="h-4 w-4" checked={heaterIncluded} onChange={(e) => setHeaterIncluded(e.target.checked)} />
-                Winter ready (heater)
-              </label>
-              <div className="min-w-[200px]">
-                <label className="text-xs font-medium text-[color:var(--muted)]">
-                  Walking distance to {PRIMARY_INSTITUTION_SHORT} (max minutes)
-                </label>
-                <input className="input mt-1" value={maxWalk} onChange={(e) => setMaxWalk(e.target.value)} placeholder="e.g. 10" inputMode="numeric" />
+        {!loading && !filtered.length ? (
+          <div className="mt-8">
+            <div className="card mx-auto max-w-2xl p-6 text-center">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-700">
+                <SearchX className="h-6 w-6" />
+              </div>
+              <div className="mt-4 text-lg font-semibold">No rooms match these filters</div>
+              <p className="mt-1 text-sm text-slate-600">Try removing a filter, changing the area, or posting a listing.</p>
+              <div className="mt-5 flex flex-col justify-center gap-2 sm:flex-row">
+                <button type="button" className="btn" onClick={clearAll}>
+                  <RotateCcw className="mr-2 h-4 w-4" />
+                  Reset filters
+                </button>
+                <Link className="btn btn-primary" href="/post/room">
+                  Post Room
+                </Link>
               </div>
             </div>
           </div>
         ) : null}
-        </div>
-      </section>
-
-      {error ? <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div> : null}
-
-      <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {loading
-          ? Array.from({ length: 6 }).map((_, i) => <CardSkeleton key={i} />)
-          : filtered.map(({ id, data }) => <RoomCard key={id} id={id} listing={data} />)}
       </div>
-
-      {!loading && !filtered.length ? (
-        <div className="mt-8">
-          <div className="card mx-auto max-w-2xl p-6 text-center">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-700">
-              <SearchX className="h-6 w-6" />
-            </div>
-            <div className="mt-4 text-lg font-semibold">No rooms match these filters</div>
-            <p className="mt-1 text-sm text-slate-600">Try removing a filter, changing the area, or posting a listing.</p>
-            <div className="mt-5 flex flex-col justify-center gap-2 sm:flex-row">
-              <button type="button" className="btn" onClick={clearAll}>
-                <RotateCcw className="mr-2 h-4 w-4" />
-                Reset filters
-              </button>
-              <Link className="btn btn-primary" href="/post/room">
-                Post Room
-              </Link>
-            </div>
-          </div>
-        </div>
-      ) : null}
     </main>
   );
 }
