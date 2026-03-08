@@ -8,6 +8,8 @@ import { useForm } from "react-hook-form";
 import { useAuth } from "@/components/auth/AuthProvider";
 import PhotoPicker from "./PhotoPicker";
 import { createItem } from "@/lib/firebase/listings";
+import { createListingAPI, getListingLimits, ListingAPIError, ListingLimits } from "@/lib/api/listings";
+import { SpamLimitError } from "@/lib/firebase/anti-spam";
 import { DEFAULT_CITY_ID, DHARAMSHALA_AREAS, ITEM_CATEGORIES, ITEM_CONDITION, REQUIRE_APPROVAL } from "@/lib/constants";
 
 const schema = z.object({
@@ -31,6 +33,7 @@ export default function ItemPostForm() {
   const [photos, setPhotos] = useState<File[]>([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [listingLimits, setListingLimits] = useState<ListingLimits | null>(null);
 
   const defaults = useMemo<FormValues>(
     () => ({
@@ -56,6 +59,21 @@ export default function ItemPostForm() {
     if (!current) form.setValue("contactPhone", profile.whatsappNumber, { shouldDirty: true });
   }, [profile?.whatsappNumber, form]);
 
+  useEffect(() => {
+    if (!user) return;
+    
+    const fetchLimits = async () => {
+      try {
+        const limits = await getListingLimits(user.uid);
+        setListingLimits(limits);
+      } catch (error) {
+        console.error("Failed to fetch listing limits:", error);
+      }
+    };
+
+    fetchLimits();
+  }, [user]);
+
   async function onSubmit(values: FormValues) {
     if (!user) return;
     setBusy(true);
@@ -64,40 +82,75 @@ export default function ItemPostForm() {
       if (photos.length === 0) throw new Error("Add at least 1 photo.");
       if (photos.length > 4) throw new Error("Max 4 photos.");
 
-      const id = await createItem(
-        {
-          type: "item",
-          cityId: DEFAULT_CITY_ID,
-          institution: profile?.institution,
-          createdByMemberSinceYear: profile?.createdAt?.toDate?.()?.getFullYear?.(),
-          title: values.title.trim(),
-          category: values.category,
-          price: Number(values.price),
-          condition: values.condition,
-          area: values.area.trim(),
-          description: values.description?.trim() || "",
-          photoUrls: [],
-          contactPhone: values.contactPhone.trim(),
-          status: "active",
-          approved: !REQUIRE_APPROVAL,
-          createdBy: user.uid,
-        },
-        photos.slice(0, 4),
-      );
+      const listingData = {
+        type: "item",
+        cityId: DEFAULT_CITY_ID,
+        institution: profile?.institution,
+        createdByMemberSinceYear: profile?.createdAt?.toDate?.()?.getFullYear?.(),
+        title: values.title.trim(),
+        category: values.category,
+        price: Number(values.price),
+        condition: values.condition,
+        area: values.area.trim(),
+        description: values.description?.trim() || "",
+        photoUrls: [],
+        contactPhone: values.contactPhone.trim(),
+      };
 
-      router.replace(`/items/${id}`);
+      const { listingId } = await createListingAPI("item", listingData, photos.slice(0, 4), user.uid);
+
+      router.replace(`/items/${listingId}`);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to post item");
+      if (e instanceof SpamLimitError) {
+        setError(e.message);
+      } else if (e instanceof ListingAPIError) {
+        setError(e.message);
+      } else {
+        setError(e instanceof Error ? e.message : "Failed to post item");
+      }
     } finally {
       setBusy(false);
     }
   }
 
   return (
-    <form
-      className="card mt-6 p-5"
-      onSubmit={form.handleSubmit(onSubmit)}
-    >
+    <div>
+      {/* Listing Limits Display */}
+      {listingLimits && (
+        <div className={`card mt-6 p-4 ${
+          listingLimits.canCreateMore 
+            ? 'border-blue-200 bg-blue-50' 
+            : 'border-red-200 bg-red-50'
+        }`}>
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className={`text-sm font-medium ${
+                listingLimits.canCreateMore ? 'text-blue-800' : 'text-red-800'
+              }`}>
+                Daily Listing Limit
+              </h3>
+              <p className={`text-xs mt-1 ${
+                listingLimits.canCreateMore ? 'text-blue-600' : 'text-red-600'
+              }`}>
+                {listingLimits.canCreateMore 
+                  ? `You can post ${listingLimits.remainingListings} more listing${listingLimits.remainingListings !== 1 ? 's' : ''} today.`
+                  : `You've reached your daily limit of ${listingLimits.dailyLimit} listings. Try again tomorrow!`
+                }
+              </p>
+            </div>
+            <div className={`text-2xl font-bold ${
+              listingLimits.canCreateMore ? 'text-blue-600' : 'text-red-600'
+            }`}>
+              {listingLimits.currentCount}/{listingLimits.dailyLimit}
+            </div>
+          </div>
+        </div>
+      )}
+
+      <form
+        className="card mt-6 p-5"
+        onSubmit={form.handleSubmit(onSubmit)}
+      >
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="sm:col-span-2">
           <label className="text-sm font-medium">Title</label>
@@ -175,9 +228,13 @@ export default function ItemPostForm() {
 
       {error ? <p className="mt-4 text-sm text-red-600">{error}</p> : null}
 
-      <button className="btn btn-primary mt-5 w-full" disabled={busy}>
-        {busy ? "Posting…" : "Post item"}
+      <button 
+        className="btn btn-primary mt-5 w-full" 
+        disabled={busy || (listingLimits ? !listingLimits.canCreateMore : false)}
+      >
+        {busy ? "Posting…" : listingLimits && !listingLimits.canCreateMore ? "Daily Limit Reached" : "Post item"}
       </button>
     </form>
+    </div>
   );
 }

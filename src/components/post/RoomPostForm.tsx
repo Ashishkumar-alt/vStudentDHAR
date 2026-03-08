@@ -9,6 +9,8 @@ import { useAuth } from "@/components/auth/AuthProvider";
 import PhotoPicker from "./PhotoPicker";
 import LocationPickerWithSearch from "@/components/ui/LocationPickerWithSearch";
 import { createRoom } from "@/lib/firebase/listings";
+import { createListingAPI, getListingLimits, ListingAPIError, ListingLimits } from "@/lib/api/listings";
+import { SpamLimitError } from "@/lib/firebase/anti-spam";
 import { DEFAULT_CITY_ID, DHARAMSHALA_AREAS, PRIMARY_INSTITUTION_SHORT, REQUIRE_APPROVAL, ROOM_GENDER_ALLOWED } from "@/lib/constants";
 
 const schema = z.object({
@@ -54,6 +56,7 @@ export default function RoomPostForm() {
   const [error, setError] = useState<string | null>(null);
   const [selectedLatitude, setSelectedLatitude] = useState<number | undefined>();
   const [selectedLongitude, setSelectedLongitude] = useState<number | undefined>();
+  const [listingLimits, setListingLimits] = useState<ListingLimits | null>(null);
 
   const defaults = useMemo<FormValues>(
     () => ({
@@ -89,6 +92,21 @@ export default function RoomPostForm() {
     if (!current) form.setValue("contactPhone", profile.whatsappNumber, { shouldDirty: true });
   }, [profile?.whatsappNumber, form]);
 
+  useEffect(() => {
+    if (!user) return;
+    
+    const fetchLimits = async () => {
+      try {
+        const limits = await getListingLimits(user.uid);
+        setListingLimits(limits);
+      } catch (error) {
+        console.error("Failed to fetch listing limits:", error);
+      }
+    };
+
+    fetchLimits();
+  }, [user]);
+
   async function onSubmit(values: FormValues) {
     if (!user) return;
     setBusy(true);
@@ -97,50 +115,85 @@ export default function RoomPostForm() {
       if (photos.length === 0) throw new Error("Add at least 1 photo.");
       if (photos.length > 5) throw new Error("Max 5 photos.");
 
-      const id = await createRoom(
-        {
-          type: "room",
-          cityId: DEFAULT_CITY_ID,
-          institution: profile?.institution,
-          createdByMemberSinceYear: profile?.createdAt?.toDate?.()?.getFullYear?.(),
-          title: values.title.trim(),
-          rent: Number(values.rent),
-          deposit: Number(values.deposit),
-          area: values.area.trim(),
-          address: values.address.trim(),
-          latitude: selectedLatitude,
-          longitude: selectedLongitude,
-          genderAllowed: values.genderAllowed,
-          vegOnly: values.vegOnly,
-          attachedBathroom: values.attachedBathroom,
-          foodIncluded: values.foodIncluded,
-          heaterIncluded: values.heaterIncluded,
-          walkMinutesToHPU: values.walkMinutesToHPU ? Number(values.walkMinutesToHPU) : undefined,
-          sunFacing: values.sunFacing,
-          mountainView: values.mountainView,
-          description: values.description?.trim() || "",
-          photoUrls: [],
-          contactPhone: values.contactPhone.trim(),
-          status: "active",
-          approved: !REQUIRE_APPROVAL,
-          createdBy: user.uid,
-        },
-        photos,
-      );
+      const listingData = {
+        type: "room",
+        cityId: DEFAULT_CITY_ID,
+        institution: profile?.institution,
+        createdByMemberSinceYear: profile?.createdAt?.toDate?.()?.getFullYear?.(),
+        title: values.title.trim(),
+        rent: Number(values.rent),
+        deposit: Number(values.deposit),
+        area: values.area.trim(),
+        address: values.address.trim(),
+        latitude: selectedLatitude,
+        longitude: selectedLongitude,
+        genderAllowed: values.genderAllowed,
+        vegOnly: values.vegOnly,
+        attachedBathroom: values.attachedBathroom,
+        foodIncluded: values.foodIncluded,
+        heaterIncluded: values.heaterIncluded,
+        walkMinutesToHPU: values.walkMinutesToHPU ? Number(values.walkMinutesToHPU) : undefined,
+        sunFacing: values.sunFacing,
+        mountainView: values.mountainView,
+        description: values.description?.trim() || "",
+        photoUrls: [],
+        contactPhone: values.contactPhone.trim(),
+      };
 
-      router.replace(`/rooms/${id}`);
+      const { listingId } = await createListingAPI("room", listingData, photos, user.uid);
+
+      router.replace(`/rooms/${listingId}`);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to post room");
+      if (e instanceof SpamLimitError) {
+        setError(e.message);
+      } else if (e instanceof ListingAPIError) {
+        setError(e.message);
+      } else {
+        setError(e instanceof Error ? e.message : "Failed to post room");
+      }
     } finally {
       setBusy(false);
     }
   }
 
   return (
-    <form
-      className="card mt-6 p-5"
-      onSubmit={form.handleSubmit(onSubmit)}
-    >
+    <div>
+      {/* Listing Limits Display */}
+      {listingLimits && (
+        <div className={`card mt-6 p-4 ${
+          listingLimits.canCreateMore 
+            ? 'border-blue-200 bg-blue-50' 
+            : 'border-red-200 bg-red-50'
+        }`}>
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className={`text-sm font-medium ${
+                listingLimits.canCreateMore ? 'text-blue-800' : 'text-red-800'
+              }`}>
+                Daily Listing Limit
+              </h3>
+              <p className={`text-xs mt-1 ${
+                listingLimits.canCreateMore ? 'text-blue-600' : 'text-red-600'
+              }`}>
+                {listingLimits.canCreateMore 
+                  ? `You can post ${listingLimits.remainingListings} more listing${listingLimits.remainingListings !== 1 ? 's' : ''} today.`
+                  : `You've reached your daily limit of ${listingLimits.dailyLimit} listings. Try again tomorrow!`
+                }
+              </p>
+            </div>
+            <div className={`text-2xl font-bold ${
+              listingLimits.canCreateMore ? 'text-blue-600' : 'text-red-600'
+            }`}>
+              {listingLimits.currentCount}/{listingLimits.dailyLimit}
+            </div>
+          </div>
+        </div>
+      )}
+
+      <form
+        className="card mt-6 p-5"
+        onSubmit={form.handleSubmit(onSubmit)}
+      >
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="sm:col-span-2">
           <label className="text-sm font-medium">Title</label>
@@ -273,9 +326,13 @@ export default function RoomPostForm() {
 
       {error ? <p className="mt-4 text-sm text-red-600">{error}</p> : null}
 
-      <button className="btn btn-primary mt-5 w-full" disabled={busy}>
-        {busy ? "Posting…" : "Post room"}
+      <button 
+        className="btn btn-primary mt-5 w-full" 
+        disabled={busy || (listingLimits ? !listingLimits.canCreateMore : false)}
+      >
+        {busy ? "Posting…" : listingLimits && !listingLimits.canCreateMore ? "Daily Limit Reached" : "Post room"}
       </button>
     </form>
+    </div>
   );
 }

@@ -1,12 +1,18 @@
-import { addDoc, deleteDoc, getDoc, updateDoc } from "firebase/firestore";
-import { serverTimestamp } from "@/lib/firebase/db";
-import { itemRef, itemsRef, roomRef, roomsRef } from "@/lib/firebase/refs";
-import type { ItemListing, RoomListing } from "@/lib/firebase/models";
+import { addDoc, deleteDoc, doc, getDoc, serverTimestamp, updateDoc } from "firebase/firestore";
+import { itemsRef, itemRef, roomRef, roomsRef } from "./refs";
+import type { ItemListing, RoomListing } from "./models";
+import { logAdminAction } from "./admin-logs";
+import { validateListingCreation } from "./anti-spam";
 import { uploadImageToCloudinary } from "@/lib/cloudinary/client";
 
-export async function createRoom(input: Omit<RoomListing, "createdAt" | "updatedAt">, photos: File[]) {
+export async function createRoom(input: Omit<RoomListing, "createdAt" | "updatedAt" | "status" | "approved">, photos: File[]) {
+  // Validate user hasn't exceeded daily listing limit
+  await validateListingCreation(input.createdBy);
+
   const docRef = await addDoc(roomsRef(), {
     ...input,
+    status: "pending",
+    approved: false,
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   });
@@ -18,9 +24,14 @@ export async function createRoom(input: Omit<RoomListing, "createdAt" | "updated
   return docRef.id;
 }
 
-export async function createItem(input: Omit<ItemListing, "createdAt" | "updatedAt">, photos: File[]) {
+export async function createItem(input: Omit<ItemListing, "createdAt" | "updatedAt" | "status" | "approved">, photos: File[]) {
+  // Validate user hasn't exceeded daily listing limit
+  await validateListingCreation(input.createdBy);
+
   const docRef = await addDoc(itemsRef(), {
     ...input,
+    status: "pending",
+    approved: false,
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   });
@@ -34,7 +45,7 @@ export async function createItem(input: Omit<ItemListing, "createdAt" | "updated
 
 export async function updateRoom(
   id: string,
-  input: Partial<Omit<RoomListing, "createdAt" | "updatedAt" | "createdBy" | "type">>,
+  input: Partial<Omit<RoomListing, "createdAt" | "updatedAt" | "createdBy" | "type" | "status" | "approved">>,
   opts?: { newPhotos?: File[]; replacePhotos?: boolean },
 ) {
   const next: Record<string, unknown> = { ...input, updatedAt: serverTimestamp() };
@@ -54,7 +65,7 @@ export async function updateRoom(
 
 export async function updateItem(
   id: string,
-  input: Partial<Omit<ItemListing, "createdAt" | "updatedAt" | "createdBy" | "type">>,
+  input: Partial<Omit<ItemListing, "createdAt" | "updatedAt" | "createdBy" | "type" | "status" | "approved">>,
   opts?: { newPhotos?: File[]; replacePhotos?: boolean },
 ) {
   const next: Record<string, unknown> = { ...input, updatedAt: serverTimestamp() };
@@ -103,6 +114,159 @@ export async function deleteRoom(id: string) {
 
 export async function deleteItem(id: string) {
   await deleteDoc(itemRef(id));
+}
+
+// Moderation functions
+export async function approveRoom(id: string, approvedBy: string, adminEmail: string) {
+  // Get room details for logging
+  const roomDoc = await getDoc(roomRef(id));
+  const roomData = roomDoc.data() as RoomListing;
+  
+  await updateDoc(roomRef(id), { 
+    status: "approved", 
+    approved: true, 
+    approvedAt: serverTimestamp(),
+    approvedBy,
+    updatedAt: serverTimestamp() 
+  });
+  
+  // Log admin action
+  await logAdminAction({
+    adminId: approvedBy,
+    adminEmail,
+    action: "approve",
+    targetType: "room",
+    targetId: id,
+    targetTitle: roomData?.title,
+  });
+}
+
+export async function rejectRoom(id: string, rejectedBy: string, adminEmail: string, reason?: string) {
+  // Get room details for logging
+  const roomDoc = await getDoc(roomRef(id));
+  const roomData = roomDoc.data() as RoomListing;
+  
+  await updateDoc(roomRef(id), { 
+    status: "rejected", 
+    approved: false,
+    rejectedAt: serverTimestamp(),
+    rejectedBy,
+    rejectionReason: reason,
+    updatedAt: serverTimestamp() 
+  });
+  
+  // Log admin action
+  await logAdminAction({
+    adminId: rejectedBy,
+    adminEmail,
+    action: "reject",
+    targetType: "room",
+    targetId: id,
+    targetTitle: roomData?.title,
+    reason,
+  });
+}
+
+export async function softDeleteRoom(id: string, deletedBy: string, adminEmail: string, reason?: string) {
+  // Get room details for logging
+  const roomDoc = await getDoc(roomRef(id));
+  const roomData = roomDoc.data() as RoomListing;
+  
+  await updateDoc(roomRef(id), { 
+    status: "deleted", 
+    approved: false,
+    deletedAt: serverTimestamp(),
+    deletedBy,
+    deletionReason: reason,
+    updatedAt: serverTimestamp() 
+  });
+  
+  // Log admin action
+  await logAdminAction({
+    adminId: deletedBy,
+    adminEmail,
+    action: "soft_delete",
+    targetType: "room",
+    targetId: id,
+    targetTitle: roomData?.title,
+    reason,
+  });
+}
+
+export async function approveItem(id: string, approvedBy: string, adminEmail: string) {
+  // Get item details for logging
+  const itemDoc = await getDoc(itemRef(id));
+  const itemData = itemDoc.data() as ItemListing;
+  
+  await updateDoc(itemRef(id), { 
+    status: "approved", 
+    approved: true, 
+    approvedAt: serverTimestamp(),
+    approvedBy,
+    updatedAt: serverTimestamp() 
+  });
+  
+  // Log admin action
+  await logAdminAction({
+    adminId: approvedBy,
+    adminEmail,
+    action: "approve",
+    targetType: "item",
+    targetId: id,
+    targetTitle: itemData?.title,
+  });
+}
+
+export async function rejectItem(id: string, rejectedBy: string, adminEmail: string, reason?: string) {
+  // Get item details for logging
+  const itemDoc = await getDoc(itemRef(id));
+  const itemData = itemDoc.data() as ItemListing;
+  
+  await updateDoc(itemRef(id), { 
+    status: "rejected", 
+    approved: false,
+    rejectedAt: serverTimestamp(),
+    rejectedBy,
+    rejectionReason: reason,
+    updatedAt: serverTimestamp() 
+  });
+  
+  // Log admin action
+  await logAdminAction({
+    adminId: rejectedBy,
+    adminEmail,
+    action: "reject",
+    targetType: "item",
+    targetId: id,
+    targetTitle: itemData?.title,
+    reason,
+  });
+}
+
+export async function softDeleteItem(id: string, deletedBy: string, adminEmail: string, reason?: string) {
+  // Get item details for logging
+  const itemDoc = await getDoc(itemRef(id));
+  const itemData = itemDoc.data() as ItemListing;
+  
+  await updateDoc(itemRef(id), { 
+    status: "deleted", 
+    approved: false,
+    deletedAt: serverTimestamp(),
+    deletedBy,
+    deletionReason: reason,
+    updatedAt: serverTimestamp() 
+  });
+  
+  // Log admin action
+  await logAdminAction({
+    adminId: deletedBy,
+    adminEmail,
+    action: "soft_delete",
+    targetType: "item",
+    targetId: id,
+    targetTitle: itemData?.title,
+    reason,
+  });
 }
 
 export async function setRoomApproved(id: string, approved: boolean) {

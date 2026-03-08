@@ -27,7 +27,9 @@ service cloud.firestore {
     }
 
     function listingReadable(resource) {
-      return resource.data.approved == true || isAdmin() || (isSignedIn() && resource.data.createdBy == request.auth.uid);
+      return (resource.data.approved == true && resource.data.status == "active") || 
+             isAdmin() || 
+             (isSignedIn() && resource.data.createdBy == request.auth.uid);
     }
 
     function listingCreatable() {
@@ -40,7 +42,8 @@ service cloud.firestore {
           && resource.data.createdBy == request.auth.uid
           && request.resource.data.createdBy == resource.data.createdBy
           && request.resource.data.createdAt == resource.data.createdAt
-          && request.resource.data.approved == resource.data.approved);
+          && request.resource.data.approved == resource.data.approved
+          && request.resource.data.status == resource.data.status);
     }
 
     match /rooms/{id} {
@@ -75,6 +78,13 @@ service cloud.firestore {
         && request.resource.data.createdBy == request.auth.uid
         && request.resource.data.status == "open";
       allow update: if isAdmin();
+      allow delete: if false;
+    }
+
+    match /admin_logs/{id} {
+      allow read: if isAdmin();
+      allow create: if isAdmin();
+      allow update: if false;
       allow delete: if false;
     }
   }

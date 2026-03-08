@@ -49,6 +49,11 @@ export function RoomCard({ id, listing }: { id: string; listing: RoomListing }) 
         ) : null}
         <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/60 via-black/25 to-transparent" />
         <div className="absolute left-3 top-3 flex flex-wrap gap-2">
+          {listing.approved ? (
+            <span className="rounded-full bg-blue-500/90 px-2.5 py-1 text-xs font-semibold text-white shadow-sm ring-1 ring-white/20">
+              Verified
+            </span>
+          ) : null}
           {isNew(listing.createdAt) ? (
             <span className="rounded-full bg-emerald-500/90 px-2.5 py-1 text-xs font-semibold text-white shadow-sm ring-1 ring-white/20">
               New
@@ -174,6 +179,11 @@ export function ItemCard({ id, listing }: { id: string; listing: ItemListing }) 
         ) : null}
         <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/60 via-black/25 to-transparent" />
         <div className="absolute left-3 top-3 flex flex-wrap gap-2">
+          {listing.approved ? (
+            <span className="rounded-full bg-blue-500/90 px-2.5 py-1 text-xs font-semibold text-white shadow-sm ring-1 ring-white/20">
+              Verified
+            </span>
+          ) : null}
           {isNew(listing.createdAt) ? (
             <span className="rounded-full bg-emerald-500/90 px-2.5 py-1 text-xs font-semibold text-white shadow-sm ring-1 ring-white/20">
               New

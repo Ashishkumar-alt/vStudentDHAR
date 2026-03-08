@@ -60,3 +60,11 @@ export function adminsRef() {
 export function adminRef(uid: string) {
   return doc(getDb(), "admins", uid);
 }
+
+export function adminLogsRef() {
+  return collection(getDb(), "admin_logs");
+}
+
+export function adminLogRef(id: string) {
+  return doc(getDb(), "admin_logs", id);
+}

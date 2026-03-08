@@ -1,6 +1,21 @@
 import type { Timestamp } from "firebase/firestore";
 
-export type ListingStatus = "active" | "sold";
+export type ListingStatus = "pending" | "approved" | "rejected" | "active" | "sold" | "deleted";
+
+export type AdminLogAction = "approve" | "reject" | "delete" | "soft_delete" | "view";
+
+export type AdminLog = {
+  adminId: string;
+  adminEmail: string;
+  action: AdminLogAction;
+  targetType: "room" | "item" | "report" | "user";
+  targetId: string;
+  targetTitle?: string;
+  reason?: string;
+  timestamp: Timestamp;
+  ipAddress?: string;
+  userAgent?: string;
+};
 
 export type RoomListing = {
   type: "room";

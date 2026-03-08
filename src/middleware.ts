@@ -15,19 +15,40 @@ function shouldBypassMaintenance(request: NextRequest): boolean {
   return isLocalhost || devAccess;
 }
 
+// Admin routes that require protection
+const ADMIN_ROUTES = [
+  "/admin",
+  "/admin/",
+  "/admin/listings",
+  "/admin/users",
+  "/admin/reports",
+  "/admin/settings",
+  "/admin/logs"
+];
+
+function isAdminRoute(pathname: string): boolean {
+  return ADMIN_ROUTES.some(route => pathname.startsWith(route));
+}
+
 export function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
   // Skip middleware for maintenance page to avoid infinite loop
-  if (request.nextUrl.pathname.startsWith("/maintenance")) {
+  if (pathname.startsWith("/maintenance")) {
     return NextResponse.next();
   }
 
-  // Skip middleware for static assets and API routes
+  // Skip middleware for static assets and API routes (except admin API)
   if (
-    request.nextUrl.pathname.startsWith("/_next") ||
-    request.nextUrl.pathname.startsWith("/api") ||
-    request.nextUrl.pathname.startsWith("/favicon.ico") ||
-    request.nextUrl.pathname.startsWith("/manifest.webmanifest")
+    pathname.startsWith("/_next") ||
+    pathname.startsWith("/favicon.ico") ||
+    pathname.startsWith("/manifest.webmanifest")
   ) {
+    return NextResponse.next();
+  }
+
+  // Allow API routes to continue (they handle their own auth)
+  if (pathname.startsWith("/api")) {
     return NextResponse.next();
   }
 
@@ -40,6 +61,12 @@ export function middleware(request: NextRequest) {
   if (MAINTENANCE_MODE) {
     const maintenanceUrl = new URL("/maintenance", request.url);
     return NextResponse.redirect(maintenanceUrl);
+  }
+
+  // For admin routes, we'll let the client-side authentication handle it
+  // The RequireAuth component will handle redirecting non-admin users
+  if (isAdminRoute(pathname)) {
+    return NextResponse.next();
   }
 
   // Otherwise, continue normally

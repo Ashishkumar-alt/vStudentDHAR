@@ -7,26 +7,49 @@ import RequireAuth from "@/components/auth/RequireAuth";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { DEFAULT_CITY_ID } from "@/lib/constants";
 import type { ItemListing, Report, RoomListing } from "@/lib/firebase/models";
-import { itemsRef, reportsRef, roomsRef } from "@/lib/firebase/refs";
-import { deleteItem, deleteRoom, setItemApproved, setRoomApproved } from "@/lib/firebase/listings";
+import { itemsRef, reportsRef, roomsRef, userRef } from "@/lib/firebase/refs";
+import { deleteItem, deleteRoom } from "@/lib/firebase/listings";
 import { watchIsAdmin } from "@/lib/firebase/admin";
 import { setReportStatus } from "@/lib/firebase/reports";
 import { itemSlug, roomSlug } from "@/lib/seo/slug";
+import { CheckCircle, XCircle, Trash2, Shield, Home, Package, Clock, Mail, Calendar } from "lucide-react";
+import { getDoc } from "firebase/firestore";
+
+// Helper function to get user email
+async function getUserEmail(userId: string): Promise<string> {
+  try {
+    const userDoc = await getDoc(userRef(userId));
+    const userData = userDoc.data();
+    return userData?.email || "Unknown";
+  } catch {
+    return "Unknown";
+  }
+}
+
+// Helper function to format date
+function formatDate(timestamp: any): string {
+  if (!timestamp) return "Unknown";
+  const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+  return date.toLocaleDateString() + " " + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
 
 function Row({
   title,
   subtitle,
+  details,
   actions,
 }: {
   title: React.ReactNode;
   subtitle: React.ReactNode;
+  details?: React.ReactNode;
   actions: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col gap-2 border-b border-zinc-100 p-4 sm:flex-row sm:items-center">
-      <div className="min-w-0 flex-1">
+    <div className="flex items-center justify-between gap-4 border-b border-[color:var(--border)] p-4 last:border-b-0 hover:bg-[color:var(--muted)]/50 transition-colors">
+      <div className="flex-1 min-w-0">
         <div className="truncate text-sm font-medium">{title}</div>
         <div className="mt-1 truncate text-xs text-zinc-600">{subtitle}</div>
+        {details && <div className="mt-1 text-xs text-zinc-500">{details}</div>}
       </div>
       <div className="flex items-center gap-2">{actions}</div>
     </div>
@@ -35,13 +58,32 @@ function Row({
 
 export default function AdminClient() {
   const { user } = useAuth();
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [adminLoading, setAdminLoading] = useState(true);
   const [rooms, setRooms] = useState<{ id: string; data: RoomListing }[]>([]);
   const [items, setItems] = useState<{ id: string; data: ItemListing }[]>([]);
   const [reports, setReports] = useState<{ id: string; data: Report }[]>([]);
-  const [error, setError] = useState<string | null>(null);
   const [busyKey, setBusyKey] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [adminLoading, setAdminLoading] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  // Helper function for moderation API calls
+  async function callModerationAPI(action: string, type: string, id: string, reason?: string) {
+    const response = await fetch('/api/admin/moderate', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${user?.uid}`, // In production, use proper token
+      },
+      body: JSON.stringify({ action, type, id, reason }),
+    });
+    
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Moderation action failed');
+    }
+    
+    return response.json();
+  }
 
   useEffect(() => {
     if (!user) return;
@@ -61,17 +103,16 @@ export default function AdminClient() {
     if (!user || !isAdmin) return;
     setError(null);
 
+    // Show ALL listings (not just pending)
     const qRooms = query(
       roomsRef(),
       where("cityId", "==", DEFAULT_CITY_ID),
-      where("approved", "==", false),
       orderBy("createdAt", "desc"),
       limit(50),
     );
     const qItems = query(
       itemsRef(),
       where("cityId", "==", DEFAULT_CITY_ID),
-      where("approved", "==", false),
       orderBy("createdAt", "desc"),
       limit(50),
     );
@@ -120,8 +161,51 @@ export default function AdminClient() {
 
   return (
     <main className="mx-auto w-full max-w-screen-2xl px-4 py-8">
-      <h1 className="text-2xl font-semibold">Admin</h1>
-      <p className="mt-1 text-sm text-zinc-600">Approve/delete listings and review reports.</p>
+      {/* Header with Stats */}
+      <div className="mb-8">
+        <h1 className="text-2xl font-semibold flex items-center gap-2">
+          <Shield className="h-8 w-8 text-blue-600" />
+          Admin Dashboard
+        </h1>
+        <p className="mt-1 text-sm text-zinc-600">Approve/delete listings and review reports.</p>
+        
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-center">
+              <div className="flex-shrink-0 bg-blue-100 rounded-lg p-3">
+                <Home className="h-6 w-6 text-blue-600" />
+              </div>
+              <div className="ml-4">
+                <p className="text-2xl font-bold text-gray-900">{rooms.length}</p>
+                <p className="text-sm text-gray-500">Pending Rooms</p>
+              </div>
+            </div>
+          </div>
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-center">
+              <div className="flex-shrink-0 bg-green-100 rounded-lg p-3">
+                <Package className="h-6 w-6 text-green-600" />
+              </div>
+              <div className="ml-4">
+                <p className="text-2xl font-bold text-gray-900">{items.length}</p>
+                <p className="text-sm text-gray-500">Pending Items</p>
+              </div>
+            </div>
+          </div>
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-center">
+              <div className="flex-shrink-0 bg-yellow-100 rounded-lg p-3">
+                <Clock className="h-6 w-6 text-yellow-600" />
+              </div>
+              <div className="ml-4">
+                <p className="text-2xl font-bold text-gray-900">{openReports.length}</p>
+                <p className="text-sm text-gray-500">Open Reports</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <RequireAuth>
         {cannot ? (
@@ -135,7 +219,7 @@ export default function AdminClient() {
             ) : null}
 
             <section className="mt-8">
-              <h2 className="text-sm font-semibold">Pending rooms</h2>
+              <h2 className="text-sm font-semibold">All Rooms</h2>
               <div className="card mt-3 overflow-hidden">
                 {rooms.length ? (
                   rooms.map(({ id, data }) => (
@@ -143,24 +227,71 @@ export default function AdminClient() {
                       key={id}
                       title={
                         <Link href={`/rooms/${id}/${roomSlug({ title: data.title, area: data.area, genderAllowed: data.genderAllowed, rent: data.rent })}`}>
-                          {data.title}
+                          <div className="flex items-center gap-2">
+                            {data.photoUrls?.[0] && (
+                              <img
+                                src={data.photoUrls[0]}
+                                alt={data.title}
+                                className="h-12 w-12 rounded-lg object-cover"
+                              />
+                            )}
+                            <div>
+                              {data.title}
+                              <div className="text-xs font-medium" style={{
+                                color: data.status === 'approved' ? '#10b981' : 
+                                       data.status === 'rejected' ? '#ef4444' : 
+                                       data.status === 'sold' ? '#6b7280' : '#f59e0b'
+                              }}>
+                                {data.status === 'approved' ? 'Approved' : 
+                                 data.status === 'rejected' ? 'Rejected' : 
+                                 data.status === 'sold' ? 'Sold' : 
+                                 data.status === 'active' ? 'Active' : 'Pending'}
+                              </div>
+                            </div>
+                          </div>
                         </Link>
                       }
                       subtitle={`${data.area} · ${data.genderAllowed} · rent ₹${data.rent}`}
+                      details={
+                        <div className="flex items-center gap-4 text-xs">
+                          <span className="flex items-center gap-1">
+                            <Mail className="h-3 w-3" />
+                            Owner: {data.createdBy ? "Loading..." : "Unknown"}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Calendar className="h-3 w-3" />
+                            Created: {formatDate(data.createdAt)}
+                          </span>
+                        </div>
+                      }
                       actions={
                         <>
                           <button
-                            className="btn h-9 px-4 text-sm"
+                            className="btn h-9 px-4 text-sm bg-green-600 text-white hover:bg-green-700 flex items-center gap-1"
                             disabled={busyKey === `room:${id}`}
-                            onClick={() => act(`room:${id}`, () => setRoomApproved(id, true))}
+                            onClick={() => act(`room:${id}`, () => callModerationAPI('approve', 'room', id))}
                           >
+                            <CheckCircle className="h-4 w-4" />
                             Approve
                           </button>
                           <button
-                            className="btn h-9 px-4 text-sm"
+                            className="btn h-9 px-4 text-sm bg-red-600 text-white hover:bg-red-700 flex items-center gap-1"
                             disabled={busyKey === `room:${id}`}
-                            onClick={() => act(`room:${id}`, () => deleteRoom(id))}
+                            onClick={() => act(`room:${id}`, () => callModerationAPI('reject', 'room', id))}
                           >
+                            <XCircle className="h-4 w-4" />
+                            Reject
+                          </button>
+                          <button
+                            className="btn h-9 px-4 text-sm bg-red-600 text-white hover:bg-red-700 flex items-center gap-1"
+                            disabled={busyKey === `room:${id}`}
+                            onClick={() => {
+                              if (confirm('Are you sure you want to delete this listing? This action cannot be undone.')) {
+                                act(`room:${id}`, () => callModerationAPI('delete', 'room', id));
+                              }
+                            }}
+                          >
+                            <Trash2 className="h-4 w-4" />
                             Delete
                           </button>
                         </>
@@ -168,13 +299,13 @@ export default function AdminClient() {
                     />
                   ))
                 ) : (
-                  <div className="p-4 text-sm text-zinc-600">No pending rooms.</div>
+                  <div className="p-4 text-sm text-zinc-600">No rooms found.</div>
                 )}
               </div>
             </section>
 
             <section className="mt-8">
-              <h2 className="text-sm font-semibold">Pending items</h2>
+              <h2 className="text-sm font-semibold">All Items</h2>
               <div className="card mt-3 overflow-hidden">
                 {items.length ? (
                   items.map(({ id, data }) => (
@@ -182,24 +313,71 @@ export default function AdminClient() {
                       key={id}
                       title={
                         <Link href={`/items/${id}/${itemSlug({ title: data.title, category: data.category, area: data.area, price: data.price })}`}>
-                          {data.title}
+                          <div className="flex items-center gap-2">
+                            {data.photoUrls?.[0] && (
+                              <img
+                                src={data.photoUrls[0]}
+                                alt={data.title}
+                                className="h-12 w-12 rounded-lg object-cover"
+                              />
+                            )}
+                            <div>
+                              {data.title}
+                              <div className="text-xs font-medium" style={{
+                                color: data.status === 'approved' ? '#10b981' : 
+                                       data.status === 'rejected' ? '#ef4444' : 
+                                       data.status === 'sold' ? '#6b7280' : '#f59e0b'
+                              }}>
+                                {data.status === 'approved' ? 'Approved' : 
+                                 data.status === 'rejected' ? 'Rejected' : 
+                                 data.status === 'sold' ? 'Sold' : 
+                                 data.status === 'active' ? 'Active' : 'Pending'}
+                              </div>
+                            </div>
+                          </div>
                         </Link>
                       }
                       subtitle={`${data.category} · ${data.area} · price ₹${data.price}`}
+                      details={
+                        <div className="flex items-center gap-4 text-xs">
+                          <span className="flex items-center gap-1">
+                            <Mail className="h-3 w-3" />
+                            Owner: {data.createdBy ? "Loading..." : "Unknown"}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Calendar className="h-3 w-3" />
+                            Created: {formatDate(data.createdAt)}
+                          </span>
+                        </div>
+                      }
                       actions={
                         <>
                           <button
-                            className="btn h-9 px-4 text-sm"
+                            className="btn h-9 px-4 text-sm bg-green-600 text-white hover:bg-green-700 flex items-center gap-1"
                             disabled={busyKey === `item:${id}`}
-                            onClick={() => act(`item:${id}`, () => setItemApproved(id, true))}
+                            onClick={() => act(`item:${id}`, () => callModerationAPI('approve', 'item', id))}
                           >
+                            <CheckCircle className="h-4 w-4" />
                             Approve
                           </button>
                           <button
-                            className="btn h-9 px-4 text-sm"
+                            className="btn h-9 px-4 text-sm bg-red-600 text-white hover:bg-red-700 flex items-center gap-1"
                             disabled={busyKey === `item:${id}`}
-                            onClick={() => act(`item:${id}`, () => deleteItem(id))}
+                            onClick={() => act(`item:${id}`, () => callModerationAPI('reject', 'item', id))}
                           >
+                            <XCircle className="h-4 w-4" />
+                            Reject
+                          </button>
+                          <button
+                            className="btn h-9 px-4 text-sm bg-red-600 text-white hover:bg-red-700 flex items-center gap-1"
+                            disabled={busyKey === `item:${id}`}
+                            onClick={() => {
+                              if (confirm('Are you sure you want to delete this listing? This action cannot be undone.')) {
+                                act(`item:${id}`, () => callModerationAPI('delete', 'item', id));
+                              }
+                            }}
+                          >
+                            <Trash2 className="h-4 w-4" />
                             Delete
                           </button>
                         </>
@@ -207,7 +385,7 @@ export default function AdminClient() {
                     />
                   ))
                 ) : (
-                  <div className="p-4 text-sm text-zinc-600">No pending items.</div>
+                  <div className="p-4 text-sm text-zinc-600">No items found.</div>
                 )}
               </div>
             </section>
@@ -250,6 +428,27 @@ export default function AdminClient() {
                             }
                           >
                             Ignore
+                          </button>
+                          <button
+                            className="btn h-9 px-4 text-sm bg-red-600 text-white hover:bg-red-700 flex items-center gap-1"
+                            disabled={busyKey === `report:${id}`}
+                            onClick={() => {
+                              if (confirm(`Are you sure you want to delete this ${data.listingType}? This action cannot be undone.`)) {
+                                act(`report:${id}`, async () => {
+                                  // Delete the actual listing that was reported
+                                  if (data.listingType === 'room') {
+                                    await deleteRoom(data.listingId);
+                                  } else if (data.listingType === 'item') {
+                                    await deleteItem(data.listingId);
+                                  }
+                                  // Also resolve the report
+                                  await setReportStatus(id, { status: "resolved", resolvedBy: user!.uid });
+                                });
+                              }
+                            }}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                            Delete Listing
                           </button>
                         </>
                       }
