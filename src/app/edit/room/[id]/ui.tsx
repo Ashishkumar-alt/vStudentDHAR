@@ -9,7 +9,7 @@ import { useForm } from "react-hook-form";
 import RequireProfile from "@/components/auth/RequireProfile";
 import { useAuth } from "@/components/auth/AuthProvider";
 import PhotoPicker from "@/components/post/PhotoPicker";
-import LocationPicker from "@/components/ui/LocationPicker";
+import LocationPickerWithSearch from "@/components/ui/LocationPickerWithSearch";
 import { getRoom, updateRoom } from "@/lib/firebase/listings";
 import type { RoomListing } from "@/lib/firebase/models";
 import { DHARAMSHALA_AREAS, PRIMARY_INSTITUTION_SHORT, ROOM_GENDER_ALLOWED } from "@/lib/constants";
@@ -241,12 +241,12 @@ export default function EditRoomClient() {
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label className="text-sm font-medium">Room Location (Click on map to update exact location)</label>
+                  <label className="text-sm font-medium">Room Location (Search or click on map to update exact location)</label>
                   <div className="mt-2">
-                    <LocationPicker
+                    <LocationPickerWithSearch
                       latitude={selectedLatitude}
                       longitude={selectedLongitude}
-                      onLocationChange={(lat, lng) => {
+                      onLocationChange={(lat: number, lng: number) => {
                         setSelectedLatitude(lat);
                         setSelectedLongitude(lng);
                       }}

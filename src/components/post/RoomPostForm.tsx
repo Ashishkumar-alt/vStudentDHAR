@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useAuth } from "@/components/auth/AuthProvider";
 import PhotoPicker from "./PhotoPicker";
-import LocationPicker from "@/components/ui/LocationPicker";
+import LocationPickerWithSearch from "@/components/ui/LocationPickerWithSearch";
 import { createRoom } from "@/lib/firebase/listings";
 import { DEFAULT_CITY_ID, DHARAMSHALA_AREAS, PRIMARY_INSTITUTION_SHORT, REQUIRE_APPROVAL, ROOM_GENDER_ALLOWED } from "@/lib/constants";
 
@@ -194,12 +194,12 @@ export default function RoomPostForm() {
         </div>
 
         <div className="sm:col-span-2">
-          <label className="text-sm font-medium">Room Location (Click on map to set exact location)</label>
+          <label className="text-sm font-medium">Room Location (Search or click on map to set exact location)</label>
           <div className="mt-2">
-            <LocationPicker
+            <LocationPickerWithSearch
               latitude={selectedLatitude}
               longitude={selectedLongitude}
-              onLocationChange={(lat, lng) => {
+              onLocationChange={(lat: number, lng: number) => {
                 setSelectedLatitude(lat);
                 setSelectedLongitude(lng);
               }}
