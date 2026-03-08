@@ -9,6 +9,7 @@ import { CONTACT_EMAIL, DEFAULT_CITY_LABEL } from "@/lib/constants";
 import { Home, House, ShoppingBag, Plus, User, Shield, Menu, X, Heart } from "lucide-react";
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "@/components/theme/ThemeProvider";
+import { watchIsAdmin } from "@/lib/firebase/admin";
 
 function NavPill({
   href,
@@ -43,11 +44,27 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [logoSrc, setLogoSrc] = useState<string>("/logo.png");
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     // Close the mobile menu on route change (lint rule disallows setState directly in effects here).
     setTimeout(() => setMobileMenuOpen(false), 0);
   }, [pathname]);
+
+  useEffect(() => {
+    if (!user) {
+      setIsAdmin(false);
+      return;
+    }
+
+    const unsubscribe = watchIsAdmin(
+      user.uid,
+      (admin) => setIsAdmin(admin),
+      () => setIsAdmin(false)
+    );
+
+    return unsubscribe;
+  }, [user]);
 
   return (
     <div className="min-h-dvh bg-transparent">
@@ -117,11 +134,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                         {theme === "dark" ? "Light mode" : "Dark mode"}
                       </button>
                       <MenuLink href="/about" label="About" icon={<User className="h-4 w-4" />} />
-                      <MenuLink href="/post" label="Post" icon={<Plus className="h-4 w-4" />} />
                       <MenuLink href="/saved" label="Saved" icon={<Heart className="h-4 w-4" />} />
                       <MenuLink href="/my-listings" label="My Listings" icon={<House className="h-4 w-4" />} />
-                      <MenuLink href="/profile" label="Profile" icon={<User className="h-4 w-4" />} />
-                      <MenuLink href="/admin" label="Admin" icon={<Shield className="h-4 w-4" />} />
+                      {isAdmin && <MenuLink href="/admin" label="Admin" icon={<Shield className="h-4 w-4" />} />}
                       <button
                         type="button"
                         className="focus-ring flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-[color:var(--foreground)] transition hover:bg-[color:color-mix(in srgb, var(--card) 82%, transparent)]"
@@ -175,10 +190,12 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                   <User className="mr-2 h-4 w-4" />
                   Profile
                 </Link>
-                <Link className="btn h-9 px-4 text-sm" href="/admin">
-                  <Shield className="mr-2 h-4 w-4" />
-                  Admin
-                </Link>
+                {isAdmin && (
+                  <Link className="btn h-9 px-4 text-sm" href="/admin">
+                    <Shield className="mr-2 h-4 w-4" />
+                    Admin
+                  </Link>
+                )}
                 <button className="btn h-9 px-4 text-sm" onClick={signOutNow}>
                   Sign out
                 </button>
