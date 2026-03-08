@@ -12,6 +12,8 @@ export type RoomListing = {
   deposit: number;
   area: string;
   address: string;
+  latitude?: number;
+  longitude?: number;
   genderAllowed: "Any" | "Boys" | "Girls";
   vegOnly?: boolean;
   attachedBathroom: boolean;

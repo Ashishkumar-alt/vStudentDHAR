@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useAuth } from "@/components/auth/AuthProvider";
 import PhotoPicker from "./PhotoPicker";
+import LocationPicker from "@/components/ui/LocationPicker";
 import { createRoom } from "@/lib/firebase/listings";
 import { DEFAULT_CITY_ID, DHARAMSHALA_AREAS, PRIMARY_INSTITUTION_SHORT, REQUIRE_APPROVAL, ROOM_GENDER_ALLOWED } from "@/lib/constants";
 
@@ -22,6 +23,8 @@ const schema = z.object({
     .refine((v) => Number.isFinite(Number(v)) && Number(v) >= 0, "Enter valid deposit"),
   area: z.string().min(2),
   address: z.string().min(5),
+  latitude: z.number().optional(),
+  longitude: z.number().optional(),
   genderAllowed: z.enum(["Any", "Boys", "Girls"]),
   vegOnly: z.boolean(),
   attachedBathroom: z.boolean(),
@@ -49,6 +52,8 @@ export default function RoomPostForm() {
   const [photos, setPhotos] = useState<File[]>([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [selectedLatitude, setSelectedLatitude] = useState<number | undefined>();
+  const [selectedLongitude, setSelectedLongitude] = useState<number | undefined>();
 
   const defaults = useMemo<FormValues>(
     () => ({
@@ -57,6 +62,8 @@ export default function RoomPostForm() {
       deposit: "",
       area: DHARAMSHALA_AREAS[0],
       address: "",
+      latitude: undefined,
+      longitude: undefined,
       genderAllowed: "Any",
       vegOnly: false,
       attachedBathroom: false,
@@ -101,6 +108,8 @@ export default function RoomPostForm() {
           deposit: Number(values.deposit),
           area: values.area.trim(),
           address: values.address.trim(),
+          latitude: selectedLatitude,
+          longitude: selectedLongitude,
           genderAllowed: values.genderAllowed,
           vegOnly: values.vegOnly,
           attachedBathroom: values.attachedBathroom,
@@ -182,6 +191,20 @@ export default function RoomPostForm() {
         <div className="sm:col-span-2">
           <label className="text-sm font-medium">Address</label>
           <input className="input mt-2" {...form.register("address")} />
+        </div>
+
+        <div className="sm:col-span-2">
+          <label className="text-sm font-medium">Room Location (Click on map to set exact location)</label>
+          <div className="mt-2">
+            <LocationPicker
+              latitude={selectedLatitude}
+              longitude={selectedLongitude}
+              onLocationChange={(lat, lng) => {
+                setSelectedLatitude(lat);
+                setSelectedLongitude(lng);
+              }}
+            />
+          </div>
         </div>
 
         <label className="flex items-center gap-2 text-sm">

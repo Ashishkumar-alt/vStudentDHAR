@@ -13,6 +13,7 @@ import { PRIMARY_INSTITUTION_SHORT } from "@/lib/constants";
 import FavoriteButton from "@/components/favorites/FavoriteButton";
 import { recordRoomView } from "@/lib/firebase/views";
 import SafetyNotice from "@/components/listings/SafetyNotice";
+import LocationDisplay from "@/components/ui/LocationDisplay";
 
 export default function RoomDetailsClient() {
   const params = useParams<{ id: string; slug?: string }>();
@@ -179,6 +180,22 @@ export default function RoomDetailsClient() {
               <p className="mt-4 whitespace-pre-wrap text-sm text-zinc-600">{listing.description}</p>
             ) : null}
           </section>
+
+          {/* Room Location Map */}
+          {listing.latitude && listing.longitude && (
+            <section className="card mt-4 p-5">
+              <h2 className="text-sm font-semibold mb-4">Room Location</h2>
+              <LocationDisplay
+                latitude={listing.latitude}
+                longitude={listing.longitude}
+                title={listing.title}
+              />
+              <div className="mt-3 text-xs text-zinc-600">
+                <p>Address: {listing.address}</p>
+                <p className="mt-1">Area: {listing.area}</p>
+              </div>
+            </section>
+          )}
         </div>
 
         <aside className="space-y-4">
