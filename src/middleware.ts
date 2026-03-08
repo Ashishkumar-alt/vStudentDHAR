@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-// Maintenance mode flag - set to true to enable maintenance mode
-const MAINTENANCE_MODE = true;
+// Maintenance mode controlled by environment variable
+const MAINTENANCE_MODE = process.env.NEXT_PUBLIC_MAINTENANCE_MODE === "true";
 
 // Developer access bypass conditions
 function shouldBypassMaintenance(request: NextRequest): boolean {
