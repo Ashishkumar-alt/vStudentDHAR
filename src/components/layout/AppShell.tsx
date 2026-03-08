@@ -46,6 +46,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const [logoSrc, setLogoSrc] = useState<string>("/logo.png");
   const [isAdmin, setIsAdmin] = useState(false);
 
+  // Hide navigation on maintenance page
+  const isMaintenancePage = pathname?.startsWith("/maintenance");
+
   useEffect(() => {
     // Close the mobile menu on route change (lint rule disallows setState directly in effects here).
     setTimeout(() => setMobileMenuOpen(false), 0);
@@ -68,7 +71,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-dvh bg-transparent">
-      <header className="app-header sticky top-0 z-20 border-b border-[color:var(--border)] backdrop-blur">
+      {/* Hide navigation on maintenance page */}
+      {!isMaintenancePage && (
+        <header className="app-header sticky top-0 z-20 border-b border-[color:var(--border)] backdrop-blur">
         <div className="mx-auto flex w-full max-w-screen-2xl items-center justify-between gap-3 px-4 py-3">
           <div className="flex items-center gap-3">
             <Link href="/" className="flex items-center gap-2 text-sm font-semibold tracking-tight">
@@ -218,17 +223,21 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           </div>
         </div>
       </header>
+      )}
 
       <div className="pb-16 sm:pb-0">{children}</div>
 
-      <nav className="app-bottom-nav fixed bottom-0 left-0 right-0 z-30 border-t border-[color:var(--border)] backdrop-blur sm:hidden">
-        <div className="mx-auto grid w-full max-w-screen-2xl grid-cols-4 gap-1 px-2 py-2">
-          <MobileTab href="/rooms" label="Rooms" icon="rooms" />
-          <MobileTab href="/items" label="Items" icon="items" />
-          <MobileTab href="/post" label="Post" icon="post" />
-          <MobileTab href="/profile" label="Me" icon="me" />
-        </div>
-      </nav>
+      {/* Hide bottom navigation on maintenance page */}
+      {!isMaintenancePage && (
+        <nav className="app-bottom-nav fixed bottom-0 left-0 right-0 z-30 border-t border-[color:var(--border)] backdrop-blur sm:hidden">
+          <div className="mx-auto grid w-full max-w-screen-2xl grid-cols-4 gap-1 px-2 py-2">
+            <MobileTab href="/rooms" label="Rooms" icon="rooms" />
+            <MobileTab href="/items" label="Items" icon="items" />
+            <MobileTab href="/post" label="Post" icon="post" />
+            <MobileTab href="/profile" label="Me" icon="me" />
+          </div>
+        </nav>
+      )}
 
       <footer className="mx-auto w-full max-w-screen-2xl px-4 pt-10 pb-24 text-center text-xs text-[color:var(--muted)] sm:py-10">
         <div className="flex flex-col items-center justify-center gap-2 sm:flex-row sm:gap-3">
