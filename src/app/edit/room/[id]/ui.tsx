@@ -9,6 +9,7 @@ import { useForm } from "react-hook-form";
 import RequireProfile from "@/components/auth/RequireProfile";
 import { useAuth } from "@/components/auth/AuthProvider";
 import PhotoPicker from "@/components/post/PhotoPicker";
+import LocationPicker from "@/components/ui/LocationPicker";
 import { getRoom, updateRoom } from "@/lib/firebase/listings";
 import type { RoomListing } from "@/lib/firebase/models";
 import { DHARAMSHALA_AREAS, PRIMARY_INSTITUTION_SHORT, ROOM_GENDER_ALLOWED } from "@/lib/constants";
@@ -51,6 +52,8 @@ export default function EditRoomClient() {
   const [photos, setPhotos] = useState<File[]>([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [selectedLatitude, setSelectedLatitude] = useState<number | undefined>();
+  const [selectedLongitude, setSelectedLongitude] = useState<number | undefined>();
 
   useEffect(() => {
     let alive = true;
@@ -72,6 +75,14 @@ export default function EditRoomClient() {
       alive = false;
     };
   }, [id]);
+
+  // Initialize coordinates when listing loads
+  useEffect(() => {
+    if (listing) {
+      setSelectedLatitude(listing.latitude);
+      setSelectedLongitude(listing.longitude);
+    }
+  }, [listing]);
 
   const defaults = useMemo<FormValues>(
     () => ({
@@ -123,6 +134,8 @@ export default function EditRoomClient() {
           deposit: Number(values.deposit),
           area: values.area.trim(),
           address: values.address.trim(),
+          latitude: selectedLatitude,
+          longitude: selectedLongitude,
           genderAllowed: values.genderAllowed,
           vegOnly: values.vegOnly,
           attachedBathroom: values.attachedBathroom,
@@ -225,6 +238,20 @@ export default function EditRoomClient() {
                 <div className="sm:col-span-2">
                   <label className="text-sm font-medium">Address</label>
                   <input className="input mt-2" {...form.register("address")} />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label className="text-sm font-medium">Room Location (Click on map to update exact location)</label>
+                  <div className="mt-2">
+                    <LocationPicker
+                      latitude={selectedLatitude}
+                      longitude={selectedLongitude}
+                      onLocationChange={(lat, lng) => {
+                        setSelectedLatitude(lat);
+                        setSelectedLongitude(lng);
+                      }}
+                    />
+                  </div>
                 </div>
 
                 <label className="flex items-center gap-2 text-sm">
