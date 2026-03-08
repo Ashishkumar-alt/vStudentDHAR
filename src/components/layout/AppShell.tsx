@@ -99,7 +99,6 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             <NavPill href="/" label="Home" icon={<Home className="h-4 w-4" />} />
             <NavPill href="/rooms" label="Rooms" icon={<House className="h-4 w-4" />} />
             <NavPill href="/items" label="Items" icon={<ShoppingBag className="h-4 w-4" />} />
-            <NavPill href="/about" label="About" icon={<User className="h-4 w-4" />} />
             <NavPill href="/saved" label="Saved" icon={<Heart className="h-4 w-4" />} />
             <NavPill href="/my-listings" label="My Listings" icon={<User className="h-4 w-4" />} />
           </nav>
@@ -138,7 +137,6 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                         </span>
                         {theme === "dark" ? "Light mode" : "Dark mode"}
                       </button>
-                      <MenuLink href="/about" label="About" icon={<User className="h-4 w-4" />} />
                       <MenuLink href="/saved" label="Saved" icon={<Heart className="h-4 w-4" />} />
                       <MenuLink href="/my-listings" label="My Listings" icon={<House className="h-4 w-4" />} />
                       {isAdmin && <MenuLink href="/admin" label="Admin" icon={<Shield className="h-4 w-4" />} />}
