@@ -7,7 +7,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useAuth } from "@/components/auth/AuthProvider";
 import PhotoPicker from "./PhotoPicker";
-import { createItem } from "@/lib/firebase/listings";
 import { createListingAPI, getListingLimits, ListingAPIError, ListingLimits } from "@/lib/api/listings";
 import { SpamLimitError } from "@/lib/firebase/anti-spam";
 import { DEFAULT_CITY_ID, DHARAMSHALA_AREAS, ITEM_CATEGORIES, ITEM_CONDITION, REQUIRE_APPROVAL } from "@/lib/constants";
@@ -83,7 +82,7 @@ export default function ItemPostForm() {
       if (photos.length > 4) throw new Error("Max 4 photos.");
 
       const listingData = {
-        type: "item",
+        type: "item" as const,
         cityId: DEFAULT_CITY_ID,
         institution: profile?.institution,
         createdByMemberSinceYear: profile?.createdAt?.toDate?.()?.getFullYear?.(),

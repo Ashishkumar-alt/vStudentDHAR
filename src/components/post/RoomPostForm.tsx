@@ -8,7 +8,6 @@ import { useForm } from "react-hook-form";
 import { useAuth } from "@/components/auth/AuthProvider";
 import PhotoPicker from "./PhotoPicker";
 import LocationPickerWithSearch from "@/components/ui/LocationPickerWithSearch";
-import { createRoom } from "@/lib/firebase/listings";
 import { createListingAPI, getListingLimits, ListingAPIError, ListingLimits } from "@/lib/api/listings";
 import { SpamLimitError } from "@/lib/firebase/anti-spam";
 import { DEFAULT_CITY_ID, DHARAMSHALA_AREAS, PRIMARY_INSTITUTION_SHORT, REQUIRE_APPROVAL, ROOM_GENDER_ALLOWED } from "@/lib/constants";
@@ -116,7 +115,7 @@ export default function RoomPostForm() {
       if (photos.length > 5) throw new Error("Max 5 photos.");
 
       const listingData = {
-        type: "room",
+        type: "room" as const,
         cityId: DEFAULT_CITY_ID,
         institution: profile?.institution,
         createdByMemberSinceYear: profile?.createdAt?.toDate?.()?.getFullYear?.(),

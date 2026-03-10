@@ -47,7 +47,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ];
 
-  // Dynamic listing URLs (only approved + active to avoid indexing thin/expired pages).
+  // Dynamic listing URLs (only active to avoid indexing thin/expired pages).
   // Uses Firestore public REST list endpoint. If your Firestore rules block public reads,
   // this will throw in production and should be replaced with a server-side data source.
   const maxPerCollection = 2000;
@@ -65,7 +65,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       for (const doc of res.docs) {
         const d = doc.data;
         if (!d) continue;
-        if ((d as unknown as { approved?: boolean }).approved !== true) continue;
         if ((d as unknown as { status?: string }).status !== "active") continue;
         const slug = roomSlug({ title: d.title, area: d.area, genderAllowed: d.genderAllowed, rent: d.rent });
         out.push({
@@ -95,7 +94,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       for (const doc of res.docs) {
         const d = doc.data;
         if (!d) continue;
-        if ((d as unknown as { approved?: boolean }).approved !== true) continue;
         if ((d as unknown as { status?: string }).status !== "active") continue;
         const slug = itemSlug({ title: d.title, category: d.category, area: d.area, price: d.price });
         out.push({

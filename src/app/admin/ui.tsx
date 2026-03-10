@@ -7,29 +7,27 @@ import RequireAuth from "@/components/auth/RequireAuth";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { DEFAULT_CITY_ID } from "@/lib/constants";
 import type { ItemListing, Report, RoomListing } from "@/lib/firebase/models";
-import { itemsRef, reportsRef, roomsRef, userRef } from "@/lib/firebase/refs";
-import { deleteItem, deleteRoom } from "@/lib/firebase/listings";
+import type { Timestamp } from "firebase/firestore";
+import { itemsRef, reportsRef, roomsRef } from "@/lib/firebase/refs";
+import {
+  approveItem,
+  approveRoom,
+  deleteItem,
+  deleteRoom,
+  rejectItem,
+  rejectRoom,
+  softDeleteItem,
+  softDeleteRoom,
+} from "@/lib/firebase/listings";
 import { watchIsAdmin } from "@/lib/firebase/admin";
 import { setReportStatus } from "@/lib/firebase/reports";
 import { itemSlug, roomSlug } from "@/lib/seo/slug";
 import { CheckCircle, XCircle, Trash2, Shield, Home, Package, Clock, Mail, Calendar } from "lucide-react";
-import { getDoc } from "firebase/firestore";
-
-// Helper function to get user email
-async function getUserEmail(userId: string): Promise<string> {
-  try {
-    const userDoc = await getDoc(userRef(userId));
-    const userData = userDoc.data();
-    return userData?.email || "Unknown";
-  } catch {
-    return "Unknown";
-  }
-}
 
 // Helper function to format date
-function formatDate(timestamp: any): string {
+function formatDate(timestamp: Timestamp | Date | null | undefined): string {
   if (!timestamp) return "Unknown";
-  const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+  const date = timestamp instanceof Date ? timestamp : timestamp.toDate();
   return date.toLocaleDateString() + " " + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
@@ -66,23 +64,39 @@ export default function AdminClient() {
   const [adminLoading, setAdminLoading] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
 
-  // Helper function for moderation API calls
-  async function callModerationAPI(action: string, type: string, id: string, reason?: string) {
-    const response = await fetch('/api/admin/moderate', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${user?.uid}`, // In production, use proper token
-      },
-      body: JSON.stringify({ action, type, id, reason }),
-    });
-    
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Moderation action failed');
+  async function moderateListing(action: "approve" | "reject" | "delete", type: "room" | "item", id: string, reason?: string) {
+    if (!user) {
+      throw new Error("You must be signed in.");
     }
-    
-    return response.json();
+
+    const adminEmail = user.email || "admin@vstudent.in";
+
+    if (type === "room") {
+      if (action === "approve") {
+        await approveRoom(id, user.uid, adminEmail);
+        return;
+      }
+
+      if (action === "reject") {
+        await rejectRoom(id, user.uid, adminEmail, reason);
+        return;
+      }
+
+      await softDeleteRoom(id, user.uid, adminEmail, reason);
+      return;
+    }
+
+    if (action === "approve") {
+      await approveItem(id, user.uid, adminEmail);
+      return;
+    }
+
+    if (action === "reject") {
+      await rejectItem(id, user.uid, adminEmail, reason);
+      return;
+    }
+
+    await softDeleteItem(id, user.uid, adminEmail, reason);
   }
 
   useEffect(() => {
@@ -146,6 +160,8 @@ export default function AdminClient() {
     () => reports.filter((r) => !r.data.status || r.data.status === "open"),
     [reports],
   );
+  const pendingRoomsCount = useMemo(() => rooms.filter(({ data }) => data.status === "pending").length, [rooms]);
+  const pendingItemsCount = useMemo(() => items.filter(({ data }) => data.status === "pending").length, [items]);
 
   async function act(nextBusyKey: string, fn: () => Promise<void>) {
     setBusyKey(nextBusyKey);
@@ -177,7 +193,7 @@ export default function AdminClient() {
                 <Home className="h-6 w-6 text-blue-600" />
               </div>
               <div className="ml-4">
-                <p className="text-2xl font-bold text-gray-900">{rooms.length}</p>
+                <p className="text-2xl font-bold text-gray-900">{pendingRoomsCount}</p>
                 <p className="text-sm text-gray-500">Pending Rooms</p>
               </div>
             </div>
@@ -188,7 +204,7 @@ export default function AdminClient() {
                 <Package className="h-6 w-6 text-green-600" />
               </div>
               <div className="ml-4">
-                <p className="text-2xl font-bold text-gray-900">{items.length}</p>
+                <p className="text-2xl font-bold text-gray-900">{pendingItemsCount}</p>
                 <p className="text-sm text-gray-500">Pending Items</p>
               </div>
             </div>
@@ -238,14 +254,16 @@ export default function AdminClient() {
                             <div>
                               {data.title}
                               <div className="text-xs font-medium" style={{
-                                color: data.status === 'approved' ? '#10b981' : 
+                                color: data.status === 'active' ? '#10b981' : 
                                        data.status === 'rejected' ? '#ef4444' : 
+                                       data.status === 'deleted' ? '#6b7280' :
                                        data.status === 'sold' ? '#6b7280' : '#f59e0b'
                               }}>
-                                {data.status === 'approved' ? 'Approved' : 
+                                {data.status === 'active' ? 'Active' : 
                                  data.status === 'rejected' ? 'Rejected' : 
+                                 data.status === 'deleted' ? 'Deleted' :
                                  data.status === 'sold' ? 'Sold' : 
-                                 data.status === 'active' ? 'Active' : 'Pending'}
+                                 'Pending'}
                               </div>
                             </div>
                           </div>
@@ -269,7 +287,7 @@ export default function AdminClient() {
                           <button
                             className="btn h-9 px-4 text-sm bg-green-600 text-white hover:bg-green-700 flex items-center gap-1"
                             disabled={busyKey === `room:${id}`}
-                            onClick={() => act(`room:${id}`, () => callModerationAPI('approve', 'room', id))}
+                            onClick={() => act(`room:${id}`, () => moderateListing("approve", "room", id))}
                           >
                             <CheckCircle className="h-4 w-4" />
                             Approve
@@ -277,7 +295,7 @@ export default function AdminClient() {
                           <button
                             className="btn h-9 px-4 text-sm bg-red-600 text-white hover:bg-red-700 flex items-center gap-1"
                             disabled={busyKey === `room:${id}`}
-                            onClick={() => act(`room:${id}`, () => callModerationAPI('reject', 'room', id))}
+                            onClick={() => act(`room:${id}`, () => moderateListing("reject", "room", id))}
                           >
                             <XCircle className="h-4 w-4" />
                             Reject
@@ -287,7 +305,7 @@ export default function AdminClient() {
                             disabled={busyKey === `room:${id}`}
                             onClick={() => {
                               if (confirm('Are you sure you want to delete this listing? This action cannot be undone.')) {
-                                act(`room:${id}`, () => callModerationAPI('delete', 'room', id));
+                                act(`room:${id}`, () => moderateListing("delete", "room", id));
                               }
                             }}
                           >
@@ -324,14 +342,16 @@ export default function AdminClient() {
                             <div>
                               {data.title}
                               <div className="text-xs font-medium" style={{
-                                color: data.status === 'approved' ? '#10b981' : 
+                                color: data.status === 'active' ? '#10b981' : 
                                        data.status === 'rejected' ? '#ef4444' : 
+                                       data.status === 'deleted' ? '#6b7280' :
                                        data.status === 'sold' ? '#6b7280' : '#f59e0b'
                               }}>
-                                {data.status === 'approved' ? 'Approved' : 
+                                {data.status === 'active' ? 'Active' : 
                                  data.status === 'rejected' ? 'Rejected' : 
+                                 data.status === 'deleted' ? 'Deleted' :
                                  data.status === 'sold' ? 'Sold' : 
-                                 data.status === 'active' ? 'Active' : 'Pending'}
+                                 'Pending'}
                               </div>
                             </div>
                           </div>
@@ -355,7 +375,7 @@ export default function AdminClient() {
                           <button
                             className="btn h-9 px-4 text-sm bg-green-600 text-white hover:bg-green-700 flex items-center gap-1"
                             disabled={busyKey === `item:${id}`}
-                            onClick={() => act(`item:${id}`, () => callModerationAPI('approve', 'item', id))}
+                            onClick={() => act(`item:${id}`, () => moderateListing("approve", "item", id))}
                           >
                             <CheckCircle className="h-4 w-4" />
                             Approve
@@ -363,7 +383,7 @@ export default function AdminClient() {
                           <button
                             className="btn h-9 px-4 text-sm bg-red-600 text-white hover:bg-red-700 flex items-center gap-1"
                             disabled={busyKey === `item:${id}`}
-                            onClick={() => act(`item:${id}`, () => callModerationAPI('reject', 'item', id))}
+                            onClick={() => act(`item:${id}`, () => moderateListing("reject", "item", id))}
                           >
                             <XCircle className="h-4 w-4" />
                             Reject
@@ -373,7 +393,7 @@ export default function AdminClient() {
                             disabled={busyKey === `item:${id}`}
                             onClick={() => {
                               if (confirm('Are you sure you want to delete this listing? This action cannot be undone.')) {
-                                act(`item:${id}`, () => callModerationAPI('delete', 'item', id));
+                                act(`item:${id}`, () => moderateListing("delete", "item", id));
                               }
                             }}
                           >
@@ -465,4 +485,3 @@ export default function AdminClient() {
     </main>
   );
 }
-

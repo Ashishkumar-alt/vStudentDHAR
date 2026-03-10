@@ -1,6 +1,6 @@
 import type { Timestamp } from "firebase/firestore";
 
-export type ListingStatus = "pending" | "approved" | "rejected" | "active" | "sold" | "deleted";
+export type ListingStatus = "pending" | "active" | "rejected" | "sold" | "deleted";
 
 export type AdminLogAction = "approve" | "reject" | "delete" | "soft_delete" | "view";
 
@@ -41,9 +41,16 @@ export type RoomListing = {
   photoUrls: string[];
   contactPhone: string;
   status: ListingStatus;
-  approved: boolean;
   createdBy: string;
   createdByMemberSinceYear?: number;
+  approvedAt?: Timestamp;
+  approvedBy?: string;
+  rejectedAt?: Timestamp;
+  rejectedBy?: string;
+  rejectionReason?: string;
+  deletedAt?: Timestamp;
+  deletedBy?: string;
+  deletionReason?: string;
   createdAt: Timestamp;
   updatedAt: Timestamp;
 };
@@ -62,9 +69,16 @@ export type ItemListing = {
   photoUrls: string[];
   contactPhone: string;
   status: ListingStatus;
-  approved: boolean;
   createdBy: string;
   createdByMemberSinceYear?: number;
+  approvedAt?: Timestamp;
+  approvedBy?: string;
+  rejectedAt?: Timestamp;
+  rejectedBy?: string;
+  rejectionReason?: string;
+  deletedAt?: Timestamp;
+  deletedBy?: string;
+  deletionReason?: string;
   createdAt: Timestamp;
   updatedAt: Timestamp;
 };

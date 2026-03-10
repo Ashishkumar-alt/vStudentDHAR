@@ -14,7 +14,6 @@ export function useRooms() {
     const q = query(
       roomsRef(),
       where("cityId", "==", DEFAULT_CITY_ID),
-      where("approved", "==", true),
       where("status", "==", "active"),
       orderBy("createdAt", "desc"),
       limit(80),
@@ -44,7 +43,6 @@ export function useRoomsByLocation(location: string) {
     const q = query(
       roomsRef(),
       where("cityId", "==", DEFAULT_CITY_ID),
-      where("approved", "==", true),
       where("status", "==", "active"),
       where("area", "==", location.replace(/-/g, ' ')),
       orderBy("createdAt", "desc"),
@@ -75,7 +73,6 @@ export function useItems() {
     const q = query(
       itemsRef(),
       where("cityId", "==", DEFAULT_CITY_ID),
-      where("approved", "==", true),
       where("status", "==", "active"),
       orderBy("createdAt", "desc"),
       limit(80),

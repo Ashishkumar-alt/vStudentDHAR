@@ -1,5 +1,5 @@
 import { addDoc, serverTimestamp } from "firebase/firestore";
-import type { AdminLog, AdminLogAction } from "./models";
+import type { AdminLogAction } from "./models";
 import { adminLogsRef } from "./refs";
 
 export async function logAdminAction({
@@ -37,7 +37,15 @@ export async function logAdminAction({
       userAgent,
     });
   } catch (error) {
+    if (
+      error &&
+      typeof error === "object" &&
+      "code" in error &&
+      error.code === "permission-denied"
+    ) {
+      return;
+    }
+
     console.error("Failed to log admin action:", error);
-    // Don't throw error to avoid breaking main functionality
   }
 }

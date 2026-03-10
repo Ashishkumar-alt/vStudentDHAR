@@ -1,18 +1,17 @@
-import { addDoc, deleteDoc, doc, getDoc, serverTimestamp, updateDoc } from "firebase/firestore";
+import { addDoc, deleteDoc, getDoc, serverTimestamp, updateDoc } from "firebase/firestore";
 import { itemsRef, itemRef, roomRef, roomsRef } from "./refs";
 import type { ItemListing, RoomListing } from "./models";
 import { logAdminAction } from "./admin-logs";
 import { validateListingCreation } from "./anti-spam";
 import { uploadImageToCloudinary } from "@/lib/cloudinary/client";
 
-export async function createRoom(input: Omit<RoomListing, "createdAt" | "updatedAt" | "status" | "approved">, photos: File[]) {
+export async function createRoom(input: Omit<RoomListing, "createdAt" | "updatedAt" | "status">, photos: File[]) {
   // Validate user hasn't exceeded daily listing limit
   await validateListingCreation(input.createdBy);
 
   const docRef = await addDoc(roomsRef(), {
     ...input,
     status: "pending",
-    approved: false,
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   });
@@ -24,14 +23,13 @@ export async function createRoom(input: Omit<RoomListing, "createdAt" | "updated
   return docRef.id;
 }
 
-export async function createItem(input: Omit<ItemListing, "createdAt" | "updatedAt" | "status" | "approved">, photos: File[]) {
+export async function createItem(input: Omit<ItemListing, "createdAt" | "updatedAt" | "status">, photos: File[]) {
   // Validate user hasn't exceeded daily listing limit
   await validateListingCreation(input.createdBy);
 
   const docRef = await addDoc(itemsRef(), {
     ...input,
     status: "pending",
-    approved: false,
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   });
@@ -45,7 +43,7 @@ export async function createItem(input: Omit<ItemListing, "createdAt" | "updated
 
 export async function updateRoom(
   id: string,
-  input: Partial<Omit<RoomListing, "createdAt" | "updatedAt" | "createdBy" | "type" | "status" | "approved">>,
+  input: Partial<Omit<RoomListing, "createdAt" | "updatedAt" | "createdBy" | "type" | "status">>,
   opts?: { newPhotos?: File[]; replacePhotos?: boolean },
 ) {
   const next: Record<string, unknown> = { ...input, updatedAt: serverTimestamp() };
@@ -65,7 +63,7 @@ export async function updateRoom(
 
 export async function updateItem(
   id: string,
-  input: Partial<Omit<ItemListing, "createdAt" | "updatedAt" | "createdBy" | "type" | "status" | "approved">>,
+  input: Partial<Omit<ItemListing, "createdAt" | "updatedAt" | "createdBy" | "type" | "status">>,
   opts?: { newPhotos?: File[]; replacePhotos?: boolean },
 ) {
   const next: Record<string, unknown> = { ...input, updatedAt: serverTimestamp() };
@@ -123,8 +121,7 @@ export async function approveRoom(id: string, approvedBy: string, adminEmail: st
   const roomData = roomDoc.data() as RoomListing;
   
   await updateDoc(roomRef(id), { 
-    status: "approved", 
-    approved: true, 
+    status: "active",
     approvedAt: serverTimestamp(),
     approvedBy,
     updatedAt: serverTimestamp() 
@@ -148,7 +145,6 @@ export async function rejectRoom(id: string, rejectedBy: string, adminEmail: str
   
   await updateDoc(roomRef(id), { 
     status: "rejected", 
-    approved: false,
     rejectedAt: serverTimestamp(),
     rejectedBy,
     rejectionReason: reason,
@@ -174,7 +170,6 @@ export async function softDeleteRoom(id: string, deletedBy: string, adminEmail: 
   
   await updateDoc(roomRef(id), { 
     status: "deleted", 
-    approved: false,
     deletedAt: serverTimestamp(),
     deletedBy,
     deletionReason: reason,
@@ -199,8 +194,7 @@ export async function approveItem(id: string, approvedBy: string, adminEmail: st
   const itemData = itemDoc.data() as ItemListing;
   
   await updateDoc(itemRef(id), { 
-    status: "approved", 
-    approved: true, 
+    status: "active",
     approvedAt: serverTimestamp(),
     approvedBy,
     updatedAt: serverTimestamp() 
@@ -224,7 +218,6 @@ export async function rejectItem(id: string, rejectedBy: string, adminEmail: str
   
   await updateDoc(itemRef(id), { 
     status: "rejected", 
-    approved: false,
     rejectedAt: serverTimestamp(),
     rejectedBy,
     rejectionReason: reason,
@@ -250,7 +243,6 @@ export async function softDeleteItem(id: string, deletedBy: string, adminEmail: 
   
   await updateDoc(itemRef(id), { 
     status: "deleted", 
-    approved: false,
     deletedAt: serverTimestamp(),
     deletedBy,
     deletionReason: reason,
@@ -267,14 +259,6 @@ export async function softDeleteItem(id: string, deletedBy: string, adminEmail: 
     targetTitle: itemData?.title,
     reason,
   });
-}
-
-export async function setRoomApproved(id: string, approved: boolean) {
-  await updateDoc(roomRef(id), { approved, updatedAt: serverTimestamp() });
-}
-
-export async function setItemApproved(id: string, approved: boolean) {
-  await updateDoc(itemRef(id), { approved, updatedAt: serverTimestamp() });
 }
 
 export async function getRoom(id: string) {

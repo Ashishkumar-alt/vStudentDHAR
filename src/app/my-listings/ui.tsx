@@ -14,14 +14,27 @@ import { CardSkeleton } from "@/components/ui/Skeleton";
 import { Eye, Trash2, CheckCircle2, Pencil } from "lucide-react";
 import { itemSlug, roomSlug } from "@/lib/seo/slug";
 
-function StatusPill({ approved, status }: { approved: boolean; status: string }) {
-  const text = !approved ? "Pending" : status === "sold" ? "Sold" : "Active";
+function StatusPill({ status }: { status: string }) {
+  const text =
+    status === "active"
+      ? "Active"
+      : status === "sold"
+        ? "Sold"
+        : status === "rejected"
+          ? "Rejected"
+          : status === "deleted"
+            ? "Deleted"
+            : "Pending";
   const cls =
-    !approved
-      ? "bg-amber-100 text-amber-800"
+    status === "active"
+      ? "bg-green-100 text-green-800"
       : status === "sold"
         ? "bg-zinc-200 text-zinc-800"
-        : "bg-green-100 text-green-800";
+        : status === "rejected"
+          ? "bg-red-100 text-red-800"
+          : status === "deleted"
+            ? "bg-zinc-200 text-zinc-700"
+            : "bg-amber-100 text-amber-800";
   return <span className={`rounded-full px-2 py-1 text-xs font-medium ${cls}`}>{text}</span>;
 }
 
@@ -184,7 +197,7 @@ export default function MyListingsClient() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <StatusPill approved={data.approved} status={data.status} />
+                    <StatusPill status={data.status} />
                     <Link className="btn h-9 px-4 text-sm" href={`/edit/room/${id}`}>
                       <Pencil className="mr-2 h-4 w-4" />
                       Edit
@@ -232,7 +245,7 @@ export default function MyListingsClient() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <StatusPill approved={data.approved} status={data.status} />
+                    <StatusPill status={data.status} />
                     <Link className="btn h-9 px-4 text-sm" href={`/edit/item/${id}`}>
                       <Pencil className="mr-2 h-4 w-4" />
                       Edit
@@ -265,4 +278,3 @@ export default function MyListingsClient() {
     </main>
   );
 }
-

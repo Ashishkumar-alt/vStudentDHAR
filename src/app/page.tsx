@@ -41,14 +41,14 @@ export default function Home() {
           </p>
 
           <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-            <Link className="btn bg-white text-slate-900 hover:bg-white/90" href="/rooms">  
+            <Link className="btn bg-white text-slate-900 hover:bg-white/90" href="/rooms">
               🏠 Browse Rooms
             </Link>
             <Link className="btn border-white/30 bg-white/10 text-white hover:bg-white/15" href="/items">
-             🛍️ Browse Items
+              🛍️ Browse Items
             </Link>
             <Link className="btn border-white/30 bg-white/10 text-white hover:bg-white/15" href="/post">
-            ➕ Post Listing
+              ➕ Post Listing
             </Link>
           </div>
 

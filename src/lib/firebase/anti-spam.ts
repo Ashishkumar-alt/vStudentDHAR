@@ -1,13 +1,43 @@
-import { collection, getDocs, query, where, Timestamp } from "firebase/firestore";
+import { getDocs, query, where } from "firebase/firestore";
 import { roomsRef, itemsRef } from "./refs";
 
-const DAILY_LISTING_LIMIT = 4;
+export const DAILY_LISTING_LIMIT = 4;
 
 export class SpamLimitError extends Error {
   constructor(message: string) {
     super(message);
     this.name = "SpamLimitError";
   }
+}
+
+function isCreatedToday(value: unknown): boolean {
+  if (!value || typeof value !== "object" || !("toDate" in value) || typeof value.toDate !== "function") {
+    return false;
+  }
+
+  const createdAt = value.toDate() as Date;
+  const now = new Date();
+
+  return (
+    createdAt.getFullYear() === now.getFullYear() &&
+    createdAt.getMonth() === now.getMonth() &&
+    createdAt.getDate() === now.getDate()
+  );
+}
+
+async function countListingsCreatedToday(userId: string): Promise<number> {
+  const roomsQuery = query(roomsRef(), where("createdBy", "==", userId));
+  const itemsQuery = query(itemsRef(), where("createdBy", "==", userId));
+
+  const [roomsSnapshot, itemsSnapshot] = await Promise.all([
+    getDocs(roomsQuery),
+    getDocs(itemsQuery),
+  ]);
+
+  const roomCount = roomsSnapshot.docs.filter((doc) => isCreatedToday(doc.data().createdAt)).length;
+  const itemCount = itemsSnapshot.docs.filter((doc) => isCreatedToday(doc.data().createdAt)).length;
+
+  return roomCount + itemCount;
 }
 
 /**
@@ -17,39 +47,7 @@ export class SpamLimitError extends Error {
  */
 export async function canUserCreateListing(userId: string): Promise<boolean> {
   try {
-    // Get today's start and end timestamps
-    const now = new Date();
-    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
-
-    const startTimestamp = Timestamp.fromDate(todayStart);
-    const endTimestamp = Timestamp.fromDate(todayEnd);
-
-    // Count user's room listings created today
-    const roomsQuery = query(
-      roomsRef(),
-      where("createdBy", "==", userId),
-      where("createdAt", ">=", startTimestamp),
-      where("createdAt", "<", endTimestamp)
-    );
-    
-    const roomsSnapshot = await getDocs(roomsQuery);
-    const roomCount = roomsSnapshot.size;
-
-    // Count user's item listings created today
-    const itemsQuery = query(
-      itemsRef(),
-      where("createdBy", "==", userId),
-      where("createdAt", ">=", startTimestamp),
-      where("createdAt", "<", endTimestamp)
-    );
-    
-    const itemsSnapshot = await getDocs(itemsQuery);
-    const itemCount = itemsSnapshot.size;
-
-    // Total listings created today
-    const totalListings = roomCount + itemCount;
-
+    const totalListings = await countListingsCreatedToday(userId);
     return totalListings < DAILY_LISTING_LIMIT;
   } catch (error) {
     console.error("Error checking spam limit:", error);
@@ -65,37 +63,7 @@ export async function canUserCreateListing(userId: string): Promise<boolean> {
  */
 export async function getUserDailyListingCount(userId: string): Promise<number> {
   try {
-    // Get today's start and end timestamps
-    const now = new Date();
-    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
-
-    const startTimestamp = Timestamp.fromDate(todayStart);
-    const endTimestamp = Timestamp.fromDate(todayEnd);
-
-    // Count user's room listings created today
-    const roomsQuery = query(
-      roomsRef(),
-      where("createdBy", "==", userId),
-      where("createdAt", ">=", startTimestamp),
-      where("createdAt", "<", endTimestamp)
-    );
-    
-    const roomsSnapshot = await getDocs(roomsQuery);
-    const roomCount = roomsSnapshot.size;
-
-    // Count user's item listings created today
-    const itemsQuery = query(
-      itemsRef(),
-      where("createdBy", "==", userId),
-      where("createdAt", ">=", startTimestamp),
-      where("createdAt", "<", endTimestamp)
-    );
-    
-    const itemsSnapshot = await getDocs(itemsQuery);
-    const itemCount = itemsSnapshot.size;
-
-    return roomCount + itemCount;
+    return await countListingsCreatedToday(userId);
   } catch (error) {
     console.error("Error getting daily listing count:", error);
     return 0;

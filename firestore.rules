@@ -27,7 +27,7 @@ service cloud.firestore {
     }
 
     function listingReadable(resource) {
-      return (resource.data.approved == true && resource.data.status == "active") || 
+      return resource.data.status == "active" || 
              isAdmin() || 
              (isSignedIn() && resource.data.createdBy == request.auth.uid);
     }
@@ -42,7 +42,6 @@ service cloud.firestore {
           && resource.data.createdBy == request.auth.uid
           && request.resource.data.createdBy == resource.data.createdBy
           && request.resource.data.createdAt == resource.data.createdAt
-          && request.resource.data.approved == resource.data.approved
           && request.resource.data.status == resource.data.status);
     }
 
