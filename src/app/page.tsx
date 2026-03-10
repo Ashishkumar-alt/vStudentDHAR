@@ -1,7 +1,7 @@
-import Link from "next/link";
 import type { Metadata } from "next";
 import AreaQuickChips from "@/components/home/AreaQuickChips";
 import DharamshalaPulse from "@/components/home/DharamshalaPulse";
+import HeroLocationSearch from "@/components/home/HeroLocationSearch";
 import HomePreviews from "@/components/home/HomePreviews";
 import { PRIMARY_INSTITUTION_SHORT } from "@/lib/constants";
 
@@ -37,20 +37,10 @@ export default function Home() {
             Near {PRIMARY_INSTITUTION_SHORT}, Kachcheri, Sakoh Upper. Post fast, contact directly on WhatsApp.
           </p>
           <p className="mt-2 max-w-2xl text-sm font-medium text-white/90">
-            Dhoop mein mat ghoomo. vStudent kholo. ☀️
+            Dhoop mein mat ghoomo. vStudent kholo.
           </p>
 
-          <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-            <Link className="btn bg-white text-slate-900 hover:bg-white/90" href="/rooms">
-              🏠 Browse Rooms
-            </Link>
-            <Link className="btn border-white/30 bg-white/10 text-white hover:bg-white/15" href="/items">
-              🛍️ Browse Items
-            </Link>
-            <Link className="btn border-white/30 bg-white/10 text-white hover:bg-white/15" href="/post">
-              ➕ Post Listing
-            </Link>
-          </div>
+          <HeroLocationSearch />
 
           <div className="mt-8">
             <AreaQuickChips />
@@ -58,38 +48,9 @@ export default function Home() {
         </div>
       </section>
 
-      <div className="grid gap-4 sm:grid-cols-3">
-        <div className="card card-hover p-5">
-          <div className="text-sm font-medium">Area-first search</div>
-          <div className="mt-1 text-sm text-zinc-600">GCD Campus, Sidhpur, Kotwali Bazaara</div>
-        </div>
-        <div className="card card-hover p-5">
-          <div className="text-sm font-medium">Summer-ready listings</div>
-          <div className="mt-1 text-sm text-zinc-600">Fan,coolers,study lamps summer gear.</div>
-        </div>
-        <div className="card card-hover p-5">
-          <div className="text-sm font-medium">Trust cues</div>
-          <div className="mt-1 text-sm text-zinc-600">Institution badge + phone verified.</div>
-        </div>
-      </div>
-
       <HomePreviews />
 
       <DharamshalaPulse />
-
-      <section className="card card-hover overflow-hidden">
-        <div className="bg-gradient-to-r from-emerald-500 to-teal-500 p-10 text-center text-white">
-          <h2 className="text-3xl font-semibold">Have something to post?</h2>
-          <p className="mt-2 text-sm text-white/90">
-            List your room or item in minutes and connect with Dharamshala students directly.
-          </p>
-          <div className="mt-6 flex justify-center">
-            <Link className="btn bg-white text-slate-900 hover:bg-white/90" href="/post">
-              Post a Listing →
-            </Link>
-          </div>
-        </div>
-      </section>
     </main>
   );
 }
