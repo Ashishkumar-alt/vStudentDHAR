@@ -359,8 +359,8 @@ export default function RoomsLocationClient({ location }: RoomsLocationClientPro
       ) : error ? (
         <div className="text-center py-12">
           <SearchX className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">Error Loading Rooms</h3>
-          <p className="text-gray-600">{error}</p>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">No rooms available</h3>
+          <p className="text-gray-600">Please try again in a moment.</p>
         </div>
       ) : sortedRows.length === 0 ? (
         <div className="text-center py-12">

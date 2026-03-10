@@ -312,6 +312,7 @@ export default function RoomsClient() {
   };
 
   const currentSortLabel = sortOptions.find((option) => option.value === sort)?.label || "Newest";
+  const showEmptyState = !loading && !filtered.length;
 
   const renderFilterPanel = () => {
     if (activeFilterCategory === "locality") {
@@ -548,7 +549,9 @@ export default function RoomsClient() {
       </section>
 
       {error ? (
-        <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>
+        <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+          We could not refresh rooms right now. Showing available results if any.
+        </div>
       ) : null}
 
       <div className="mt-6 grid grid-cols-1 gap-4 sm:mt-7 sm:grid-cols-2 lg:grid-cols-3">
@@ -557,14 +560,18 @@ export default function RoomsClient() {
           : filtered.map(({ id, data }) => <RoomCard key={id} id={id} listing={data} />)}
       </div>
 
-      {!loading && !filtered.length ? (
+      {showEmptyState ? (
         <div className="mt-7">
           <div className="card mx-auto max-w-md p-5 text-center">
             <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-100 text-slate-700">
               <SearchX className="h-5 w-5" />
             </div>
-            <div className="mt-3 text-base font-semibold">No rooms match these filters</div>
-            <p className="mt-1 text-sm text-slate-600">Try adjusting filters, changing the area, or posting a listing.</p>
+            <div className="mt-3 text-base font-semibold">{error ? "No rooms available" : "No rooms match these filters"}</div>
+            <p className="mt-1 text-sm text-slate-600">
+              {error
+                ? "Please try again in a moment, or post a listing if you have one available."
+                : "Try adjusting filters, changing the area, or posting a listing."}
+            </p>
             <div className="mt-4 flex flex-col justify-center gap-2 sm:flex-row">
               <button type="button" className="btn h-9 px-4 text-sm" onClick={clearAll}>
                 <RotateCcw className="mr-2 h-4 w-4" />

@@ -33,6 +33,7 @@ service cloud.firestore {
     }
 
     function canReadRoom(resource) {
+      // Public room pages must stay readable for active listings even when request.auth is null.
       return resource.data.status == "active" ||
         isAdmin() ||
         (isSignedIn() && resource.data.createdBy == request.auth.uid);
@@ -56,6 +57,7 @@ service cloud.firestore {
     }
 
     match /rooms/{id} {
+      // Active room listings are public; writes still require auth/admin checks below.
       allow read: if canReadRoom(resource);
       allow create: if canCreateListing() && listingCreatable();
       allow update: if listingUpdatable(resource);
