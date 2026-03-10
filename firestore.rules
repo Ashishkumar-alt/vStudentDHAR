@@ -32,6 +32,16 @@ service cloud.firestore {
              (isSignedIn() && resource.data.createdBy == request.auth.uid);
     }
 
+    function canReadRoom(resource) {
+      return resource.data.status == "active" ||
+        isAdmin() ||
+        (isSignedIn() && resource.data.createdBy == request.auth.uid);
+    }
+
+    function canCreateListing() {
+      return isSignedIn();
+    }
+
     function listingCreatable() {
       return isSignedIn() && request.resource.data.createdBy == request.auth.uid;
     }
@@ -46,8 +56,8 @@ service cloud.firestore {
     }
 
     match /rooms/{id} {
-      allow read: if listingReadable(resource);
-      allow create: if listingCreatable();
+      allow read: if canReadRoom(resource);
+      allow create: if canCreateListing() && listingCreatable();
       allow update: if listingUpdatable(resource);
       allow delete: if isAdmin() || (isSignedIn() && resource.data.createdBy == request.auth.uid);
     }

@@ -17,10 +17,9 @@ import { DHARAMSHALA_AREAS, ROOM_GENDER_ALLOWED } from "@/lib/constants";
 import { asNumber } from "@/lib/utils";
 import { RoomCard } from "@/components/listings/ListingCard";
 import { useRooms } from "@/components/listings/useListings";
-import { useAuth } from "@/components/auth/AuthProvider";
 import { CardSkeleton } from "@/components/ui/Skeleton";
 
-type SortOption = "new" | "priceAsc" | "priceDesc" | "popular";
+type SortOption = "new" | "priceAsc" | "priceDesc";
 type FilterCategory = "locality" | "budget" | "gender" | "amenities" | "services";
 
 type FilterDraft = {
@@ -38,7 +37,6 @@ const sortOptions: Array<{ value: SortOption; label: string }> = [
   { value: "priceAsc", label: "Price: Low to High" },
   { value: "priceDesc", label: "Price: High to Low" },
   { value: "new", label: "Newest" },
-  { value: "popular", label: "Popularity" },
 ];
 
 const filterCategories: Array<{ value: FilterCategory; label: string }> = [
@@ -107,7 +105,6 @@ function BottomSheet({
 export default function RoomsClient() {
   const router = useRouter();
   const search = useSearchParams();
-  const { profile } = useAuth();
 
   const [area, setArea] = useState<string>("");
   const [genderAllowed, setGenderAllowed] = useState<string>("Any");
@@ -229,24 +226,8 @@ export default function RoomsClient() {
     });
 
     return [...base].sort((a, b) => {
-      const inst = profile?.institution;
-
-      const score = (x: typeof a) => {
-        let s = 0;
-        if (area && x.data.area === area) s += 20;
-        if (inst && x.data.institution === inst) s += 10;
-        if (typeof x.data.walkMinutesToHPU === "number") s += Math.max(0, 15 - x.data.walkMinutesToHPU);
-        if (x.data.attachedBathroom) s += 4;
-        if (x.data.heaterIncluded) s += 3;
-        return s;
-      };
-
       if (sort === "priceAsc") return a.data.rent - b.data.rent;
       if (sort === "priceDesc") return b.data.rent - a.data.rent;
-      if (sort === "popular") return score(b) - score(a);
-
-      const ds = score(b) - score(a);
-      if (ds !== 0) return ds;
       return (b.data.createdAt?.toMillis?.() || 0) - (a.data.createdAt?.toMillis?.() || 0);
     });
   }, [
@@ -261,7 +242,6 @@ export default function RoomsClient() {
     attachedBathroom,
     maxWalk,
     sort,
-    profile?.institution,
   ]);
 
   const activeFilterCount = useMemo(() => {
@@ -597,27 +577,6 @@ export default function RoomsClient() {
           </div>
         </div>
       ) : null}
-
-      <div className="fixed inset-x-0 bottom-16 z-30 px-4 sm:hidden">
-        <div className="mx-auto flex max-w-sm items-center gap-2 rounded-full border border-[color:rgba(20,184,166,0.12)] bg-white/95 p-2 shadow-[0_14px_34px_rgba(15,23,42,0.12)] backdrop-blur">
-          <button
-            type="button"
-            className="inline-flex h-10 flex-1 items-center justify-center rounded-full bg-[color:rgba(240,253,250,1)] text-sm font-medium text-slate-800"
-            onClick={openSortSheet}
-          >
-            <ArrowUpDown className="mr-2 h-4 w-4 text-teal-600" />
-            Sort
-          </button>
-          <button
-            type="button"
-            className="inline-flex h-10 flex-1 items-center justify-center rounded-full bg-[color:rgba(240,249,255,1)] text-sm font-medium text-slate-800"
-            onClick={openFilterSheet}
-          >
-            <SlidersHorizontal className="mr-2 h-4 w-4 text-sky-600" />
-            Filters
-          </button>
-        </div>
-      </div>
 
       <BottomSheet open={showSortSheet} title="Sort" onClose={() => setShowSortSheet(false)}>
         <div className="space-y-3">

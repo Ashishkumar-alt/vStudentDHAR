@@ -56,8 +56,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!user) {
-      setIsAdmin(false);
-      return;
+      const t = setTimeout(() => setIsAdmin(false), 0);
+      return () => clearTimeout(t);
     }
 
     const unsubscribe = watchIsAdmin(
