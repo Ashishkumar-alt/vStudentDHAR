@@ -41,6 +41,7 @@ export default function RootLayout({
     <html lang="en" className="h-full" suppressHydrationWarning>
       <head>
         <ThemeInitializer />
+        <Script src="https://accounts.google.com/gsi/client" strategy="beforeInteractive" />
       </head>
 
       <body className={`${inter.variable} h-full antialiased`}>

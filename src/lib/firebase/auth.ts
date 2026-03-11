@@ -3,6 +3,9 @@ import {
   getAuth,
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
+  signInWithCredential,
+  GoogleAuthProvider,
+  signOut as firebaseSignOut,
 } from "firebase/auth";
 import { getFirebaseApp } from "./client";
 
@@ -25,5 +28,17 @@ export async function signInWithEmail(email: string, password: string) {
 export async function resetPassword(email: string) {
   const auth = getFirebaseAuth();
   await sendPasswordResetEmail(auth, email);
+}
+
+export async function signInWithGoogle(token: string) {
+  const auth = getFirebaseAuth();
+  const credential = GoogleAuthProvider.credential(token);
+  const cred = await signInWithCredential(auth, credential);
+  return cred.user;
+}
+
+export async function signOut() {
+  const auth = getFirebaseAuth();
+  await firebaseSignOut(auth);
 }
 
