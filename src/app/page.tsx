@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import AreaQuickChips from "@/components/home/AreaQuickChips";
 import DharamshalaPulse from "@/components/home/DharamshalaPulse";
-import HeroLocationSearch from "@/components/home/HeroLocationSearch";
 import HomePreviews from "@/components/home/HomePreviews";
 import { PRIMARY_INSTITUTION_SHORT } from "@/lib/constants";
 
@@ -39,8 +38,6 @@ export default function Home() {
           <p className="mt-2 max-w-2xl text-sm font-medium text-white/90">
             Dhoop mein mat ghoomo. vStudent kholo.
           </p>
-
-          <HeroLocationSearch />
 
           <div className="mt-8">
             <AreaQuickChips />

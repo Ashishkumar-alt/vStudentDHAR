@@ -88,7 +88,7 @@ export function useRoomsByLocation(location: string) {
             const area = data.area?.trim().toLowerCase();
             const institution = data.institution?.trim().toLowerCase();
 
-            return normalizedAreas.includes(area) || normalizedAreas.includes(institution);
+            return normalizedAreas.includes(area || '') || normalizedAreas.includes(institution || '');
           });
         setRows(next);
         setError(null);
