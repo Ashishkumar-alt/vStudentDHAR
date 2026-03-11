@@ -10,21 +10,45 @@ import { useItems } from "@/components/listings/useListings";
 import { useAuth } from "@/components/auth/AuthProvider";
 
 const categoryIcons: Record<string, any> = {
-  "Books": Book,
-  "Furniture": Home,
-  "Cycles": Bike,
-  "Electronics": Laptop,
-  "Notes": FileText,
-  "Hostel Essentials": ShoppingBag,
+  "Books & Study Materials": Book,
+  "Hostel Essentials": Home,
+  "Clothing & Traditional Dress": ShoppingBag,
+  "Sports Items": TrendingUp,
+  "Electronics & Gadgets": Laptop,
+  "Transport (Cycle / Scooter)": Bike,
 };
 
 const categoryColors: Record<string, string> = {
-  "Books": "bg-purple-100 text-purple-700 border-purple-200",
-  "Furniture": "bg-blue-100 text-blue-700 border-blue-200",
-  "Cycles": "bg-green-100 text-green-700 border-green-200",
-  "Electronics": "bg-pink-100 text-pink-700 border-pink-200",
-  "Notes": "bg-yellow-100 text-yellow-700 border-yellow-200",
-  "Hostel Essentials": "bg-indigo-100 text-indigo-700 border-indigo-200",
+  "Books & Study Materials": "bg-purple-100 text-purple-700 border-purple-200",
+  "Hostel Essentials": "bg-blue-100 text-blue-700 border-blue-200",
+  "Clothing & Traditional Dress": "bg-pink-100 text-pink-700 border-pink-200",
+  "Sports Items": "bg-green-100 text-green-700 border-green-200",
+  "Electronics & Gadgets": "bg-indigo-100 text-indigo-700 border-indigo-200",
+  "Transport (Cycle / Scooter)": "bg-yellow-100 text-yellow-700 border-yellow-200",
+};
+
+const mainCategories = [
+  "Books & Study Materials",
+  "Hostel Essentials", 
+  "Clothing & Traditional Dress",
+  "Sports Items",
+  "Electronics & Gadgets",
+  "Transport (Cycle / Scooter)"
+];
+
+// Map original categories to main categories
+const categoryMapping: Record<string, string> = {
+  "Books": "Books & Study Materials",
+  "Notes": "Books & Study Materials",
+  "Furniture": "Hostel Essentials",
+  "Hostel Essentials": "Hostel Essentials",
+  "Clothing": "Clothing & Traditional Dress",
+  "Traditional Dress": "Clothing & Traditional Dress",
+  "Sports": "Sports Items",
+  "Cycles": "Transport (Cycle / Scooter)",
+  "Scooter": "Transport (Cycle / Scooter)",
+  "Electronics": "Electronics & Gadgets",
+  "Gadgets": "Electronics & Gadgets",
 };
 
 export default function GenZItemsPage() {
@@ -35,11 +59,30 @@ export default function GenZItemsPage() {
   const [selectedCategory, setSelectedCategory] = useState("");
   const { rows, loading, error } = useItems();
 
+  // Hide the default AppShell header for this page
+  useEffect(() => {
+    const appHeader = document.querySelector('.app-header') as HTMLElement;
+    const appBottomNav = document.querySelector('.app-bottom-nav') as HTMLElement;
+    if (appHeader) appHeader.style.display = 'none';
+    if (appBottomNav) appBottomNav.style.display = 'none';
+    
+    return () => {
+      if (appHeader) appHeader.style.display = '';
+      if (appBottomNav) appBottomNav.style.display = '';
+    };
+  }, []);
+
   const filtered = useMemo(() => {
     return rows.filter(({ data }) => {
       const keyword = searchQuery.trim().toLowerCase();
       if (keyword && !data.title.toLowerCase().includes(keyword)) return false;
-      if (selectedCategory && data.category !== selectedCategory) return false;
+      
+      // Filter by selected main category
+      if (selectedCategory) {
+        const itemMainCategory = categoryMapping[data.category] || data.category;
+        if (itemMainCategory !== selectedCategory) return false;
+      }
+      
       return true;
     });
   }, [rows, searchQuery, selectedCategory]);
@@ -47,7 +90,8 @@ export default function GenZItemsPage() {
   const categoryStats = useMemo(() => {
     const stats: Record<string, number> = {};
     rows.forEach(({ data }) => {
-      stats[data.category] = (stats[data.category] || 0) + 1;
+      const mainCategory = categoryMapping[data.category] || data.category;
+      stats[mainCategory] = (stats[mainCategory] || 0) + 1;
     });
     return stats;
   }, [rows]);
@@ -143,7 +187,7 @@ export default function GenZItemsPage() {
       <section className="px-4 pb-6">
         <h2 className="text-xl font-bold text-gray-900 mb-4">Browse Categories</h2>
         <div className="grid grid-cols-2 gap-3">
-          {ITEM_CATEGORIES.map((category) => {
+          {mainCategories.map((category) => {
             const Icon = categoryIcons[category] || ShoppingBag;
             const count = categoryStats[category] || 0;
             const colorClass = categoryColors[category] || "bg-gray-100 text-gray-700 border-gray-200";
@@ -167,8 +211,46 @@ export default function GenZItemsPage() {
         </div>
       </section>
 
+      {/* Category Items */}
+      {selectedCategory && (
+        <section className="px-4 pb-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold text-gray-900">{selectedCategory}</h2>
+            <button
+              onClick={() => setSelectedCategory("")}
+              className="text-purple-600 text-sm font-medium"
+            >
+              Clear
+            </button>
+          </div>
+          <div className="space-y-3">
+            {filtered.slice(0, 8).map(({ id, data }) => (
+              <div key={id} className="bg-white rounded-2xl p-4 shadow-md border border-purple-100">
+                <div className="flex gap-3">
+                  {data.photoUrls?.[0] && (
+                    <div className="w-16 h-16 rounded-xl bg-gray-100 overflow-hidden flex-shrink-0">
+                      <img src={data.photoUrls[0]} alt={data.title} className="w-full h-full object-cover" />
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-gray-900 truncate">{data.title}</h3>
+                    <p className="text-purple-600 font-bold">₹{data.price}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-xs text-gray-500">{data.area}</span>
+                      <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">
+                        {data.category}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
       {/* Trending Items */}
-      {trendingItems.length > 0 && (
+      {!selectedCategory && trendingItems.length > 0 && (
         <section className="px-4 pb-6">
           <div className="flex items-center gap-2 mb-4">
             <TrendingUp className="h-5 w-5 text-purple-600" />
