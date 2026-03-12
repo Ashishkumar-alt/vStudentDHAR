@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import AreaQuickChips from "@/components/home/AreaQuickChips";
 import DharamshalaPulse from "@/components/home/DharamshalaPulse";
 import HomePreviews from "@/components/home/HomePreviews";
@@ -16,15 +17,19 @@ export default function Home() {
     <main className="mx-auto w-full max-w-screen-2xl space-y-16 px-4 py-10">
       <section className="card card-hover relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-indigo-600 to-fuchsia-600" />
-        <div
-          className="absolute inset-0 opacity-[0.18] blur-2xl sm:opacity-[0.14]"
-          style={{
-            backgroundImage:
-              "url(/dharamshala-hero.webp), url(/dharamshala-hero.jpg), url(/dharamshala-hero.jpeg), url(/dharamshala-hero.png), url(/hero-mountains.svg)",
-            backgroundSize: "cover",
-            backgroundPosition: "50% 20%",
-          }}
-        />
+        <div className="absolute inset-0 opacity-[0.18] blur-2xl sm:opacity-[0.14]">
+          <Image
+            src="/dharamshala-hero.webp"
+            alt="Dharamshala mountains background"
+            fill
+            sizes="100vw"
+            style={{
+              objectFit: 'cover',
+              objectPosition: '50% 20%',
+            }}
+            priority
+          />
+        </div>
         <div className="relative p-6 sm:p-12">
           <div className="inline-flex rounded-full bg-white/15 px-3 py-1 text-xs font-medium text-white/90">
             Dharamshala student Marketplace

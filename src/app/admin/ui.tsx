@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { limit, onSnapshot, orderBy, query, where } from "firebase/firestore";
 import RequireAuth from "@/components/auth/RequireAuth";
@@ -245,9 +246,11 @@ export default function AdminClient() {
                         <Link href={`/rooms/${id}/${roomSlug({ title: data.title, area: data.area, genderAllowed: data.genderAllowed, rent: data.rent })}`}>
                           <div className="flex items-center gap-2">
                             {data.photoUrls?.[0] && (
-                              <img
+                              <Image
                                 src={data.photoUrls[0]}
                                 alt={data.title}
+                                width={48}
+                                height={48}
                                 className="h-12 w-12 rounded-lg object-cover"
                               />
                             )}
@@ -333,9 +336,11 @@ export default function AdminClient() {
                         <Link href={`/items/${id}/${itemSlug({ title: data.title, category: data.category, area: data.area, price: data.price })}`}>
                           <div className="flex items-center gap-2">
                             {data.photoUrls?.[0] && (
-                              <img
+                              <Image
                                 src={data.photoUrls[0]}
                                 alt={data.title}
+                                width={48}
+                                height={48}
                                 className="h-12 w-12 rounded-lg object-cover"
                               />
                             )}

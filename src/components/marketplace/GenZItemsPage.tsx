@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Search, Star, Clock, TrendingUp, Filter, X, Menu, Sparkles, ShoppingBag, Book, Bike, Laptop, FileText, Home } from "lucide-react";
@@ -229,7 +230,13 @@ export default function GenZItemsPage() {
                 <div className="flex gap-3">
                   {data.photoUrls?.[0] && (
                     <div className="w-16 h-16 rounded-xl bg-gray-100 overflow-hidden flex-shrink-0">
-                      <img src={data.photoUrls[0]} alt={data.title} className="w-full h-full object-cover" />
+                      <Image 
+                        src={data.photoUrls[0]} 
+                        alt={data.title} 
+                        width={64}
+                        height={64}
+                        className="w-full h-full object-cover" 
+                      />
                     </div>
                   )}
                   <div className="flex-1 min-w-0">
@@ -262,7 +269,13 @@ export default function GenZItemsPage() {
                 <div className="flex gap-3">
                   {data.photoUrls?.[0] && (
                     <div className="w-16 h-16 rounded-xl bg-gray-100 overflow-hidden flex-shrink-0">
-                      <img src={data.photoUrls[0]} alt={data.title} className="w-full h-full object-cover" />
+                      <Image 
+                        src={data.photoUrls[0]} 
+                        alt={data.title} 
+                        width={64}
+                        height={64}
+                        className="w-full h-full object-cover" 
+                      />
                     </div>
                   )}
                   <div className="flex-1 min-w-0">
