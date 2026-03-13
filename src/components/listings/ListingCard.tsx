@@ -25,13 +25,28 @@ function isNew(createdAt: unknown) {
 export function RoomCard({ id, listing }: { id: string; listing: RoomListing }) {
   const detailsHref = `/rooms/${id}`;
 
+  // Format upload time
+  const formatUploadTime = (createdAt: unknown) => {
+    try {
+      const created = (createdAt as { toDate?: () => Date } | null)?.toDate?.();
+      if (!created) return "now";
+      const diff = Date.now() - created.getTime();
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      if (days === 0) return "today";
+      if (days === 1) return "1d ago";
+      return `${days}d ago`;
+    } catch {
+      return "now";
+    }
+  };
+
   return (
-    <article className="group relative overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md">
+    <article className="group relative overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
       {/* Room Image */}
       <Link
         href={detailsHref}
         aria-label={`View room details for ${listing.title}`}
-        className="block aspect-[16/10] w-full bg-gray-100"
+        className="block aspect-[4/3] w-full bg-gradient-to-br from-gray-50 to-gray-100"
       >
         <div className="relative h-full">
           <div className="absolute right-3 top-3 z-20">
@@ -41,8 +56,9 @@ export function RoomCard({ id, listing }: { id: string; listing: RoomListing }) 
           {/* Verified Badge - Top Left */}
           {listing.status === "active" ? (
             <div className="absolute left-3 top-3 z-20">
-              <span className="rounded-full bg-blue-500 px-2.5 py-1 text-xs font-semibold text-white shadow-sm">
-                Verified
+              <span className="inline-flex items-center gap-1 rounded-full bg-black/80 backdrop-blur-sm px-3 py-1.5 text-xs font-medium text-white">
+                <div className="h-1.5 w-1.5 rounded-full bg-emerald-400"></div>
+                verified
               </span>
             </div>
           ) : null}
@@ -54,7 +70,7 @@ export function RoomCard({ id, listing }: { id: string; listing: RoomListing }) 
               alt={listing.title || "Room listing"}
               fill
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-              className="object-cover transition duration-500 group-hover:scale-[1.02]"
+              className="object-cover transition duration-500 group-hover:scale-105"
               priority={false}
               placeholder="blur"
               blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwA/8A8A"
@@ -65,54 +81,51 @@ export function RoomCard({ id, listing }: { id: string; listing: RoomListing }) 
                 const parent = target.parentElement;
                 if (parent && !parent.querySelector('.fallback-placeholder')) {
                   const placeholder = document.createElement('div');
-                  placeholder.className = 'fallback-placeholder absolute inset-0 flex items-center justify-center bg-gray-100';
-                  placeholder.innerHTML = '<div class="text-center"><div class="text-4xl mb-2">🏠</div><div class="text-sm">No Image</div></div>';
+                  placeholder.className = 'fallback-placeholder absolute inset-0 flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100';
+                  placeholder.innerHTML = '<div class="text-center"><div class="text-5xl mb-2 opacity-50">🏠</div><div class="text-sm text-gray-400">No image</div></div>';
                   parent.appendChild(placeholder);
                 }
               }}
             />
           ) : (
-            <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
+            <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
               <div className="text-center">
-                <div className="text-4xl mb-2">🏠</div>
-                <div className="text-sm text-gray-500">No Image</div>
+                <div className="text-5xl mb-2 opacity-50">🏠</div>
+                <div className="text-sm text-gray-400">No image</div>
               </div>
             </div>
           )}
 
-          {/* Price Overlay - Bottom Right of Image */}
+          {/* Price Overlay - Bottom Right */}
           <div className="absolute right-3 bottom-3 z-20">
-            <div className="rounded-xl bg-white/95 px-3 py-2 shadow-lg backdrop-blur-sm">
+            <div className="rounded-2xl bg-white/95 backdrop-blur-md px-4 py-2.5 shadow-lg">
               <div className="text-lg font-bold text-gray-900">{formatINR(listing.rent)}</div>
-              <div className="text-xs text-gray-600">per month</div>
+              <div className="text-xs text-gray-500">/month</div>
             </div>
           </div>
         </div>
       </Link>
 
       {/* Card Content */}
-      <div className="p-4">
-        {/* Title and Location */}
-        <div className="mb-3">
-          <h3 className="text-base font-semibold text-gray-900 truncate">{listing.title}</h3>
-          <div className="mt-1 flex items-center text-sm text-gray-600">
-            <MapPin className="mr-1 h-4 w-4" />
-            <span>{listing.area}</span>
-          </div>
-        </div>
+      <div className="p-5">
+        {/* Title */}
+        <h3 className="mb-2 text-base font-semibold text-gray-900 line-clamp-1 leading-tight">
+          {listing.title}
+        </h3>
 
-        {/* Availability Status */}
-        <div className="mb-4">
-          <span className="inline-flex items-center rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-800">
-            <div className="mr-2 h-2 w-2 rounded-full bg-green-500"></div>
-            Available Now
-          </span>
+        {/* Location and Time */}
+        <div className="mb-4 flex items-center justify-between text-sm text-gray-500">
+          <div className="flex items-center gap-1">
+            <MapPin className="h-3.5 w-3.5" />
+            <span className="truncate">{listing.area}</span>
+          </div>
+          <span className="text-xs font-medium">{formatUploadTime(listing.createdAt)}</span>
         </div>
 
         {/* View Details Button */}
         <Link
           href={detailsHref}
-          className="block w-full rounded-xl bg-blue-600 px-4 py-3 text-center font-medium text-white transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          className="block w-full rounded-2xl bg-black px-4 py-3 text-center text-sm font-medium text-white transition-all duration-300 hover:bg-gray-800 hover:shadow-lg active:scale-[0.98]"
         >
           View Details
         </Link>
