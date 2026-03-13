@@ -7,39 +7,28 @@ let adminDb: admin.firestore.Firestore | null = null;
 
 /**
  * Initialize Firebase Admin SDK
- * This should be called once on server startup
+ * Uses environment variables for production deployment on Vercel
  */
 export function getFirebaseAdminApp(): admin.app.App {
   if (adminApp) return adminApp;
 
-  // Check if we're in development or production
-  const isDevelopment = process.env.NODE_ENV === "development";
+  // Use environment variables for all environments (development and production)
+  const projectId = process.env.FIREBASE_PROJECT_ID;
+  const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
+  const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, "\n");
+  
+  if (!projectId || !clientEmail || !privateKey) {
+    throw new Error("Missing Firebase Admin configuration. Please set FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, and FIREBASE_PRIVATE_KEY environment variables.");
+  }
   
   try {
-    if (isDevelopment) {
-      // In development, use service account file
-      const serviceAccount = require("../../../../../service-account.json");
-      adminApp = admin.initializeApp({
-        credential: admin.credential.cert(serviceAccount),
-      }, "vstudent-admin");
-    } else {
-      // In production, use environment variables
-      const projectId = process.env.FIREBASE_PROJECT_ID;
-      const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
-      const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, "\n");
-      
-      if (!projectId || !clientEmail || !privateKey) {
-        throw new Error("Missing Firebase Admin configuration in environment variables");
-      }
-      
-      adminApp = admin.initializeApp({
-        credential: admin.credential.cert({
-          projectId,
-          clientEmail,
-          privateKey,
-        }),
-      }, "vstudent-admin");
-    }
+    adminApp = admin.initializeApp({
+      credential: admin.credential.cert({
+        projectId,
+        clientEmail,
+        privateKey,
+      }),
+    }, "vstudent-admin");
   } catch (error) {
     console.error("Error initializing Firebase Admin SDK:", error);
     throw error;

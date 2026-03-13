@@ -9,26 +9,31 @@ interface SearchBarProps {
   onSearch?: (query: string) => void;
   className?: string;
   showFilters?: boolean;
+  value?: string;
 }
 
 export default function SearchBar({ 
   placeholder = "Search by title, area...", 
   onSearch,
   className = "",
-  showFilters = true 
+  showFilters = true,
+  value: externalValue
 }: SearchBarProps) {
-  const [query, setQuery] = useState("");
+  const [internalQuery, setInternalQuery] = useState("");
   const [isFocused, setIsFocused] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
 
+  // Use external value if provided, otherwise use internal state
+  const query = externalValue !== undefined ? externalValue : internalQuery;
+
   // Initialize with existing search query
   useEffect(() => {
     const existingQuery = searchParams?.get("search");
-    if (existingQuery) {
-      setQuery(existingQuery);
+    if (existingQuery && externalValue === undefined) {
+      setInternalQuery(existingQuery);
     }
-  }, [searchParams]);
+  }, [searchParams, externalValue]);
 
   const handleSearch = (searchQuery: string) => {
     const trimmedQuery = searchQuery.trim();
@@ -57,13 +62,24 @@ export default function SearchBar({
   };
 
   const handleClear = () => {
-    setQuery("");
+    if (externalValue === undefined) {
+      setInternalQuery("");
+    }
     handleSearch("");
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Escape") {
-      setQuery("");
+      if (externalValue === undefined) {
+        setInternalQuery("");
+      }
+    }
+  };
+
+  // Handle input change only when not controlled externally
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (externalValue === undefined) {
+      setInternalQuery(e.target.value);
     }
   };
 
@@ -75,7 +91,7 @@ export default function SearchBar({
           <input
             type="text"
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={handleInputChange}
             onKeyDown={handleKeyDown}
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
