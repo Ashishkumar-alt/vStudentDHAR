@@ -28,6 +28,7 @@ import {
 import { getRoom } from "@/lib/firebase/listings";
 import type { RoomListing } from "@/lib/firebase/models";
 import { formatINR, institutionShortLabel, toWhatsAppLink } from "@/lib/utils";
+import ContactButtons from "@/components/ui/ContactButtons";
 import ReportListing from "@/components/listings/ReportListing";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { PRIMARY_INSTITUTION_SHORT } from "@/lib/constants";
@@ -342,29 +343,10 @@ export default function ModernRoomDetails() {
             {/* Contact Buttons - Desktop */}
             <div className="hidden md:block bg-white rounded-2xl p-6 shadow-sm">
               <h3 className="font-semibold text-gray-900 mb-4">Contact Owner</h3>
-              <div className="space-y-3">
-                {phoneHref && (
-                  <a
-                    href={phoneHref}
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all duration-200 shadow-lg hover:shadow-xl"
-                  >
-                    <Phone className="h-4 w-4" />
-                    <span className="text-base">Call Owner</span>
-                  </a>
-                )}
-                {wa && (
-                  <a
-                    href={wa}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full bg-green-500 hover:bg-green-600 text-white font-medium py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all duration-200 shadow-lg hover:shadow-xl"
-                  >
-                    <MessageCircle className="h-4 w-4" />
-                    <span className="text-base">WhatsApp Owner</span>
-                  </a>
-                )}
-                <p className="text-center text-xs text-gray-500 mt-3 font-medium">{listing.contactPhone}</p>
-              </div>
+              <ContactButtons 
+                phone={listing.contactPhone} 
+                layout="desktop"
+              />
             </div>
 
             {/* Facilities Section */}
@@ -474,29 +456,10 @@ export default function ModernRoomDetails() {
       {/* Sticky Bottom Contact Bar - Mobile Only */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-2xl z-50 md:hidden">
         <div className="p-4">
-          <div className="flex gap-3 max-w-lg mx-auto">
-            {phoneHref && (
-              <a
-                href={phoneHref}
-                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all duration-200 shadow-lg hover:shadow-xl"
-              >
-                <Phone className="h-4 w-4" />
-                <span className="text-base">Call Owner</span>
-              </a>
-            )}
-            {wa && (
-              <a
-                href={wa}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex-1 bg-green-500 hover:bg-green-600 text-white font-medium py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all duration-200 shadow-lg hover:shadow-xl"
-              >
-                <MessageCircle className="h-4 w-4" />
-                <span className="text-base">WhatsApp Owner</span>
-              </a>
-            )}
-          </div>
-          <p className="text-center text-xs text-gray-500 mt-3 font-medium">{listing.contactPhone}</p>
+          <ContactButtons 
+            phone={listing.contactPhone} 
+            layout="mobile"
+          />
         </div>
       </div>
     </div>

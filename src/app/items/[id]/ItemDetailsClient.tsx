@@ -13,6 +13,7 @@ import { PRIMARY_INSTITUTION_SHORT } from "@/lib/constants";
 import FavoriteButton from "@/components/favorites/FavoriteButton";
 import { recordItemView } from "@/lib/firebase/views";
 import SafetyNotice from "@/components/listings/SafetyNotice";
+import PhoneDisplay from "@/components/ui/PhoneDisplay";
 
 export default function ItemDetailsClient() {
   const params = useParams<{ id: string; slug?: string }>();
@@ -160,17 +161,22 @@ export default function ItemDetailsClient() {
           </section>
           <section className="card p-5">
             <h2 className="text-sm font-semibold">Contact</h2>
-            <p className="mt-2 text-sm text-zinc-600">WhatsApp: {listing.contactPhone}</p>
+            <div className="mt-2">
+              <PhoneDisplay 
+                phone={listing.contactPhone}
+                className="text-sm text-zinc-600"
+                showRevealButton={true}
+              />
+            </div>
             <div className="mt-3">
               <SafetyNotice context="item" />
             </div>
-            {wa ? (
-              <a className="btn btn-primary mt-3 w-full" href={wa} target="_blank" rel="noreferrer">
-                Open WhatsApp
-              </a>
-            ) : null}
           </section>
-
+          {wa ? (
+            <a className="btn btn-primary mt-3 w-full" href={wa} target="_blank" rel="noreferrer">
+              Open WhatsApp
+            </a>
+          ) : null}
           <ReportListing listingType="item" listingId={id} />
         </aside>
       </div>

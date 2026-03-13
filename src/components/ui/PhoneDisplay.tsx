@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Phone, Eye, EyeOff } from "lucide-react";
+import { Phone, Eye, EyeOff, LogIn } from "lucide-react";
 import { maskPhoneNumber, getSafePhoneDisplay, type PhoneVisibilityState, createPhoneVisibilityState, revealPhoneWithPermission } from "@/lib/utils/phone-masking";
 import { useAuth } from "@/components/auth/AuthProvider";
 
@@ -19,8 +19,14 @@ export default function PhoneDisplay({ phone, className = "", showRevealButton =
 
   const handleRevealPhone = () => {
     if (!user) {
-      // User not authenticated - could trigger login modal
-      alert("Please sign in to view phone number");
+      // Trigger login modal
+      const loginModal = document.getElementById('login-modal-trigger') as HTMLElement;
+      if (loginModal) {
+        loginModal.click();
+      } else {
+        // Fallback: redirect to login page
+        window.location.href = '/login';
+      }
       return;
     }
 
@@ -46,6 +52,30 @@ export default function PhoneDisplay({ phone, className = "", showRevealButton =
     );
   }
 
+  // If user is not authenticated, show masked phone with login button
+  if (!user) {
+    return (
+      <div className={`flex items-center gap-2 ${className}`}>
+        <Phone className="h-4 w-4 text-gray-600" />
+        <span className="text-sm text-gray-900">
+          {maskPhoneNumber(phone)}
+        </span>
+        
+        {showRevealButton && (
+          <button
+            onClick={handleRevealPhone}
+            className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-700 transition-colors"
+            title="Login to view phone number"
+          >
+            <LogIn className="h-3 w-3" />
+            <span>Login</span>
+          </button>
+        )}
+      </div>
+    );
+  }
+
+  // User is authenticated - show full phone with reveal/hide functionality
   return (
     <div className={`flex items-center gap-2 ${className}`}>
       <Phone className="h-4 w-4 text-gray-600" />
