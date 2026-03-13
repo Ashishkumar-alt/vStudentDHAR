@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { signInWithGoogle } from "@/lib/firebase/auth";
 import { useRouter } from "next/navigation";
+import { getGoogleClientId } from "@/lib/firebase/client";
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -45,7 +46,7 @@ export default function LoginModal({ isOpen, onClose, redirectTo = "/post" }: Lo
     const timer = setTimeout(() => {
       if (window.google) {
         window.google.accounts.id.initialize({
-          client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "YOUR_CLIENT_ID",
+          client_id: getGoogleClientId(),
           callback: window.handleCredentialResponse,
         });
 
