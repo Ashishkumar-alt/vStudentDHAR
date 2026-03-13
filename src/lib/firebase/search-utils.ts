@@ -219,7 +219,7 @@ export async function advancedSearch(searchOptions: SearchOptions & {
   const { amenities, services, postedWithin, ...basicOptions } = searchOptions;
 
   // Get basic search results first
-  let results = await Promise.all([
+  let results: Array<{ id: string; data: DocumentData }[]> = await Promise.all([
     searchRooms(basicOptions),
     searchItems(basicOptions),
   ]);
@@ -283,6 +283,7 @@ export async function advancedSearch(searchOptions: SearchOptions & {
         cutoffDate = new Date(0);
     }
 
+    // Filter each results array by date
     results = results.map(typeResults => 
       typeResults.filter(({ data }) => {
         const createdAt = data.createdAt?.toDate?.();
