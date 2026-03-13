@@ -477,12 +477,13 @@ export default function RoomsClient() {
   return (
     <main className="mx-auto w-full max-w-screen-2xl px-4 py-5 pb-28 sm:py-6 sm:pb-6">
       <section className="space-y-4 sm:space-y-5">
+        {/* Simplified Hero Section */}
         <div className="relative overflow-hidden rounded-[2rem] border border-teal-100 bg-gradient-to-br from-teal-400 via-sky-300 to-emerald-200 p-5 text-slate-900 shadow-[0_20px_48px_rgba(20,184,166,0.18)] sm:p-6">
           <div className="pointer-events-none absolute -left-10 top-8 h-28 w-28 rounded-full bg-white/30 blur-2xl" />
           <div className="pointer-events-none absolute right-0 top-0 h-32 w-32 rounded-full bg-sky-100/60 blur-3xl" />
           <div className="pointer-events-none absolute bottom-0 right-10 h-24 w-24 rounded-full bg-emerald-100/60 blur-2xl" />
 
-          <div className="relative flex items-start justify-between gap-3">
+          <div className="relative flex items-start gap-3">
             <div>
               <div className="inline-flex items-center gap-2 rounded-full border border-white/55 bg-white/35 px-3 py-1 text-xs font-semibold text-slate-800 backdrop-blur">
                 <MapPin className="h-3.5 w-3.5" />
@@ -490,60 +491,52 @@ export default function RoomsClient() {
               </div>
               <h1 className="mt-4 text-3xl font-semibold tracking-tight sm:text-4xl">Find Rooms Near You</h1>
               <p className="mt-2 max-w-xl text-sm text-slate-700/90">
-                Discover verified student stays, compare prices quickly, and browse the best rooms around campus.
+                Discover verified student stays and browse the best rooms around campus.
               </p>
             </div>
-            <Link
-              className="btn h-10 border-white/70 bg-white/80 px-4 text-sm text-slate-900 backdrop-blur hover:bg-white"
-              href="/post/room"
+          </div>
+        </div>
+
+        {/* Prominent Search Bar */}
+        <div className="px-2 sm:px-0">
+          <SearchBar
+            placeholder="Search by title, area, or description..."
+            value={q}
+            onSearch={(newQuery) => setQ(newQuery)}
+            showFilters={false}
+            className="shadow-[0_10px_22px_rgba(14,165,233,0.08)] rounded-xl"
+          />
+        </div>
+
+        {/* Compact Filter Pills */}
+        <div className="flex items-center justify-between gap-3 px-2 sm:px-0">
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              className="inline-flex h-9 items-center rounded-full border border-[color:var(--border)] bg-[color:var(--card)] px-4 text-sm font-medium shadow-[0_6px_14px_rgba(20,184,166,0.08)] transition hover:bg-[color:var(--muted)]"
+              onClick={openSortSheet}
             >
-              Post Room
-            </Link>
+              <ArrowUpDown className="mr-2 h-4 w-4 text-teal-600" />
+              Sort
+            </button>
+            <button
+              type="button"
+              className="inline-flex h-9 items-center rounded-full border border-[color:var(--border)] bg-[color:var(--card)] px-4 text-sm font-medium shadow-[0_6px_14px_rgba(20,184,166,0.08)] transition hover:bg-[color:var(--muted)]"
+              onClick={openFilterSheet}
+            >
+              <SlidersHorizontal className="mr-2 h-4 w-4 text-sky-600" />
+              Filters
+              {activeFilterCount ? (
+                <span className="ml-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-[color:var(--foreground)] px-1.5 text-[10px] font-semibold text-[color:var(--background)]">
+                  {activeFilterCount}
+                </span>
+              ) : null}
+            </button>
           </div>
-
-          <div className="relative mt-4 rounded-[1.6rem] border border-white/55 bg-white/45 p-3 shadow-[0_10px_26px_rgba(15,23,42,0.06)] backdrop-blur">
-            <div className="text-sm font-medium text-slate-800">Great ! We picked the best stays for you</div>
-            <div className="mt-1 text-xs text-slate-700/75">
-              {loading ? "Loading..." : `${filtered.length} rooms live now`} · Sorted by {currentSortLabel}
-            </div>
+          
+          <div className="text-sm text-zinc-600">
+            {loading ? "Loading..." : `${filtered.length} room${filtered.length === 1 ? "" : "s"}`}
           </div>
-        </div>
-
-        <SearchBar
-          placeholder="Search by title, area, or description..."
-          value={q}
-          onSearch={(newQuery) => setQ(newQuery)}
-          showFilters={true}
-          className="shadow-[0_10px_22px_rgba(14,165,233,0.08)]"
-        />
-
-        <div className="flex items-center gap-2 pt-1">
-          <button
-            type="button"
-            className="inline-flex h-9 items-center rounded-full border border-[color:rgba(20,184,166,0.14)] bg-[color:rgba(240,253,250,0.95)] px-4 text-sm font-medium text-slate-700 shadow-[0_6px_14px_rgba(20,184,166,0.08)] transition hover:bg-[color:rgba(236,253,245,1)]"
-            onClick={openSortSheet}
-          >
-            <ArrowUpDown className="mr-2 h-4 w-4 text-teal-600" />
-            Sort
-          </button>
-          <button
-            type="button"
-            className="inline-flex h-9 items-center rounded-full border border-[color:rgba(14,165,233,0.14)] bg-[color:rgba(240,249,255,0.95)] px-4 text-sm font-medium text-slate-700 shadow-[0_6px_14px_rgba(14,165,233,0.08)] transition hover:bg-[color:rgba(239,246,255,1)]"
-            onClick={openFilterSheet}
-          >
-            <SlidersHorizontal className="mr-2 h-4 w-4 text-sky-600" />
-            Filters
-            {activeFilterCount ? (
-              <span className="ml-2 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-[color:var(--foreground)] px-1.5 text-[10px] font-semibold text-[color:var(--background)]">
-                {activeFilterCount}
-              </span>
-            ) : null}
-          </button>
-        </div>
-
-        <div className="flex items-center justify-between gap-3 pt-1 text-sm text-zinc-600">
-          <span>{loading ? "Loading rooms..." : `${filtered.length} room${filtered.length === 1 ? "" : "s"}`}</span>
-          <span className="truncate">Sorted by {currentSortLabel}</span>
         </div>
       </section>
 

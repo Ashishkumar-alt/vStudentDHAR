@@ -119,11 +119,6 @@ export default function SearchBar({
         
         {showFilters && (
           <div className="mt-3 flex items-center justify-between">
-            <div className="flex items-center gap-2 text-xs text-gray-500">
-              <span>Press Enter to search</span>
-              <span>•</span>
-              <span>ESC to clear</span>
-            </div>
             <button
               type="button"
               className="inline-flex items-center gap-1 rounded-full border border-gray-200 px-3 py-1 text-xs text-gray-600 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
