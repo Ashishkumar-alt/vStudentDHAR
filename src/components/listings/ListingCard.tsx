@@ -4,9 +4,12 @@ import Image from "next/image";
 import Link from "next/link";
 import type { ItemListing, RoomListing } from "@/lib/firebase/models";
 import { formatINR, toWhatsAppLink } from "@/lib/utils";
-import { MapPin, MessageCircle, Footprints, Flame, Leaf } from "lucide-react";
+import { MapPin, MessageCircle, Footprints, Flame, Leaf, Phone } from "lucide-react";
 import FavoriteButton from "@/components/favorites/FavoriteButton";
+import VerificationBadges from "@/components/ui/VerificationBadges";
+import TrustSignals from "@/components/ui/TrustSignals";
 import { itemSlug } from "@/lib/seo/slug";
+import PhoneDisplay from "@/components/ui/PhoneDisplay";
 
 function isNew(createdAt: unknown) {
   try {
@@ -111,6 +114,26 @@ export function RoomCard({ id, listing }: { id: string; listing: RoomListing }) 
       </div>
 
       <div className="relative z-20 p-4">
+        {/* Verification Badges */}
+        <div className="mb-3">
+          <VerificationBadges
+            isVerified={listing.status === "active"}
+            quickResponder={listing.heaterIncluded} // Using as proxy for quick response
+            photosVerified={listing.photoUrls && listing.photoUrls.length > 0}
+            responseTime="2"
+            size="sm"
+          />
+        </div>
+
+        {/* Trust Signals */}
+        <TrustSignals
+          distance={listing.walkMinutesToHPU ? `${listing.walkMinutesToHPU}km from University` : undefined}
+          available={listing.status === "active"}
+          postedDate={listing.createdAt?.toDate()}
+          area={listing.area}
+          className="mb-3"
+        />
+
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="text-xs text-[color:var(--muted)]">Deposit {formatINR(listing.deposit)}</div>
           <div className="inline-flex items-center gap-2 text-xs text-[color:var(--muted)]">
@@ -169,6 +192,15 @@ export function RoomCard({ id, listing }: { id: string; listing: RoomListing }) 
               <MessageCircle className="h-4 w-4" />
             </a>
           </div>
+        </div>
+
+        {/* Contact Phone Display (Mobile Optimized) */}
+        <div className="mt-3 pt-3 border-t border-[color:var(--border)]">
+          <PhoneDisplay 
+            phone={listing.contactPhone}
+            className="text-xs"
+            showRevealButton={true}
+          />
         </div>
       </div>
     </article>

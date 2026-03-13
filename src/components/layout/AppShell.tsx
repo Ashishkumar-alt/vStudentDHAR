@@ -10,6 +10,10 @@ import { Home, House, ShoppingBag, Plus, User, Shield, Menu, X, Heart } from "lu
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "@/components/theme/ThemeProvider";
 import { watchIsAdmin } from "@/lib/firebase/admin";
+import MobileBottomNav from "@/components/navigation/MobileBottomNav";
+import MobilePostButton from "@/components/navigation/MobileBottomNav";
+import FeatureGate from "@/components/ui/FeatureGate";
+import ComingSoon from "@/components/ui/ComingSoon";
 
 function NavPill({
   href,
@@ -98,7 +102,25 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           <nav className="hidden items-center gap-1 rounded-full bg-[color:color-mix(in srgb, var(--card) 68%, transparent)] p-1 ring-1 ring-[color:var(--border)] sm:flex">
             <NavPill href="/" label="Home" icon={<Home className="h-4 w-4" />} />
             <NavPill href="/rooms" label="Rooms" icon={<House className="h-4 w-4" />} />
-            <NavPill href="/items" label="Items" icon={<ShoppingBag className="h-4 w-4" />} />
+            <FeatureGate 
+              feature="ITEMS_FEATURE_ENABLED"
+              fallback={
+                <div className="relative group">
+                  <button
+                    className="focus-ring inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium text-[color:var(--muted)] transition-all duration-200 hover:text-[color:var(--foreground)] hover:bg-[color:color-mix(in srgb, var(--card) 65%, transparent)]"
+                    onClick={() => window.location.href = '/items'}
+                  >
+                    <span className="opacity-80"><ShoppingBag className="h-4 w-4" /></span>
+                    <span>Items</span>
+                    <span className="absolute -top-1 -right-1 rounded-full bg-amber-100 px-1.5 py-0.5 text-xs font-medium text-amber-800">
+                      Soon
+                    </span>
+                  </button>
+                </div>
+              }
+            >
+              <NavPill href="/items" label="Items" icon={<ShoppingBag className="h-4 w-4" />} />
+            </FeatureGate>
             <NavPill href="/saved" label="Saved" icon={<Heart className="h-4 w-4" />} />
             <NavPill href="/my-listings" label="My Listings" icon={<User className="h-4 w-4" />} />
           </nav>
@@ -225,17 +247,11 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
       <div className="pb-16 sm:pb-0 md:pb-0">{children}</div>
 
-      {/* Hide bottom navigation on maintenance page and desktop */}
-      {!isMaintenancePage && (
-        <nav className="app-bottom-nav fixed bottom-0 left-0 right-0 z-30 border-t border-[color:var(--border)] backdrop-blur sm:hidden md:hidden">
-          <div className="mx-auto grid w-full max-w-screen-2xl grid-cols-4 gap-1 px-2 py-2">
-            <MobileTab href="/rooms" label="Rooms" icon="rooms" />
-            <MobileTab href="/items" label="Items" icon="items" />
-            <MobileTab href="/post" label="Post" icon="post" />
-            <MobileTab href="/profile" label="Me" icon="me" />
-          </div>
-        </nav>
-      )}
+      {/* Enhanced Mobile Bottom Navigation */}
+      <MobileBottomNav />
+      
+      {/* Floating Post Button for Mobile */}
+      <MobilePostButton />
 
       <footer className="mx-auto w-full max-w-screen-2xl px-4 pt-10 pb-24 text-center text-xs text-[color:var(--muted)] sm:py-10">
         <div className="flex flex-col items-center justify-center gap-2 sm:flex-row sm:gap-3">
@@ -271,42 +287,6 @@ function MenuLink({ href, label, icon }: { href: string; label: string; icon: Re
         {icon}
       </span>
       {label}
-    </Link>
-  );
-}
-
-function MobileTab({
-  href,
-  label,
-  icon,
-}: {
-  href: string;
-  label: string;
-  icon: "rooms" | "items" | "post" | "me";
-}) {
-  const pathname = usePathname();
-  const active = pathname === href || (href !== "/" && pathname?.startsWith(href));
-  const IconEl =
-    icon === "rooms" ? House : icon === "items" ? ShoppingBag : icon === "post" ? Plus : User;
-  return (
-    <Link
-      href={href}
-      className={[
-        "focus-ring flex flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2 text-[11px] transition",
-        active ? "text-[color:var(--foreground)]" : "text-[color:var(--muted)]",
-      ].join(" ")}
-    >
-      <div
-        className={[
-          "flex h-9 w-9 items-center justify-center rounded-2xl ring-1 ring-[color:var(--border)]",
-          active
-            ? "bg-[color:var(--foreground)] text-[color:var(--background)] shadow-sm"
-            : "bg-[color:color-mix(in srgb, var(--card) 78%, transparent)] text-[color:var(--foreground)]",
-        ].join(" ")}
-      >
-        <IconEl className="h-5 w-5" />
-      </div>
-      <span className="font-medium">{label}</span>
     </Link>
   );
 }

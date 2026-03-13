@@ -18,6 +18,7 @@ import { asNumber } from "@/lib/utils";
 import { RoomCard } from "@/components/listings/ListingCard";
 import { useRooms } from "@/components/listings/useListings";
 import { CardSkeleton } from "@/components/ui/Skeleton";
+import SearchBar from "@/components/search/SearchBar";
 
 type SortOption = "new" | "priceAsc" | "priceDesc";
 type FilterCategory = "locality" | "budget" | "gender" | "amenities" | "services";
@@ -508,15 +509,13 @@ export default function RoomsClient() {
           </div>
         </div>
 
-        <div className="relative">
-          <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[color:var(--muted)]" />
-          <input
-            className="h-12 w-full rounded-full border border-[color:color-mix(in srgb, #67e8f9 22%, var(--border) 78%)] bg-[color:var(--card)] pl-11 pr-4 text-sm text-[color:var(--foreground)] shadow-[0_10px_22px_rgba(14,165,233,0.08)] outline-none transition placeholder:text-[color:var(--muted)] focus:border-[color:color-mix(in srgb, #14b8a6 38%, var(--border) 62%)] focus:ring-2 focus:ring-[color:rgba(20,184,166,0.12)]"
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="Search area or room"
-          />
-        </div>
+        <SearchBar
+          placeholder="Search by title, area, or description..."
+          value={q}
+          onSearch={(newQuery) => setQ(newQuery)}
+          showFilters={true}
+          className="shadow-[0_10px_22px_rgba(14,165,233,0.08)]"
+        />
 
         <div className="flex items-center gap-2 pt-1">
           <button

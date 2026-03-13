@@ -6,9 +6,9 @@ import HomePreviews from "@/components/home/HomePreviews";
 import { PRIMARY_INSTITUTION_SHORT } from "@/lib/constants";
 
 export const metadata: Metadata = {
-  title: "Rooms & PG in Dharamshala for Students",
+  title: "Find Student Rooms in Dharamshala - vStudent",
   description:
-    "vStudent is a local student marketplace to find rooms and PG in Dharamshala near Central University. Browse verified listings, filter by area, and contact owners on WhatsApp.",
+    "Find student rooms and PGs in Dharamshala near Central University, Upper Sakoh, and Kachcheri. Verified listings, direct contact, no broker fees.",
   alternates: { canonical: "/" },
 };
 
@@ -36,13 +36,13 @@ export default function Home() {
               Dharamshala student Marketplace
             </div>
             <h1 className="mt-5 text-3xl font-semibold leading-tight tracking-tight text-white sm:text-4xl md:text-5xl">
-              Find rooms & student items
+              Find Student Rooms in Dharamshala
             </h1>
             <p className="mt-4 text-base text-white/80 sm:text-lg md:text-xl max-w-3xl mx-auto">
-              Near {PRIMARY_INSTITUTION_SHORT}, Kachcheri, Sakoh Upper. Post fast, contact directly on WhatsApp.
+              Rooms and PGs near Central University, Upper Sakoh, and Kachcheri.
             </p>
             <p className="mt-2 text-sm font-medium text-white/90 sm:text-base md:text-lg">
-              Dhoop mein mat ghoomo. vStudent kholo.
+              Room dhundna ab easy ho gaya.
             </p>
 
             <div className="mt-8 md:mt-10">
