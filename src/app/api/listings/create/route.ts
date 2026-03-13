@@ -1,10 +1,37 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withAuth, type AuthenticatedUser } from "@/lib/auth/middleware";
 import { createRoom, createItem } from "@/lib/firebase/listings";
 import { SpamLimitError, getRemainingListingsToday } from "@/lib/firebase/anti-spam";
 import { adminRef, userRef } from "@/lib/firebase/refs";
 import { getDoc } from "firebase/firestore";
+import { z } from "zod";
 
-// Helper function to verify user authentication
+// Validation schemas
+const roomListingSchema = z.object({
+  title: z.string().min(3).max(100),
+  area: z.string().min(2).max(50),
+  description: z.string().max(1200).optional(),
+  contactPhone: z.string().regex(/^\+?[0-9]{8,15}$/, "Invalid phone number"),
+  rent: z.number().min(0).max(100000),
+  deposit: z.number().min(0).max(100000),
+  genderAllowed: z.enum(["male", "female", "any"]),
+  address: z.string().max(200),
+  institution: z.string().max(100).optional(),
+  sunFacing: z.boolean().optional(),
+  mountainView: z.boolean().optional(),
+});
+
+const itemListingSchema = z.object({
+  title: z.string().min(3).max(100),
+  area: z.string().min(2).max(50),
+  description: z.string().max(1200).optional(),
+  contactPhone: z.string().regex(/^\+?[0-9]{8,15}$/, "Invalid phone number"),
+  price: z.number().min(0).max(100000),
+  category: z.string().min(2).max(50),
+  condition: z.string().min(2).max(50),
+});
+
+// Helper function to verify user exists and is valid
 async function verifyUser(userId: string) {
   const userDoc = await getDoc(userRef(userId));
   if (!userDoc.exists()) {
@@ -13,21 +40,16 @@ async function verifyUser(userId: string) {
   return userDoc.data();
 }
 
-export async function POST(request: NextRequest) {
+// Validate listing data
+function validateListingData(data: any, type: "room" | "item") {
+  const schema = type === "room" ? roomListingSchema : itemListingSchema;
+  return schema.parse(data);
+}
+
+export const POST = withAuth(async (request: NextRequest, user: AuthenticatedUser) => {
   try {
-    // Get authorization header
-    const authHeader = request.headers.get("authorization");
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return NextResponse.json({ error: "Unauthorized: Missing or invalid token" }, { status: 401 });
-    }
-
-    const userId = authHeader.split(" ")[1];
-    if (!userId) {
-      return NextResponse.json({ error: "Unauthorized: Invalid user ID" }, { status: 401 });
-    }
-
-    // Verify user exists
-    await verifyUser(userId);
+    // Verify user exists in database
+    await verifyUser(user.uid);
 
     // Parse form data
     const formData = await request.formData();
@@ -44,8 +66,22 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid listing type. Must be 'room' or 'item'" }, { status: 400 });
     }
 
-    // Add userId to listing data
-    listingData.createdBy = userId;
+    // Validate listing data with Zod
+    try {
+      validateListingData(listingData, type as "room" | "item");
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return NextResponse.json({ 
+          error: "Invalid listing data", 
+          details: error.issues 
+        }, { status: 400 });
+      }
+      throw error;
+    }
+
+    // Add user ID to listing data
+    listingData.createdBy = user.uid;
+    listingData.createdByEmail = user.email;
 
     // Create listing based on type
     let listingId: string;
@@ -66,7 +102,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get remaining listings for user info
-    const remainingListings = await getRemainingListingsToday(userId);
+    const remainingListings = await getRemainingListingsToday(user.uid);
 
     return NextResponse.json({
       success: true,
@@ -79,35 +115,24 @@ export async function POST(request: NextRequest) {
     console.error("Error creating listing:", error);
     
     const errorMessage = error instanceof Error ? error.message : "Failed to create listing";
-    const statusCode = errorMessage.includes("Unauthorized") ? 401 : 
-                      errorMessage.includes("not found") ? 404 :
-                      errorMessage.includes("Invalid") ? 400 : 500;
+    const statusCode = errorMessage.includes("not found") ? 404 :
+                      errorMessage.includes("Invalid") ? 400 :
+                      errorMessage.includes("Unauthorized") ? 401 : 500;
 
     return NextResponse.json(
       { error: errorMessage },
       { status: statusCode }
     );
   }
-}
+});
 
-export async function GET(request: NextRequest) {
+export const GET = withAuth(async (request: NextRequest, user: AuthenticatedUser) => {
   try {
-    // Get authorization header
-    const authHeader = request.headers.get("authorization");
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return NextResponse.json({ error: "Unauthorized: Missing or invalid token" }, { status: 401 });
-    }
-
-    const userId = authHeader.split(" ")[1];
-    if (!userId) {
-      return NextResponse.json({ error: "Unauthorized: Invalid user ID" }, { status: 401 });
-    }
-
     // Verify user exists
-    await verifyUser(userId);
+    await verifyUser(user.uid);
 
     // Get remaining listings for today
-    const remainingListings = await getRemainingListingsToday(userId);
+    const remainingListings = await getRemainingListingsToday(user.uid);
     const currentCount = 4 - remainingListings; // Since limit is 4
 
     return NextResponse.json({
@@ -122,12 +147,12 @@ export async function GET(request: NextRequest) {
     console.error("Error getting listing limits:", error);
     
     const errorMessage = error instanceof Error ? error.message : "Failed to get listing limits";
-    const statusCode = errorMessage.includes("Unauthorized") ? 401 : 
-                      errorMessage.includes("not found") ? 404 : 500;
+    const statusCode = errorMessage.includes("not found") ? 404 :
+                      errorMessage.includes("Unauthorized") ? 401 : 500;
 
     return NextResponse.json(
       { error: errorMessage },
       { status: statusCode }
     );
   }
-}
+});

@@ -223,11 +223,11 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       </header>
       )}
 
-      <div className="pb-16 sm:pb-0">{children}</div>
+      <div className="pb-16 sm:pb-0 md:pb-0">{children}</div>
 
-      {/* Hide bottom navigation on maintenance page */}
+      {/* Hide bottom navigation on maintenance page and desktop */}
       {!isMaintenancePage && (
-        <nav className="app-bottom-nav fixed bottom-0 left-0 right-0 z-30 border-t border-[color:var(--border)] backdrop-blur sm:hidden">
+        <nav className="app-bottom-nav fixed bottom-0 left-0 right-0 z-30 border-t border-[color:var(--border)] backdrop-blur sm:hidden md:hidden">
           <div className="mx-auto grid w-full max-w-screen-2xl grid-cols-4 gap-1 px-2 py-2">
             <MobileTab href="/rooms" label="Rooms" icon="rooms" />
             <MobileTab href="/items" label="Items" icon="items" />

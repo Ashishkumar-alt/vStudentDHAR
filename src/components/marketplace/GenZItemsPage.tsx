@@ -187,7 +187,7 @@ export default function GenZItemsPage() {
       {/* Browse Categories */}
       <section className="px-4 pb-6">
         <h2 className="text-xl font-bold text-gray-900 mb-4">Browse Categories</h2>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {mainCategories.map((category) => {
             const Icon = categoryIcons[category] || ShoppingBag;
             const count = categoryStats[category] || 0;
@@ -197,7 +197,7 @@ export default function GenZItemsPage() {
               <button
                 key={category}
                 onClick={() => setSelectedCategory(selectedCategory === category ? "" : category)}
-                className={`p-4 rounded-2xl border-2 transition-all ${
+                className={`p-6 rounded-2xl border-2 transition-all h-full min-h-[140px] flex flex-col items-center justify-center text-center hover:shadow-lg hover:-translate-y-1 ${
                   selectedCategory === category
                     ? colorClass.replace('100', '200').replace('text-', 'bg-').replace('border-', 'text-')
                     : colorClass

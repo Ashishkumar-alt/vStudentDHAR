@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 
 export default function Home() {
   return (
-    <main className="mx-auto w-full max-w-screen-2xl space-y-16 px-4 py-10">
+    <main className="container mx-auto max-w-6xl px-4 md:px-6 space-y-16 py-10">
       <section className="card card-hover relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-indigo-600 to-fuchsia-600" />
         <div className="absolute inset-0 opacity-[0.18] blur-2xl sm:opacity-[0.14]">
@@ -30,22 +30,24 @@ export default function Home() {
             priority
           />
         </div>
-        <div className="relative p-6 sm:p-12">
-          <div className="inline-flex rounded-full bg-white/15 px-3 py-1 text-xs font-medium text-white/90">
-            Dharamshala student Marketplace
-          </div>
-          <h1 className="mt-5 text-4xl font-semibold leading-tight tracking-tight text-white sm:text-5xl">
-            Find rooms & student items
-          </h1>
-          <p className="mt-4 max-w-2xl text-base text-white/80">
-            Near {PRIMARY_INSTITUTION_SHORT}, Kachcheri, Sakoh Upper. Post fast, contact directly on WhatsApp.
-          </p>
-          <p className="mt-2 max-w-2xl text-sm font-medium text-white/90">
-            Dhoop mein mat ghoomo. vStudent kholo.
-          </p>
+        <div className="relative p-6 sm:p-12 md:p-16">
+          <div className="max-w-4xl mx-auto text-center">
+            <div className="inline-flex rounded-full bg-white/15 px-3 py-1 text-xs font-medium text-white/90">
+              Dharamshala student Marketplace
+            </div>
+            <h1 className="mt-5 text-3xl font-semibold leading-tight tracking-tight text-white sm:text-4xl md:text-5xl">
+              Find rooms & student items
+            </h1>
+            <p className="mt-4 text-base text-white/80 sm:text-lg md:text-xl max-w-3xl mx-auto">
+              Near {PRIMARY_INSTITUTION_SHORT}, Kachcheri, Sakoh Upper. Post fast, contact directly on WhatsApp.
+            </p>
+            <p className="mt-2 text-sm font-medium text-white/90 sm:text-base md:text-lg">
+              Dhoop mein mat ghoomo. vStudent kholo.
+            </p>
 
-          <div className="mt-8">
-            <AreaQuickChips />
+            <div className="mt-8 md:mt-10">
+              <AreaQuickChips />
+            </div>
           </div>
         </div>
       </section>

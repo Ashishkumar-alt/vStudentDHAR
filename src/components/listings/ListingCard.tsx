@@ -42,12 +42,34 @@ export function RoomCard({ id, listing }: { id: string; listing: RoomListing }) 
         {listing.photoUrls?.[0] ? (
           <Image
             src={listing.photoUrls[0]}
-            alt={listing.title}
+            alt={listing.title || "Room listing"}
             fill
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             className="object-cover transition duration-500 group-hover:scale-[1.04]"
+            priority={false}
+            placeholder="blur"
+            blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwA/8A8A"
+            onError={(e) => {
+              // Fallback to placeholder if image fails to load
+              const target = e.target as HTMLImageElement;
+              target.style.display = 'none';
+              const parent = target.parentElement;
+              if (parent && !parent.querySelector('.fallback-placeholder')) {
+                const placeholder = document.createElement('div');
+                placeholder.className = 'fallback-placeholder absolute inset-0 flex items-center justify-center bg-gray-100 text-gray-400';
+                placeholder.innerHTML = '<div class="text-center"><div class="text-4xl mb-2">🏠</div><div class="text-sm">No Image</div></div>';
+                parent.appendChild(placeholder);
+              }
+            }}
           />
-        ) : null}
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center bg-gray-100 text-gray-400">
+            <div className="text-center">
+              <div className="text-4xl mb-2">🏠</div>
+              <div className="text-sm">No Image</div>
+            </div>
+          </div>
+        )}
 
         <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
 
@@ -176,11 +198,34 @@ export function ItemCard({ id, listing }: { id: string; listing: ItemListing }) 
         {listing.photoUrls?.[0] ? (
           <Image
             src={listing.photoUrls[0]}
-            alt={listing.title}
+            alt={listing.title || "Item listing"}
             fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             className="object-cover transition duration-500 group-hover:scale-[1.04]"
+            priority={false}
+            placeholder="blur"
+            blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwA/8A8A"
+            onError={(e) => {
+              // Fallback to placeholder if image fails to load
+              const target = e.target as HTMLImageElement;
+              target.style.display = 'none';
+              const parent = target.parentElement;
+              if (parent && !parent.querySelector('.fallback-placeholder')) {
+                const placeholder = document.createElement('div');
+                placeholder.className = 'fallback-placeholder absolute inset-0 flex items-center justify-center bg-gray-100 text-gray-400';
+                placeholder.innerHTML = '<div class="text-center"><div class="text-4xl mb-2">📦</div><div class="text-sm">No Image</div></div>';
+                parent.appendChild(placeholder);
+              }
+            }}
           />
-        ) : null}
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center bg-gray-100 text-gray-400">
+            <div className="text-center">
+              <div className="text-4xl mb-2">📦</div>
+              <div className="text-sm">No Image</div>
+            </div>
+          </div>
+        )}
         <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/60 via-black/25 to-transparent" />
         <div className="absolute left-3 top-3 flex flex-wrap gap-2">
           {listing.status === "active" ? (

@@ -1,0 +1,191 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    function isAdmin() {
+      return isSignedIn() && 
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+    
+    function isValidEmail(email) {
+      return email.matches('.+@.+\\..+');
+    }
+    
+    function isValidPhone(phone) {
+      return phone.matches('^\\+?[0-9]{8,15}$');
+    }
+    
+    function isValidListingData(data) {
+      return data.keys().hasAll([
+        'title', 'area', 'contactPhone', 'createdBy', 
+        'createdAt', 'status'
+      ]) &&
+      data.title is string &&
+      data.title.size() > 2 && data.title.size() <= 100 &&
+      data.area is string &&
+      data.area.size() > 2 && data.area.size() <= 50 &&
+      isValidPhone(data.contactPhone) &&
+      data.createdBy == request.auth.uid &&
+      data.status in ['pending', 'active', 'rejected', 'deleted'];
+    }
+    
+    function isValidUserData(data) {
+      return data.keys().hasAll(['uid', 'email', 'createdAt']) &&
+        data.uid == request.auth.uid &&
+        isValidEmail(data.email);
+    }
+    
+    function canReadListing(resource) {
+      return resource.data.status == "active" || 
+        isAdmin() || 
+        (isSignedIn() && resource.data.createdBy == request.auth.uid);
+    }
+    
+    function canUpdateListing(resource) {
+      return isAdmin() ||
+        (isSignedIn() && 
+          resource.data.createdBy == request.auth.uid &&
+          request.resource.data.createdBy == resource.data.createdBy &&
+          request.resource.data.createdAt == resource.data.createdAt &&
+          // Only allow status change to pending (for resubmission) or keep same
+          (request.resource.data.status == resource.data.status || 
+           (resource.data.status == 'rejected' && request.resource.data.status == 'pending')));
+    }
+
+    // Admin collection - only manual setup or system creation
+    match /admins/{uid} {
+      allow read: if isAdmin() || (isSignedIn() && request.auth.uid == uid);
+      allow write: if false; // Admins must be created manually or through system
+      allow create: if false; // No direct creation
+      allow update: if false; // No direct updates
+      allow delete: if false; // No direct deletion
+    }
+
+    // Users collection
+    match /users/{uid} {
+      allow read: if isAdmin() || (isSignedIn() && request.auth.uid == uid);
+      allow create: if isSignedIn() && 
+        request.auth.uid == uid &&
+        isValidUserData(request.resource.data);
+      allow update: if isAdmin() || 
+        (isSignedIn() && 
+          request.auth.uid == uid &&
+          // Don't allow changing uid or email
+          request.resource.data.uid == resource.data.uid &&
+          request.resource.data.email == resource.data.email &&
+          // Only allow updating own fields
+          request.resource.data.keys().hasAll(['uid', 'email', 'createdAt', 'updatedAt']) &&
+          request.resource.data.updatedTime == request.time);
+      allow delete: if isAdmin(); // Only admins can delete users
+
+      // Favorites subcollection
+      match /favorites/{favId} {
+        allow read: if isSignedIn() && request.auth.uid == uid;
+        allow create: if isSignedIn() && 
+          request.auth.uid == uid &&
+          request.resource.data.keys().hasAll(['listingId', 'listingType', 'createdAt']);
+        allow update: if isSignedIn() && request.auth.uid == uid;
+        allow delete: if isSignedIn() && request.auth.uid == uid;
+      }
+    }
+
+    // Rooms collection
+    match /rooms/{id} {
+      allow read: if canReadListing(resource);
+      allow create: if isSignedIn() && 
+        isValidListingData(request.resource.data) &&
+        request.resource.data.keys().hasAll(['rent', 'deposit', 'genderAllowed', 'address']) &&
+        request.resource.data.rent is number &&
+        request.resource.data.rent >= 0 &&
+        request.resource.data.deposit is number &&
+        request.resource.data.deposit >= 0 &&
+        request.resource.data.genderAllowed in ['male', 'female', 'any'];
+      allow update: if canUpdateListing(resource) &&
+        isValidListingData(request.resource.data);
+      allow delete: if isAdmin() || 
+        (isSignedIn() && resource.data.createdBy == request.auth.uid);
+        
+      // Views tracking - users can only view their own view records
+      match /views/{viewerId} {
+        allow read: if isAdmin() || 
+          (isSignedIn() && 
+            get(/databases/$(database)/documents/rooms/$(id)).data.createdBy == request.auth.uid);
+        allow create: if isSignedIn() && request.auth.uid == viewerId;
+        allow update: if isSignedIn() && request.auth.uid == viewerId;
+        allow delete: if false;
+      }
+    }
+
+    // Items collection
+    match /items/{id} {
+      allow read: if canReadListing(resource);
+      allow create: if isSignedIn() && 
+        isValidListingData(request.resource.data) &&
+        request.resource.data.keys().hasAll(['price', 'category', 'condition']) &&
+        request.resource.data.price is number &&
+        request.resource.data.price >= 0 &&
+        request.resource.data.category is string &&
+        request.resource.data.category.size() > 2 &&
+        request.resource.data.condition is string &&
+        request.resource.data.condition.size() > 2;
+      allow update: if canUpdateListing(resource) &&
+        isValidListingData(request.resource.data);
+      allow delete: if isAdmin() || 
+        (isSignedIn() && resource.data.createdBy == request.auth.uid);
+        
+      // Views tracking
+      match /views/{viewerId} {
+        allow read: if isAdmin() || 
+          (isSignedIn() && 
+            get(/databases/$(database)/documents/items/$(id)).data.createdBy == request.auth.uid);
+        allow create: if isSignedIn() && request.auth.uid == viewerId;
+        allow update: if isSignedIn() && request.auth.uid == viewerId;
+        allow delete: if false;
+      }
+    }
+
+    // Reports collection
+    match /reports/{id} {
+      allow read: if isAdmin();
+      allow create: if isSignedIn() &&
+        request.resource.data.createdBy == request.auth.uid &&
+        request.resource.data.status == "open" &&
+        request.resource.data.keys().hasAll([
+          'listingId', 'listingType', 'reason', 'createdBy', 'createdAt'
+        ]) &&
+        request.resource.data.reason is string &&
+        request.resource.data.reason.size() > 10 &&
+        request.resource.data.reason.size() <= 500;
+      allow update: if isAdmin() &&
+        request.resource.data.status in ['resolved', 'dismissed'];
+      allow delete: if false;
+    }
+
+    // Admin logs collection - audit trail
+    match /admin_logs/{id} {
+      allow read: if isAdmin();
+      allow create: if isAdmin() &&
+        request.resource.data.keys().hasAll([
+          'adminId', 'action', 'targetId', 'targetType', 'timestamp', 'details'
+        ]) &&
+        request.resource.data.adminId == request.auth.uid &&
+        request.resource.data.action is string &&
+        request.resource.data.targetId is string &&
+        request.resource.data.targetType in ['room', 'item', 'user', 'report'];
+      allow update: if false; // Logs are immutable
+      allow delete: if false; // Logs are immutable
+    }
+
+    // System settings collection (for admin configuration)
+    match /settings/{settingId} {
+      allow read: if isAdmin();
+      allow create: if isAdmin();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+  }
+}

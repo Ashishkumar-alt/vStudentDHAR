@@ -1,125 +1,111 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withAdminAuth, type AdminUser } from "@/lib/auth/middleware";
 import { approveRoom, rejectRoom, softDeleteRoom, approveItem, rejectItem, softDeleteItem } from "@/lib/firebase/listings";
 import { adminRef, userRef } from "@/lib/firebase/refs";
 import { getDoc, doc } from "firebase/firestore";
 import { getDb } from "@/lib/firebase/db";
+import { z } from "zod";
 
-// Helper function to get user email from Firestore
-async function getUserEmail(uid: string): Promise<string> {
-  const userDoc = await getDoc(userRef(uid));
-  const userData = userDoc.data();
-  return userData?.email || "admin@vstudent.in";
-}
+// Validation schema for moderation actions
+const moderationSchema = z.object({
+  action: z.enum(["approve", "reject", "delete"]),
+  type: z.enum(["room", "item"]),
+  id: z.string().min(1),
+  reason: z.string().optional(),
+});
 
-// Helper function to verify admin status and get user info
-async function getAdminInfo(uid: string) {
-  const [adminDoc, userDoc] = await Promise.all([
-    getDoc(adminRef(uid)),
-    getDoc(userRef(uid))
-  ]);
-  
-  if (!adminDoc.exists()) {
-    throw new Error("Admin access required");
-  }
-  
-  const userData = userDoc.data();
-  return {
-    isAdmin: true,
-    adminEmail: userData?.email || "admin@vstudent.in"
-  };
-}
-
-export async function POST(request: NextRequest) {
+// Helper function to log admin actions
+async function logAdminAction(admin: AdminUser, action: string, targetType: string, targetId: string, details?: any) {
   try {
-    // Get authorization header
-    const authHeader = request.headers.get("authorization");
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return NextResponse.json({ error: "Unauthorized: Missing or invalid token" }, { status: 401 });
-    }
+    const { getFirebaseAdminFirestore } = await import("@/lib/firebase/admin-server");
+    const db = getFirebaseAdminFirestore();
+    await db.collection("admin_logs").add({
+      adminId: admin.uid,
+      adminEmail: admin.email,
+      action,
+      targetType,
+      targetId,
+      timestamp: new Date(),
+      details: details || {},
+    });
+  } catch (error) {
+    console.error("Failed to log admin action:", error);
+  }
+}
 
-    // Extract token (in a real app, you'd verify this token)
-    const token = authHeader.split(" ")[1];
-    
-    // For now, we'll assume the token contains the user ID
-    // In production, you'd verify the Firebase ID token
-    const userId = token || ""; // Ensure userId is not undefined
-
-    // Verify admin status and get admin info
-    const adminInfo = await getAdminInfo(userId);
-
+export const POST = withAdminAuth(async (request: NextRequest, admin: AdminUser) => {
+  try {
     const body = await request.json();
-    const { action, type, id, reason } = body;
+    
+    // Validate request body
+    const validatedData = moderationSchema.parse(body);
+    const { action, type, id, reason } = validatedData;
 
-    if (!action || !type || !id) {
-      return NextResponse.json({ error: "Missing required fields: action, type, id" }, { status: 400 });
-    }
+    // Execute moderation action and log it
+    const adminEmail = admin.email;
 
-    if (!["approve", "reject", "delete"].includes(action)) {
-      return NextResponse.json({ error: "Invalid action" }, { status: 400 });
-    }
-
-    if (!["room", "item"].includes(type)) {
-      return NextResponse.json({ error: "Invalid type" }, { status: 400 });
-    }
-
-    const adminEmail = adminInfo.adminEmail;
-
-    // Execute moderation action
     switch (action) {
       case "approve":
         if (type === "room") {
-          await approveRoom(id, userId, adminEmail);
+          await approveRoom(id, admin.uid, adminEmail);
         } else {
-          await approveItem(id, userId, adminEmail);
+          await approveItem(id, admin.uid, adminEmail);
         }
+        await logAdminAction(admin, "approve", type, id);
         break;
 
       case "reject":
         if (type === "room") {
-          await rejectRoom(id, userId, adminEmail, reason);
+          await rejectRoom(id, admin.uid, adminEmail, reason);
         } else {
-          await rejectItem(id, userId, adminEmail, reason);
+          await rejectItem(id, admin.uid, adminEmail, reason);
         }
+        await logAdminAction(admin, "reject", type, id, { reason });
         break;
 
       case "delete":
         if (type === "room") {
-          await softDeleteRoom(id, userId, adminEmail, reason);
+          await softDeleteRoom(id, admin.uid, adminEmail, reason);
         } else {
-          await softDeleteItem(id, userId, adminEmail, reason);
+          await softDeleteItem(id, admin.uid, adminEmail, reason);
         }
+        await logAdminAction(admin, "delete", type, id, { reason });
         break;
     }
 
-    return NextResponse.json({ success: true, message: `${action} action completed` });
+    return NextResponse.json({ 
+      success: true, 
+      message: `${action} action completed successfully`,
+      action,
+      type,
+      id
+    });
 
   } catch (error) {
     console.error("Moderation API error:", error);
+    
+    if (error instanceof z.ZodError) {
+      return NextResponse.json({ 
+        error: "Invalid request data", 
+        details: error.issues 
+      }, { status: 400 });
+    }
+    
     return NextResponse.json(
       { error: "Internal server error", details: error instanceof Error ? error.message : "Unknown error" },
       { status: 500 }
     );
   }
-}
+});
 
-export async function GET(request: NextRequest) {
+export const GET = withAdminAuth(async (request: NextRequest, admin: AdminUser) => {
   try {
-    // Get authorization header
-    const authHeader = request.headers.get("authorization");
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return NextResponse.json({ error: "Unauthorized: Missing or invalid token" }, { status: 401 });
-    }
-
-    const token = authHeader.split(" ")[1];
-    const userId = token || ""; // Ensure userId is not undefined
-
-    // Verify admin status and get admin info
-    const adminInfo = await getAdminInfo(userId);
-
+    // Return admin verification status
     return NextResponse.json({ 
       success: true, 
       message: "Admin access verified",
-      adminId: userId 
+      adminId: admin.uid,
+      adminEmail: admin.email
     });
 
   } catch (error) {
@@ -129,4 +115,4 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+});

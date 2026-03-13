@@ -15,19 +15,28 @@ function shouldBypassMaintenance(request: NextRequest): boolean {
   return isLocalhost || devAccess;
 }
 
-// Admin routes that require protection
+// Admin routes that require server-side protection
 const ADMIN_ROUTES = [
   "/admin",
   "/admin/",
-  "/admin/listings",
-  "/admin/users",
-  "/admin/reports",
-  "/admin/settings",
-  "/admin/logs"
+  "/api/admin"
+];
+
+// Protected API routes that require authentication
+const PROTECTED_API_ROUTES = [
+  "/api/listings/create",
+  "/api/listings/update", 
+  "/api/listings/delete",
+  "/api/user/profile",
+  "/api/favorites"
 ];
 
 function isAdminRoute(pathname: string): boolean {
   return ADMIN_ROUTES.some(route => pathname.startsWith(route));
+}
+
+function isProtectedApiRoute(pathname: string): boolean {
+  return PROTECTED_API_ROUTES.some(route => pathname.startsWith(route));
 }
 
 export function middleware(request: NextRequest) {
@@ -38,17 +47,14 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Skip middleware for static assets and API routes (except admin API)
+  // Skip middleware for static assets and public files
   if (
     pathname.startsWith("/_next") ||
     pathname.startsWith("/favicon.ico") ||
-    pathname.startsWith("/manifest.webmanifest")
+    pathname.startsWith("/manifest.webmanifest") ||
+    pathname.startsWith("/robots.txt") ||
+    pathname.startsWith("/sitemap.xml")
   ) {
-    return NextResponse.next();
-  }
-
-  // Allow API routes to continue (they handle their own auth)
-  if (pathname.startsWith("/api")) {
     return NextResponse.next();
   }
 
@@ -63,13 +69,19 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(maintenanceUrl);
   }
 
-  // For admin routes, we'll let the client-side authentication handle it
-  // The RequireAuth component will handle redirecting non-admin users
+  // For admin routes, redirect to login (client-side will handle verification)
   if (isAdminRoute(pathname)) {
+    const loginUrl = new URL("/login", request.url);
+    loginUrl.searchParams.set("message", "Admin access required");
+    return NextResponse.redirect(loginUrl);
+  }
+
+  // For protected API routes, let them handle their own auth
+  if (isProtectedApiRoute(pathname)) {
     return NextResponse.next();
   }
 
-  // Otherwise, continue normally
+  // For other routes, continue normally (client-side will handle auth)
   return NextResponse.next();
 }
 
@@ -80,9 +92,9 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
-     * - api (API routes)
+     * - api/public (public API routes)
      * - maintenance (maintenance page itself)
      */
-    "/((?!_next/static|_next/image|favicon.ico|api|maintenance).*)",
+    "/((?!_next/static|_next/image|favicon.ico|api/public|maintenance).*)",
   ],
 };
