@@ -93,7 +93,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
       {/* HEADER */}
       {!isMaintenancePage && (
-        <header className="sticky top-0 z-20 border-b border-[color:var(--border)] backdrop-blur">
+        <header className="sticky top-0 z-40 border-b border-[color:var(--border)] backdrop-blur">
           <div className="mx-auto flex w-full max-w-screen-2xl items-center justify-between gap-3 px-4 py-3">
 
             {/* Logo */}
@@ -132,13 +132,81 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             </nav>
 
             {/* Mobile Menu Button */}
-            <div className="sm:hidden">
+            <div className="relative sm:hidden">
               <button
                 className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-[color:var(--border)] bg-[color:var(--card)]"
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                onClick={() => setMobileMenuOpen(prev => !prev)}
               >
                 {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
               </button>
+
+              {/* Mobile Dropdown Menu */}
+              {mobileMenuOpen && (
+                <div className="absolute right-0 top-12 z-50 w-64 rounded-xl border border-[color:var(--border)] bg-white shadow-lg">
+                <div className="p-2">
+                  {/* Navigation Links */}
+                  <div className="space-y-1">
+                    <Link
+                      href="/saved"
+                      className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-[color:var(--foreground)] hover:bg-[color:var(--muted)]"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <Heart className="h-4 w-4" />
+                      Saved
+                    </Link>
+                    <Link
+                      href="/my-listings"
+                      className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-[color:var(--foreground)] hover:bg-[color:var(--muted)]"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <User className="h-4 w-4" />
+                      My Listings
+                    </Link>
+                    {user ? (
+                      <>
+                        <Link
+                          href="/profile"
+                          className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-[color:var(--foreground)] hover:bg-[color:var(--muted)]"
+                          onClick={() => setMobileMenuOpen(false)}
+                        >
+                          <User className="h-4 w-4" />
+                          Profile
+                        </Link>
+                        {isAdmin && (
+                          <Link
+                            href="/admin"
+                            className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-[color:var(--foreground)] hover:bg-[color:var(--muted)]"
+                            onClick={() => setMobileMenuOpen(false)}
+                          >
+                            <Shield className="h-4 w-4" />
+                            Admin
+                          </Link>
+                        )}
+                        <button
+                          className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-[color:var(--foreground)] hover:bg-[color:var(--muted)]"
+                          onClick={() => {
+                            signOutNow();
+                            setMobileMenuOpen(false);
+                          }}
+                        >
+                          <User className="h-4 w-4" />
+                          Sign out
+                        </button>
+                      </>
+                    ) : (
+                      <Link
+                        href="/login"
+                        className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-[color:var(--foreground)] hover:bg-[color:var(--muted)]"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        <User className="h-4 w-4" />
+                        Sign in
+                      </Link>
+                    )}
+                  </div>
+                </div>
+              </div>
+              )}
             </div>
 
             {/* Desktop Actions */}

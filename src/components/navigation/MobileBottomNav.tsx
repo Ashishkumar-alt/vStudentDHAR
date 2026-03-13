@@ -100,7 +100,7 @@ export default function MobileBottomNav() {
     <>
       {/* Mobile Bottom Navigation */}
       <div className={`
-        fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 
+        fixed bottom-0 left-0 right-0 z-30 bg-white border-t border-gray-200 
         transition-transform duration-300 ease-in-out
         ${isVisible ? "translate-y-0" : "translate-y-full"}
       `}>
@@ -193,7 +193,7 @@ export function MobilePostButton() {
     <button
       onClick={() => router.push("/post")}
       className={`
-        fixed bottom-20 right-4 z-40 w-14 h-14 bg-gradient-to-r from-blue-600 to-indigo-600 
+        fixed bottom-20 right-4 z-20 w-14 h-14 bg-gradient-to-r from-blue-600 to-indigo-600 
         text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 
         flex items-center justify-center group
         ${isVisible ? "scale-100 opacity-100" : "scale-0 opacity-0"}
