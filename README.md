@@ -49,3 +49,4 @@ firebase deploy --only firestore:rules,storage:rules
 Uploads use a server-side signature via `src/app/api/cloudinary/sign/route.ts`, so your Cloudinary secret never goes to the browser.
 
 ## Notes
+"# Force redeploy" 
