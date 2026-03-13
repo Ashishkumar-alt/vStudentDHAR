@@ -24,184 +24,98 @@ function isNew(createdAt: unknown) {
 
 export function RoomCard({ id, listing }: { id: string; listing: RoomListing }) {
   const detailsHref = `/rooms/${id}`;
-  const wa = toWhatsAppLink(
-    listing.contactPhone,
-    `Hi, I am interested in your room on vStudent Dharamshala: ${listing.title}. Is it available?`,
-  );
 
   return (
-    <article className="card card-hover group relative overflow-hidden">
+    <article className="group relative overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md">
+      {/* Room Image */}
       <Link
         href={detailsHref}
         aria-label={`View room details for ${listing.title}`}
-        className="absolute inset-0 z-10"
-      />
-
-      <div className="relative aspect-[16/10] w-full bg-[color:color-mix(in srgb, var(--card) 70%, var(--background) 30%)]">
-        <div className="absolute right-3 top-3 z-20">
-          <FavoriteButton listingType="room" listingId={id} />
-        </div>
-
-        {listing.photoUrls?.[0] ? (
-          <Image
-            src={listing.photoUrls[0]}
-            alt={listing.title || "Room listing"}
-            fill
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            className="object-cover transition duration-500 group-hover:scale-[1.04]"
-            priority={false}
-            placeholder="blur"
-            blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwA/8A8A"
-            onError={(e) => {
-              // Fallback to placeholder if image fails to load
-              const target = e.target as HTMLImageElement;
-              target.style.display = 'none';
-              const parent = target.parentElement;
-              if (parent && !parent.querySelector('.fallback-placeholder')) {
-                const placeholder = document.createElement('div');
-                placeholder.className = 'fallback-placeholder absolute inset-0 flex items-center justify-center bg-gray-100 text-gray-400';
-                placeholder.innerHTML = '<div class="text-center"><div class="text-4xl mb-2">🏠</div><div class="text-sm">No Image</div></div>';
-                parent.appendChild(placeholder);
-              }
-            }}
-          />
-        ) : (
-          <div className="absolute inset-0 flex items-center justify-center bg-gray-100 text-gray-400">
-            <div className="text-center">
-              <div className="text-4xl mb-2">🏠</div>
-              <div className="text-sm">No Image</div>
-            </div>
+        className="block aspect-[16/10] w-full bg-gray-100"
+      >
+        <div className="relative h-full">
+          <div className="absolute right-3 top-3 z-20">
+            <FavoriteButton listingType="room" listingId={id} />
           </div>
-        )}
 
-        <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
-
-        <div className="absolute left-3 top-3 z-20 flex flex-wrap gap-2">
+          {/* Verified Badge - Top Left */}
           {listing.status === "active" ? (
-            <span className="rounded-full bg-blue-500/90 px-2.5 py-1 text-xs font-semibold text-white shadow-sm ring-1 ring-white/20">
-              Verified
-            </span>
+            <div className="absolute left-3 top-3 z-20">
+              <span className="rounded-full bg-blue-500 px-2.5 py-1 text-xs font-semibold text-white shadow-sm">
+                Verified
+              </span>
+            </div>
           ) : null}
-          {isNew(listing.createdAt) ? (
-            <span className="rounded-full bg-emerald-500/90 px-2.5 py-1 text-xs font-semibold text-white shadow-sm ring-1 ring-white/20">
-              New
-            </span>
-          ) : null}
-          {listing.heaterIncluded ? (
-            <span className="rounded-full bg-emerald-600/90 px-2.5 py-1 text-xs font-semibold text-white shadow-sm ring-1 ring-white/20">
-              Winter Ready
-            </span>
-          ) : null}
-        </div>
 
-        <div className="absolute inset-x-3 bottom-3 z-20">
-          <div className="flex items-end justify-between gap-3">
-            <div className="min-w-0">
-              <div className="truncate text-base font-semibold tracking-tight text-white">{listing.title}</div>
-              <div className="mt-1 flex items-center gap-1 text-sm text-white/85">
-                <MapPin className="h-4 w-4" />
-                <span className="truncate">
-                  {listing.area} · {listing.genderAllowed}
-                </span>
+          {/* Room Image */}
+          {listing.photoUrls?.[0] ? (
+            <Image
+              src={listing.photoUrls[0]}
+              alt={listing.title || "Room listing"}
+              fill
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              className="object-cover transition duration-500 group-hover:scale-[1.02]"
+              priority={false}
+              placeholder="blur"
+              blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwA/8A8A"
+              onError={(e) => {
+                // Fallback to placeholder if image fails to load
+                const target = e.target as HTMLImageElement;
+                target.style.display = 'none';
+                const parent = target.parentElement;
+                if (parent && !parent.querySelector('.fallback-placeholder')) {
+                  const placeholder = document.createElement('div');
+                  placeholder.className = 'fallback-placeholder absolute inset-0 flex items-center justify-center bg-gray-100';
+                  placeholder.innerHTML = '<div class="text-center"><div class="text-4xl mb-2">🏠</div><div class="text-sm">No Image</div></div>';
+                  parent.appendChild(placeholder);
+                }
+              }}
+            />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
+              <div className="text-center">
+                <div className="text-4xl mb-2">🏠</div>
+                <div className="text-sm text-gray-500">No Image</div>
               </div>
             </div>
-            <div className="shrink-0 rounded-2xl bg-white/12 px-3 py-2 text-right backdrop-blur">
-              <div className="text-[11px] font-medium text-white/80">Rent</div>
-              <div className="text-sm font-semibold text-white">{formatINR(listing.rent)}/mo</div>
+          )}
+
+          {/* Price Overlay - Bottom Right of Image */}
+          <div className="absolute right-3 bottom-3 z-20">
+            <div className="rounded-xl bg-white/95 px-3 py-2 shadow-lg backdrop-blur-sm">
+              <div className="text-lg font-bold text-gray-900">{formatINR(listing.rent)}</div>
+              <div className="text-xs text-gray-600">per month</div>
             </div>
           </div>
         </div>
-      </div>
+      </Link>
 
-      <div className="relative z-20 p-4">
-        {/* Verification Badges */}
+      {/* Card Content */}
+      <div className="p-4">
+        {/* Title and Location */}
         <div className="mb-3">
-          <VerificationBadges
-            isVerified={listing.status === "active"}
-            quickResponder={listing.heaterIncluded} // Using as proxy for quick response
-            photosVerified={listing.photoUrls && listing.photoUrls.length > 0}
-            responseTime="2"
-            size="sm"
-          />
-        </div>
-
-        {/* Trust Signals */}
-        <TrustSignals
-          distance={listing.walkMinutesToHPU ? `${listing.walkMinutesToHPU}km from University` : undefined}
-          available={listing.status === "active"}
-          postedDate={listing.createdAt?.toDate()}
-          area={listing.area}
-          className="mb-3"
-        />
-
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <div className="text-xs text-[color:var(--muted)]">Deposit {formatINR(listing.deposit)}</div>
-          <div className="inline-flex items-center gap-2 text-xs text-[color:var(--muted)]">
-            {listing.foodIncluded ? (
-              <span className="rounded-full bg-[color:color-mix(in srgb, var(--card) 80%, var(--background) 20%)] px-2 py-1 ring-1 ring-[color:var(--border)]">
-                Food
-              </span>
-            ) : null}
-            {listing.attachedBathroom ? (
-              <span className="rounded-full bg-[color:color-mix(in srgb, var(--card) 80%, var(--background) 20%)] px-2 py-1 ring-1 ring-[color:var(--border)]">
-                Attached bath
-              </span>
-            ) : null}
+          <h3 className="text-base font-semibold text-gray-900 truncate">{listing.title}</h3>
+          <div className="mt-1 flex items-center text-sm text-gray-600">
+            <MapPin className="mr-1 h-4 w-4" />
+            <span>{listing.area}</span>
           </div>
         </div>
 
-        <div className="mt-3 flex flex-wrap gap-2 text-xs text-[color:var(--muted)]">
-          {listing.vegOnly ? (
-            <span className="inline-flex items-center gap-1 rounded-full bg-[color:color-mix(in srgb, var(--card) 80%, var(--background) 20%)] px-2 py-1 ring-1 ring-[color:var(--border)]">
-              <Leaf className="h-3.5 w-3.5" />
-              Veg
-            </span>
-          ) : null}
-          {listing.heaterIncluded ? (
-            <span className="inline-flex items-center gap-1 rounded-full bg-[color:color-mix(in srgb, var(--accent) 14%, transparent)] px-2 py-1 text-[color:color-mix(in srgb, var(--accent) 60%, var(--foreground) 40%)] ring-1 ring-[color:color-mix(in srgb, var(--accent) 30%, var(--border) 70%)]">
-              <Flame className="h-3.5 w-3.5" />
-              Heater
-            </span>
-          ) : null}
-          {typeof listing.walkMinutesToHPU === "number" ? (
-            <span className="inline-flex items-center gap-1 rounded-full bg-[color:color-mix(in srgb, var(--card) 80%, var(--background) 20%)] px-2 py-1 ring-1 ring-[color:var(--border)]">
-              <Footprints className="h-3.5 w-3.5" />
-              {listing.walkMinutesToHPU} min walk
-            </span>
-          ) : null}
+        {/* Availability Status */}
+        <div className="mb-4">
+          <span className="inline-flex items-center rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-800">
+            <div className="mr-2 h-2 w-2 rounded-full bg-green-500"></div>
+            Available Now
+          </span>
         </div>
 
-        <div className="mt-4 flex items-center justify-between gap-2">
-          <div className="text-sm font-semibold text-[color:color-mix(in srgb, var(--brand) 70%, #2563eb 30%)]">
-            {formatINR(listing.rent)}/month
-          </div>
-          <div className="flex items-center gap-2">
-            <Link
-              href={detailsHref}
-              className="focus-ring inline-flex h-9 items-center justify-center rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 px-4 text-sm font-medium text-white shadow-sm transition hover:shadow-md hover:brightness-[1.02] active:translate-y-px"
-            >
-              View Details
-            </Link>
-            <a
-              className="focus-ring inline-flex h-9 w-9 items-center justify-center rounded-2xl border border-[color:var(--border)] bg-[color:var(--card)] text-[color:var(--foreground)] shadow-sm transition hover:shadow-md active:translate-y-px"
-              href={wa}
-              target="_blank"
-              rel="noreferrer"
-              aria-label="WhatsApp"
-            >
-              <MessageCircle className="h-4 w-4" />
-            </a>
-          </div>
-        </div>
-
-        {/* Contact Phone Display (Mobile Optimized) */}
-        <div className="mt-3 pt-3 border-t border-[color:var(--border)]">
-          <PhoneDisplay 
-            phone={listing.contactPhone}
-            className="text-xs"
-            showRevealButton={true}
-          />
-        </div>
+        {/* View Details Button */}
+        <Link
+          href={detailsHref}
+          className="block w-full rounded-xl bg-blue-600 px-4 py-3 text-center font-medium text-white transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+        >
+          View Details
+        </Link>
       </div>
     </article>
   );
