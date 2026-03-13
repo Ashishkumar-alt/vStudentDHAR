@@ -14,6 +14,7 @@ type AuthState = {
   profileComplete: boolean;
   loading: boolean;
   signOutNow: () => Promise<void>;
+  isAdmin: boolean;
 };
 
 const AuthContext = createContext<AuthState | null>(null);
@@ -51,6 +52,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             const userData: any = {
               uid: u.uid,
               email: u.email || "",
+              role: u.email === "vstudent343@gmail.com" ? "admin" : "user",
               createdAt: serverTimestamp(),
               updatedAt: serverTimestamp(),
             };
@@ -96,6 +98,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       profile,
       profileComplete,
       loading,
+      isAdmin: profile?.role === "admin",
       signOutNow: async () => {
         const auth = getFirebaseAuth();
         await firebaseSignOut(auth);

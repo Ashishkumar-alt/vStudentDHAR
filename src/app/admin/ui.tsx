@@ -6,6 +6,7 @@ import Link from "next/link";
 import { limit, onSnapshot, orderBy, query, where } from "firebase/firestore";
 import RequireAuth from "@/components/auth/RequireAuth";
 import { useAuth } from "@/components/auth/AuthProvider";
+import { useRouter } from "next/navigation";
 import { DEFAULT_CITY_ID } from "@/lib/constants";
 import type { ItemListing, Report, RoomListing } from "@/lib/firebase/models";
 import type { Timestamp } from "firebase/firestore";
@@ -56,14 +57,21 @@ function Row({
 }
 
 export default function AdminClient() {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
+  const router = useRouter();
   const [rooms, setRooms] = useState<{ id: string; data: RoomListing }[]>([]);
   const [items, setItems] = useState<{ id: string; data: ItemListing }[]>([]);
   const [reports, setReports] = useState<{ id: string; data: Report }[]>([]);
   const [busyKey, setBusyKey] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [adminLoading, setAdminLoading] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
+
+  // Redirect non-admin users
+  useEffect(() => {
+    if (!adminLoading && !isAdmin) {
+      router.push("/rooms");
+    }
+  }, [isAdmin, adminLoading, router]);
 
   async function moderateListing(action: "approve" | "reject" | "delete", type: "room" | "item", id: string, reason?: string) {
     if (!user) {
@@ -99,20 +107,6 @@ export default function AdminClient() {
 
     await softDeleteItem(id, user.uid, adminEmail, reason);
   }
-
-  useEffect(() => {
-    if (!user) return;
-    setAdminLoading(true);
-    const unsub = watchIsAdmin(
-      user.uid,
-      (val) => {
-        setIsAdmin(val);
-        setAdminLoading(false);
-      },
-      () => setAdminLoading(false),
-    );
-    return () => unsub();
-  }, [user]);
 
   useEffect(() => {
     if (!user || !isAdmin) return;
@@ -156,7 +150,7 @@ export default function AdminClient() {
     };
   }, [user, isAdmin]);
 
-  const cannot = useMemo(() => adminLoading || !isAdmin, [adminLoading, isAdmin]);
+  const cannot = useMemo(() => !isAdmin, [isAdmin]);
   const openReports = useMemo(
     () => reports.filter((r) => !r.data.status || r.data.status === "open"),
     [reports],
@@ -227,7 +221,7 @@ export default function AdminClient() {
       <RequireAuth>
         {cannot ? (
           <div className="card mt-6 p-5 text-sm text-zinc-700">
-            {adminLoading ? "Checking access..." : "Not authorized. Add your UID to Firestore collection `admins`."}
+            Not authorized. Admin access required.
           </div>
         ) : (
           <>

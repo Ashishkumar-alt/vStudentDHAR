@@ -112,6 +112,7 @@ export type UserProfile = {
   college?: string;
   institution?: string;
   userType?: "student" | "landlord";
+  role?: "user" | "admin";
   photoUrl?: string;
   createdAt: Timestamp;
   updatedAt: Timestamp;

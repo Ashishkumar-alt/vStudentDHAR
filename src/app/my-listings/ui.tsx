@@ -11,7 +11,7 @@ import { deleteItem, deleteRoom, markItemSold, markRoomSold } from "@/lib/fireba
 import { getItemViewsCount, getRoomViewsCount } from "@/lib/firebase/views";
 import { formatINR } from "@/lib/utils";
 import { CardSkeleton } from "@/components/ui/Skeleton";
-import { Eye, Trash2, CheckCircle2, Pencil } from "lucide-react";
+import { Eye, Trash2, CheckCircle2, Pencil, Shield } from "lucide-react";
 import { itemSlug, roomSlug } from "@/lib/seo/slug";
 
 function StatusPill({ status }: { status: string }) {
@@ -39,7 +39,7 @@ function StatusPill({ status }: { status: string }) {
 }
 
 export default function MyListingsClient() {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const [rooms, setRooms] = useState<{ id: string; data: RoomListing }[] | null>(null);
   const [items, setItems] = useState<{ id: string; data: ItemListing }[] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -127,10 +127,20 @@ export default function MyListingsClient() {
 
   return (
     <main className="mx-auto w-full max-w-screen-2xl px-4 py-8">
-      <h1 className="text-2xl font-semibold">My listings</h1>
-      <p className="mt-1 text-sm text-zinc-600">Manage your posted rooms and items.</p>
-
       <RequireAuth>
+        <div className="mt-6 flex items-center justify-between">
+          <h1 className="text-2xl font-semibold">My listings</h1>
+          <p className="mt-1 text-sm text-zinc-600">Manage your posted rooms and items.</p>
+          {isAdmin && (
+            <Link
+              href="/admin"
+              className="inline-flex items-center gap-2 rounded-full bg-purple-100 px-4 py-2 text-sm font-medium text-purple-700 hover:bg-purple-200 transition-colors"
+            >
+              <Shield className="h-4 w-4" />
+              Admin Panel
+            </Link>
+          )}
+        </div>
         <div className="mt-6 grid gap-3 sm:grid-cols-4">
           <div className="card p-4">
             <div className="text-xs font-medium text-slate-600">Active</div>
