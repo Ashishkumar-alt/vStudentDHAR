@@ -150,7 +150,6 @@ export default function AdminClient() {
     };
   }, [user, isAdmin]);
 
-  const cannot = useMemo(() => !isAdmin, [isAdmin]);
   const openReports = useMemo(
     () => reports.filter((r) => !r.data.status || r.data.status === "open"),
     [reports],
@@ -219,15 +218,9 @@ export default function AdminClient() {
       </div>
 
       <RequireAuth>
-        {cannot ? (
-          <div className="card mt-6 p-5 text-sm text-zinc-700">
-            Not authorized. Admin access required.
-          </div>
-        ) : (
-          <>
-            {error ? (
-              <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>
-            ) : null}
+        {error ? (
+          <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>
+        ) : null}
 
             <section className="mt-8">
               <h2 className="text-sm font-semibold">All Rooms</h2>
@@ -478,8 +471,6 @@ export default function AdminClient() {
                 )}
               </div>
             </section>
-          </>
-        )}
       </RequireAuth>
     </main>
   );

@@ -52,7 +52,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             const userData: any = {
               uid: u.uid,
               email: u.email || "",
-              role: u.email === "vstudent343@gmail.com" ? "admin" : "user",
+              role: u.email?.toLowerCase() === "vstudent343@gmail.com" ? "admin" : "user",
               createdAt: serverTimestamp(),
               updatedAt: serverTimestamp(),
             };
@@ -98,7 +98,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       profile,
       profileComplete,
       loading,
-      isAdmin: profile?.role === "admin",
+      isAdmin: profile?.role === "admin" || user?.email?.toLowerCase() === "vstudent343@gmail.com",
       signOutNow: async () => {
         const auth = getFirebaseAuth();
         await firebaseSignOut(auth);

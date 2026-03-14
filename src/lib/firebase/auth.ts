@@ -6,11 +6,17 @@ import {
   signInWithCredential,
   GoogleAuthProvider,
   signOut as firebaseSignOut,
+  browserLocalPersistence,
 } from "firebase/auth";
 import { getFirebaseApp } from "./client";
 
 export function getFirebaseAuth() {
-  return getAuth(getFirebaseApp());
+  const auth = getAuth(getFirebaseApp());
+  // Enable browser local persistence for better mobile experience
+  if (typeof window !== 'undefined') {
+    auth.setPersistence(browserLocalPersistence).catch(console.error);
+  }
+  return auth;
 }
 
 export async function signUpWithEmail(email: string, password: string) {
