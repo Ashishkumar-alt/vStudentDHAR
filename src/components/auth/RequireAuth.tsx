@@ -14,14 +14,15 @@ export default function RequireAuth({ children }: { children: React.ReactNode })
   const isTempAdmin = userEmail === "vstudent343@gmail.com";
   const finalIsAdmin = isAdmin || isTempAdmin;
 
-  console.log('🛡️ RequireAuth: State', { 
+  console.log('🛡️ RequireAuth v2.0: State', { 
     user: !!user, 
     loading, 
     isAdmin, 
     finalIsAdmin,
     userEmail,
     pathname,
-    userAgent: navigator.userAgent.includes('Mobile') ? 'Mobile' : 'Desktop'
+    userAgent: navigator.userAgent.includes('Mobile') ? 'Mobile' : 'Desktop',
+    timestamp: new Date().toISOString()
   });
 
   useEffect(() => {
