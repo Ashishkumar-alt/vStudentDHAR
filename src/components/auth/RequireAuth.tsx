@@ -9,30 +9,52 @@ export default function RequireAuth({ children }: { children: React.ReactNode })
   const router = useRouter();
   const pathname = usePathname();
 
+  console.log('🛡️ RequireAuth: State', { 
+    user: !!user, 
+    loading, 
+    isAdmin, 
+    pathname,
+    userAgent: navigator.userAgent.includes('Mobile') ? 'Mobile' : 'Desktop'
+  });
+
   useEffect(() => {
+    console.log('🛡️ RequireAuth: useEffect', { loading, user: !!user, isAdmin, pathname });
+    
     // Wait for auth state to be determined
-    if (loading) return;
+    if (loading) {
+      console.log('🛡️ RequireAuth: Still loading, waiting...');
+      return;
+    }
 
     // If no user, redirect to login
     if (!user) {
-      router.replace(`/login?next=${encodeURIComponent(pathname || "/")}`);
+      console.log('🛡️ RequireAuth: No user, redirecting to login');
+      const nextUrl = encodeURIComponent(pathname || "/");
+      router.replace(`/login?next=${nextUrl}`);
       return;
     }
 
     // If on admin page and user is not admin, redirect to home
     if (pathname === "/admin" && !isAdmin) {
+      console.log('🛡️ RequireAuth: User not admin, redirecting to home', {
+        userEmail: user.email,
+        isAdmin
+      });
       router.replace("/");
       return;
     }
+
+    console.log('🛡️ RequireAuth: ✅ Access granted');
   }, [user, loading, isAdmin, router, pathname]);
 
   // Show loading spinner while checking auth state
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-white">
         <div className="flex flex-col items-center gap-4">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-[color:var(--border)] border-t-[color:var(--foreground)]"></div>
-          <p className="text-sm text-[color:var(--muted)]">Loading...</p>
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-200 border-t-blue-600"></div>
+          <p className="text-sm text-gray-600">Loading authentication...</p>
+          <p className="text-xs text-gray-400">Please wait while we verify your access</p>
         </div>
       </div>
     );
@@ -41,8 +63,11 @@ export default function RequireAuth({ children }: { children: React.ReactNode })
   // Show redirecting message if no user
   if (!user) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p className="text-sm text-[color:var(--muted)]">Redirecting to login...</p>
+      <div className="flex min-h-screen items-center justify-center bg-white">
+        <div className="flex flex-col items-center gap-4">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-gray-600"></div>
+          <p className="text-sm text-gray-600">Redirecting to login...</p>
+        </div>
       </div>
     );
   }
@@ -50,17 +75,27 @@ export default function RequireAuth({ children }: { children: React.ReactNode })
   // Show access denied if on admin page but not admin
   if (pathname === "/admin" && !isAdmin) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-center">
-          <div className="mb-4 text-2xl">🚫</div>
-          <h2 className="mb-2 text-lg font-semibold">Access Denied</h2>
-          <p className="mb-4 text-sm text-[color:var(--muted)]">Admin access required</p>
-          <button
-            onClick={() => router.replace("/")}
-            className="btn btn-primary"
-          >
-            Go to Home
-          </button>
+      <div className="flex min-h-screen items-center justify-center bg-white">
+        <div className="text-center max-w-md mx-auto p-6">
+          <div className="mb-4 text-4xl">🚫</div>
+          <h2 className="mb-2 text-xl font-semibold text-gray-900">Access Denied</h2>
+          <p className="mb-4 text-sm text-gray-600">
+            Admin access required. You're logged in as {user.email} but don't have admin privileges.
+          </p>
+          <div className="space-y-2">
+            <button
+              onClick={() => router.replace("/")}
+              className="w-full btn btn-primary"
+            >
+              Go to Home
+            </button>
+            <button
+              onClick={() => router.replace("/my-listings")}
+              className="w-full btn"
+            >
+              My Listings
+            </button>
+          </div>
         </div>
       </div>
     );
