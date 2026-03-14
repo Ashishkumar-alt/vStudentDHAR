@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { limit, onSnapshot, orderBy, query, where } from "firebase/firestore";
-import RequireAuth from "@/components/auth/RequireAuth";
+import AdminGuard from "@/components/auth/AdminGuard";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useRouter } from "next/navigation";
 import { DEFAULT_CITY_ID } from "@/lib/constants";
@@ -217,7 +217,7 @@ export default function AdminClient() {
         </div>
       </div>
 
-      <RequireAuth>
+      <AdminGuard>
         {error ? (
           <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>
         ) : null}
@@ -471,7 +471,7 @@ export default function AdminClient() {
                 )}
               </div>
             </section>
-      </RequireAuth>
+      </AdminGuard>
     </main>
   );
 }
