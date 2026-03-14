@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { CONTACT_EMAIL, DEFAULT_CITY_LABEL } from "@/lib/constants";
+import { ADMIN_EMAIL } from "@/constants/admin";
 import { Home, House, ShoppingBag, Plus, User, Shield, Menu, X, Heart } from "lucide-react";
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "@/components/theme/ThemeProvider";
@@ -65,7 +66,15 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [logoSrc, setLogoSrc] = useState("/logo.png");
-  const [isAdmin, setIsAdmin] = useState(false);
+  
+  // Simple admin check based on email
+  const isAdmin = user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
+  
+  console.log(" AppShell - Admin status:", {
+    userEmail: user?.email,
+    isAdmin,
+    ADMIN_EMAIL
+  });
 
   const isMaintenancePage = pathname?.startsWith("/maintenance");
 
