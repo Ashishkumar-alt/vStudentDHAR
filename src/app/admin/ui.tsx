@@ -21,7 +21,6 @@ import {
   softDeleteItem,
   softDeleteRoom,
 } from "@/lib/firebase/listings";
-import { watchIsAdmin } from "@/lib/firebase/admin";
 import { setReportStatus } from "@/lib/firebase/reports";
 import { itemSlug, roomSlug } from "@/lib/seo/slug";
 import { CheckCircle, XCircle, Trash2, Shield, Home, Package, Clock, Mail, Calendar } from "lucide-react";
@@ -57,21 +56,15 @@ function Row({
 }
 
 export default function AdminClient() {
-  const { user, isAdmin } = useAuth();
+  const { user } = useAuth();
   const router = useRouter();
   const [rooms, setRooms] = useState<{ id: string; data: RoomListing }[]>([]);
   const [items, setItems] = useState<{ id: string; data: ItemListing }[]>([]);
   const [reports, setReports] = useState<{ id: string; data: Report }[]>([]);
   const [busyKey, setBusyKey] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [adminLoading, setAdminLoading] = useState(false);
 
-  // Redirect non-admin users
-  useEffect(() => {
-    if (!adminLoading && !isAdmin) {
-      router.push("/rooms");
-    }
-  }, [isAdmin, adminLoading, router]);
+  // AdminGuard handles authentication, no need for additional checks here
 
   async function moderateListing(action: "approve" | "reject" | "delete", type: "room" | "item", id: string, reason?: string) {
     if (!user) {
@@ -109,7 +102,7 @@ export default function AdminClient() {
   }
 
   useEffect(() => {
-    if (!user || !isAdmin) return;
+    if (!user) return;
     setError(null);
 
     // Show ALL listings (not just pending)
@@ -148,7 +141,7 @@ export default function AdminClient() {
       unsub2();
       unsub3();
     };
-  }, [user, isAdmin]);
+  }, [user]);
 
   const openReports = useMemo(
     () => reports.filter((r) => !r.data.status || r.data.status === "open"),
