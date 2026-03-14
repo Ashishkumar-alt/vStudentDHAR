@@ -22,53 +22,34 @@ export default function AdminGuard({ children }: AdminGuardProps) {
     pathname
   });
 
-  useEffect(() => {
-    // Wait for auth state to be ready
-    if (loading) {
-      console.log("🔐 AdminGuard - Auth still loading, waiting...");
-      return;
-    }
-
-    // Check if user is logged in
-    if (!user) {
-      console.log("🔐 AdminGuard - No user, redirecting to login");
-      const nextUrl = encodeURIComponent(pathname || "/");
-      router.replace(`/login?next=${nextUrl}`);
-      return;
-    }
-
-    // Check if user is admin
-    const isAdmin = isAdminEmail(user.email || undefined);
-    console.log("🔐 AdminGuard - Admin check:", {
-      userEmail: user.email,
-      isAdmin,
-      ADMIN_EMAIL: "vstudent343@gmail.com"
-    });
-
-    // If on admin page and not admin, redirect
-    if (pathname === "/admin" && !isAdmin) {
-      console.log("🔐 AdminGuard - Access denied, redirecting to login");
-      router.replace("/login?message=Admin+access+required");
-      return;
-    }
-
-    console.log("🔐 AdminGuard - ✅ Access granted");
-  }, [user, loading, router, pathname]);
-
-  // Show loading while auth is initializing
+  // Show loading while auth is initializing - this is the FIRST and MOST IMPORTANT check
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-white">
         <div className="flex flex-col items-center gap-4">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-200 border-t-blue-600"></div>
           <p className="text-sm text-gray-600">Loading authentication...</p>
+          <p className="text-xs text-gray-400">Please wait while we verify your access</p>
         </div>
       </div>
     );
   }
 
-  // Show loading while checking admin access
+  // At this point, loading is false, so we can safely check user and admin status
+  const isAdmin = isAdminEmail(user?.email || undefined);
+  
+  console.log("🔐 AdminGuard - Final check (loading: false):", {
+    hasUser: !!user,
+    userEmail: user?.email,
+    isAdmin,
+    pathname
+  });
+
+  // If no user when loading is complete, redirect to login
   if (!user) {
+    console.log("🔐 AdminGuard - No user after loading, redirecting to login");
+    const nextUrl = encodeURIComponent(pathname || "/");
+    router.replace(`/login?next=${nextUrl}`);
     return (
       <div className="flex min-h-screen items-center justify-center bg-white">
         <div className="flex flex-col items-center gap-4">
@@ -79,8 +60,10 @@ export default function AdminGuard({ children }: AdminGuardProps) {
     );
   }
 
-  // If user is not admin and trying to access admin page
-  if (!isAdminEmail(user.email || undefined) && pathname === "/admin") {
+  // If user exists but not admin and trying to access admin page
+  if (!isAdmin && pathname === "/admin") {
+    console.log("🔐 AdminGuard - Access denied, user is not admin");
+    router.replace("/login?message=Admin+access+required");
     return (
       <div className="flex min-h-screen items-center justify-center bg-white">
         <div className="text-center max-w-md mx-auto p-6">
@@ -100,6 +83,7 @@ export default function AdminGuard({ children }: AdminGuardProps) {
     );
   }
 
-  // Allow access
+  // If we reach here, user is authenticated and has admin access (or not trying to access admin page)
+  console.log("🔐 AdminGuard - ✅ Access granted");
   return <>{children}</>;
 }
