@@ -134,7 +134,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         userEmail: user?.email, 
         profileAdmin,
         emailAdmin,
-        adminStatus 
+        adminStatus,
+        hasUser: !!user,
+        hasProfile: !!profile
       });
       
       return {

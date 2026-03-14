@@ -9,16 +9,23 @@ export default function RequireAuth({ children }: { children: React.ReactNode })
   const router = useRouter();
   const pathname = usePathname();
 
+  // TEMPORARY: Force admin access for vstudent343@gmail.com
+  const userEmail = user?.email?.toLowerCase();
+  const isTempAdmin = userEmail === "vstudent343@gmail.com";
+  const finalIsAdmin = isAdmin || isTempAdmin;
+
   console.log('🛡️ RequireAuth: State', { 
     user: !!user, 
     loading, 
     isAdmin, 
+    finalIsAdmin,
+    userEmail,
     pathname,
     userAgent: navigator.userAgent.includes('Mobile') ? 'Mobile' : 'Desktop'
   });
 
   useEffect(() => {
-    console.log('🛡️ RequireAuth: useEffect', { loading, user: !!user, isAdmin, pathname });
+    console.log('🛡️ RequireAuth: useEffect', { loading, user: !!user, finalIsAdmin, pathname });
     
     // Wait for auth state to be determined
     if (loading) {
@@ -35,17 +42,19 @@ export default function RequireAuth({ children }: { children: React.ReactNode })
     }
 
     // If on admin page and user is not admin, redirect to home
-    if (pathname === "/admin" && !isAdmin) {
+    if (pathname === "/admin" && !finalIsAdmin) {
       console.log('🛡️ RequireAuth: User not admin, redirecting to home', {
         userEmail: user.email,
-        isAdmin
+        isAdmin: finalIsAdmin,
+        originalIsAdmin: isAdmin,
+        tempAdmin: isTempAdmin
       });
       router.replace("/");
       return;
     }
 
     console.log('🛡️ RequireAuth: ✅ Access granted');
-  }, [user, loading, isAdmin, router, pathname]);
+  }, [user, loading, finalIsAdmin, router, pathname]);
 
   // Show loading spinner while checking auth state
   if (loading) {
@@ -73,7 +82,7 @@ export default function RequireAuth({ children }: { children: React.ReactNode })
   }
 
   // Show access denied if on admin page but not admin
-  if (pathname === "/admin" && !isAdmin) {
+  if (pathname === "/admin" && !finalIsAdmin) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-white">
         <div className="text-center max-w-md mx-auto p-6">
