@@ -2,10 +2,38 @@
 
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+
+export const dynamic = "force-dynamic";
 
 export default function DebugAuthPage() {
   const { user, loading, isAdmin, profile } = useAuth();
   const router = useRouter();
+  const [browserInfo, setBrowserInfo] = useState<any>(null);
+  const [storageInfo, setStorageInfo] = useState<any>(null);
+
+  useEffect(() => {
+    // Only access navigator and localStorage on client side
+    if (typeof window !== 'undefined') {
+      setBrowserInfo({
+        userAgent: navigator.userAgent,
+        platform: navigator.platform,
+        cookieEnabled: navigator.cookieEnabled,
+        onLine: navigator.onLine,
+      });
+
+      setStorageInfo({
+        localStorage: {
+          available: typeof localStorage !== 'undefined',
+          keys: typeof localStorage !== 'undefined' ? Object.keys(localStorage) : [],
+        },
+        sessionStorage: {
+          available: typeof sessionStorage !== 'undefined',
+          keys: typeof sessionStorage !== 'undefined' ? Object.keys(sessionStorage) : [],
+        },
+      });
+    }
+  }, []);
 
   console.log('DebugAuthPage: Rendering', { user: !!user, loading, isAdmin });
 
@@ -38,28 +66,14 @@ export default function DebugAuthPage() {
           <div className="p-4 bg-blue-100 rounded">
             <h2 className="font-semibold mb-2">Browser Info:</h2>
             <pre className="text-sm">
-              {JSON.stringify({
-                userAgent: navigator.userAgent,
-                platform: navigator.platform,
-                cookieEnabled: navigator.cookieEnabled,
-                onLine: navigator.onLine,
-              }, null, 2)}
+              {browserInfo ? JSON.stringify(browserInfo, null, 2) : 'Loading browser info...'}
             </pre>
           </div>
 
           <div className="p-4 bg-green-100 rounded">
             <h2 className="font-semibold mb-2">Storage Info:</h2>
             <pre className="text-sm">
-              {JSON.stringify({
-                localStorage: {
-                  available: typeof localStorage !== 'undefined',
-                  keys: typeof localStorage !== 'undefined' ? Object.keys(localStorage) : [],
-                },
-                sessionStorage: {
-                  available: typeof sessionStorage !== 'undefined',
-                  keys: typeof sessionStorage !== 'undefined' ? Object.keys(sessionStorage) : [],
-                },
-              }, null, 2)}
+              {storageInfo ? JSON.stringify(storageInfo, null, 2) : 'Loading storage info...'}
             </pre>
           </div>
 

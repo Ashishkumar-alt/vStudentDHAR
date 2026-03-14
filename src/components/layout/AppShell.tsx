@@ -13,7 +13,6 @@ import { Moon, Sun } from "lucide-react";
 import { useTheme } from "@/components/theme/ThemeProvider";
 import { watchIsAdmin } from "@/lib/firebase/admin";
 import MobileBottomNav from "@/components/navigation/MobileBottomNav";
-import MobilePostButton from "@/components/navigation/MobileBottomNav";
 import FeatureGate from "@/components/ui/FeatureGate";
 
 // Client-only component to avoid hydration mismatch
@@ -66,15 +65,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [logoSrc, setLogoSrc] = useState("/logo.png");
-  
-  // Simple admin check based on email
-  const isAdmin = user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
-  
-  console.log(" AppShell - Admin status:", {
-    userEmail: user?.email,
-    isAdmin,
-    ADMIN_EMAIL
-  });
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const isMaintenancePage = pathname?.startsWith("/maintenance");
 
@@ -83,18 +74,20 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   }, [pathname]);
 
   useEffect(() => {
+    // Simple admin check based on email
     if (!user) {
       setIsAdmin(false);
       return;
     }
 
-    const unsubscribe = watchIsAdmin(
-      user.uid,
-      (admin: boolean) => setIsAdmin(admin),
-      () => setIsAdmin(false)
-    );
-
-    return unsubscribe;
+    const isAdminUser = user.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
+    setIsAdmin(isAdminUser);
+    
+    console.log(" AppShell - Admin status:", {
+      userEmail: user.email,
+      isAdmin: isAdminUser,
+      ADMIN_EMAIL
+    });
   }, [user]);
 
   return (
@@ -266,7 +259,6 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       <ClientOnly>
         <div className="sm:hidden">
           <MobileBottomNav />
-          <MobilePostButton />
         </div>
       </ClientOnly>
 
