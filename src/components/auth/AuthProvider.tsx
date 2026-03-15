@@ -6,6 +6,7 @@ import { onAuthStateChanged, signOut as firebaseSignOut } from "firebase/auth";
 import { getFirebaseAuth } from "@/lib/firebase/auth";
 import { doc, onSnapshot, setDoc, updateDoc, type FieldValue } from "firebase/firestore";
 import { getDb, serverTimestamp } from "@/lib/firebase/db";
+import { watchIsAdmin } from "@/lib/firebase/admin";
 import type { UserProfile } from "@/lib/firebase/models";
 
 type AuthState = {
@@ -25,11 +26,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [profileComplete, setProfileComplete] = useState(false);
   const [loading, setLoading] = useState(true);
   const [authInitialized, setAuthInitialized] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  
+  let profileUnsub: null | (() => void) = null;
+  let adminUnsub: null | (() => void) = null;
 
   useEffect(() => {
     const auth = getFirebaseAuth();
-    let profileUnsub: null | (() => void) = null;
-
+    
     console.log('🔐 AuthProvider: Setting up auth state listener');
     
     const unsub = onAuthStateChanged(auth, async (u) => {
@@ -54,13 +58,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           console.log('🔐 AuthProvider: No user, clearing profile');
           setProfile(null);
           setProfileComplete(false);
+          setIsAdmin(false);
           setLoading(false);
           return;
         }
 
-        // Check admin status immediately from email for faster access
-        const isEmailAdmin = u.email?.toLowerCase() === "vstudent343@gmail.com";
-        console.log('🔐 AuthProvider: Email admin check', { email: u.email, isAdmin: isEmailAdmin });
+        // Set up admin status watcher using Firestore admins collection
+        const adminUnsub = watchIsAdmin(
+          u.uid,
+          (adminStatus) => {
+            console.log('🔐 AuthProvider: Admin status from Firestore:', {
+              uid: u.uid,
+              email: u.email,
+              isAdmin: adminStatus
+            });
+            setIsAdmin(adminStatus);
+          },
+          (error) => {
+            console.error('🔐 AuthProvider: Admin status error:', error);
+            setIsAdmin(false);
+          }
+        );
 
         const db = getDb();
         const ref = doc(db, "users", u.uid);
@@ -70,11 +88,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           console.log('🔐 AuthProvider: Profile snapshot received', { exists: snap.exists() });
           
           if (!snap.exists()) {
-            // Create user profile with Google data if available
+            // Create user profile if it doesn't exist
             const userData: any = {
               uid: u.uid,
               email: u.email || "",
-              role: isEmailAdmin ? "admin" : "user",
+              role: "user", // Default to user, admin status comes from admins collection
               createdAt: serverTimestamp(),
               updatedAt: serverTimestamp(),
             };
@@ -118,6 +136,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => {
       console.log('🔐 AuthProvider: Cleaning up auth listeners');
       if (profileUnsub) profileUnsub();
+      if (adminUnsub) adminUnsub();
       unsub();
     };
   }, []);
