@@ -18,6 +18,7 @@ export const DHARAMSHALA_AREAS = [
   "McLeodganj",
   "Dari",
   "Sheela Chowk",
+  "Lower Barol",
 ] as const;
 
 export const DEFAULT_INSTITUTION_LABEL = PRIMARY_INSTITUTION_LONG;
